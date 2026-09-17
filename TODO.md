@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 1.2 chiuso il 17/09/2026.
-**Prossimo giro:** 1.3 — Fase 1, Normalizzazione, regole di categoria, ranking autocompletamento, validazioni, vedi `fasi/fase-1-dominio/PIANO.md`.
+**Stato:** giro 1.3 chiuso il 17/09/2026.
+**Prossimo giro:** 2.1 — Fase 2, Persistenza e API: schema 001, colonne di sincronizzazione, change_log, repository, vedi fasi/fase-2-persistenza-api/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -14,7 +14,7 @@
 ### Fase 1 — Dominio puro
 - [x] 1.1 Soldi, date, UUIDv5, ricorrenze
 - [x] 1.2 Saldo a D, cicli, formula di previsione + test di accettazione
-- [ ] 1.3 Normalizzazione, regole di categoria, ranking autocompletamento, validazioni
+- [x] 1.3 Normalizzazione, regole di categoria, ranking autocompletamento, validazioni
 
 ### Fase 2 — Persistenza e API
 - [ ] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
@@ -41,7 +41,6 @@
 - [ ] Richiede una nuova sessione di pianificazione su Opus
 
 ## Pendenze aperte
-- Nessuna pendenza aperta. Prossimo giro: 1.3 — Fase 1, Normalizzazione/regole/validazioni.
-- Nessun rilievo fondato ma fuori scope.
-- Nessuna domanda in attesa dell'utente.
-- Nessun debito accettato.
+- Durante il lavoro delle sessioni Codex è comparso un file `AGENTS.md` non tracciato alla radice, non richiesto dai brief; non è stato incluso nel commit e la decisione se tenerlo, cancellarlo o ignorarlo è dell'utente.
+- Nessun rilievo fondato fuori scope, nessuna domanda in attesa dell'utente, nessun debito accettato.
+- Le interfacce per catch-up delle ricorrenze, backup ed export sono rimandate alla fase 2, in attesa dei requisiti istruiti.
