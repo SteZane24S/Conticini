@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 1.3 chiuso il 17/09/2026.
-**Prossimo giro:** 2.1 — Fase 2, Persistenza e API: schema 001, colonne di sincronizzazione, change_log, repository, vedi fasi/fase-2-persistenza-api/PIANO.md.
+**Stato:** giro 2.1 chiuso il 17/09/2026.
+**Prossimo giro:** 2.2 — Fase 2, Persistenza e API: API conti, settori/categorie, movimenti, trasferimenti, vedi fasi/fase-2-persistenza-api/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -17,7 +17,7 @@
 - [x] 1.3 Normalizzazione, regole di categoria, ranking autocompletamento, validazioni
 
 ### Fase 2 — Persistenza e API
-- [ ] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
+- [x] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
 - [ ] 2.2 API conti, settori/categorie, movimenti, trasferimenti
 - [ ] 2.3 API stipendi/cicli, spese fisse, occorrenze, catch-up
 - [ ] 2.4 API previsioni, prospetto, regole e suggerimenti
@@ -41,6 +41,7 @@
 - [ ] Richiede una nuova sessione di pianificazione su Opus
 
 ## Pendenze aperte
-- Durante il lavoro delle sessioni Codex è comparso un file `AGENTS.md` non tracciato alla radice, non richiesto dai brief; non è stato incluso nel commit e la decisione se tenerlo, cancellarlo o ignorarlo è dell'utente.
-- Nessun rilievo fondato fuori scope, nessuna domanda in attesa dell'utente, nessun debito accettato.
-- Le interfacce per catch-up delle ricorrenze, backup ed export sono rimandate alla fase 2, in attesa dei requisiti istruiti.
+- Il file `AGENTS.md` non tracciato alla radice resta una pendenza preesistente invariata: è comparso durante sessioni Codex di un giro precedente, non è richiesto dai brief e non è incluso in alcun commit; la decisione se tenerlo, cancellarlo o ignorarlo è dell’utente.
+- Nessun rilievo fondato ma fuori scope è emerso nel giro 2.1; nessuna domanda è in attesa dell’utente.
+- Prossimo giro: 2.2 — API conti, settori/categorie, movimenti, trasferimenti; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
+- Debiti accettati consapevolmente: nessuno.

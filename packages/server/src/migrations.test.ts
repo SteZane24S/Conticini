@@ -39,7 +39,7 @@ describe('migrazioni e meta', () => {
       .get() as {
       count: number;
     };
-    expect(count.count).toBe(1);
+    expect(count.count).toBe(2);
     db2.close();
   });
 
@@ -67,7 +67,7 @@ describe('migrazioni e meta', () => {
     const db1 = new Database(dbPath);
     runMigrations(db1);
     const first = ensureMeta(db1);
-    expect(first.schemaVersion).toBe(1);
+    expect(first.schemaVersion).toBe(2);
     db1.close();
 
     temporaryMigration = path.join(
@@ -85,7 +85,7 @@ describe('migrazioni e meta', () => {
     const second = ensureMeta(db2);
     db2.close();
 
-    expect(second.schemaVersion).toBe(2);
+    expect(second.schemaVersion).toBe(3);
     expect(second.datasetId).toBe(first.datasetId);
     expect(second.deviceId).toBe(first.deviceId);
   });
