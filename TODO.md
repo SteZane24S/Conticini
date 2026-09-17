@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 0.3 chiuso il 17/09/2026.
-**Prossimo giro:** 1.1 — Fase 1, Dominio puro (Soldi, date, UUIDv5, ricorrenze), vedi `fasi/fase-1-dominio/PIANO.md`.
+**Stato:** giro 1.1 chiuso il 17/09/2026.
+**Prossimo giro:** 1.2 — Fase 1, Saldi/cicli/prospetto (saldo a D, cicli, formula di previsione), vedi `fasi/fase-1-dominio/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -12,7 +12,7 @@
 - [x] 0.3 Web: Vite + proxy, layout provvisorio con navigazione, build servita da Fastify
 
 ### Fase 1 — Dominio puro
-- [ ] 1.1 Soldi, date, UUIDv5, ricorrenze
+- [x] 1.1 Soldi, date, UUIDv5, ricorrenze
 - [ ] 1.2 Saldo a D, cicli, formula di previsione + test di accettazione
 - [ ] 1.3 Normalizzazione, regole di categoria, ranking autocompletamento, validazioni
 
@@ -41,7 +41,7 @@
 - [ ] Richiede una nuova sessione di pianificazione su Opus
 
 ## Pendenze aperte
-- Nessuna pendenza aperta. Prossimo giro: 1.1 — Fase 1, Dominio puro.
+- Nessuna pendenza aperta. Prossimo giro: 1.2 — Fase 1, Saldi/cicli/prospetto.
 - Nessun rilievo fondato ma fuori scope.
 - Nessuna domanda in attesa dell'utente.
 - Nessun debito accettato.
