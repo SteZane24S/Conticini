@@ -1,0 +1,10 @@
+dist
+node_modules
+coverage
+.dati-dev
+package-lock.json
+CLAUDE.md
+PIANO.md
+TODO.md
+fasi
+storico

@@ -1,0 +1,14 @@
+{
+  "name": "@conticini/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@conticini/contratti": "*",
+    "@conticini/dominio": "*"
+  }
+}
