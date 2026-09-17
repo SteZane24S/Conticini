@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev": "cross-env CONTICINI_DATA_DIR=../../.dati-dev CONTICINI_DEV=1 tsx watch src/index.ts"
   },
   "dependencies": {
     "@conticini/contratti": "*",
@@ -14,6 +15,8 @@
     "fastify": "^5.6.2"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0"
+    "@types/better-sqlite3": "^9.6.0",
+    "cross-env": "^10.1.0",
+    "tsx": "^4.23.13"
   }
 }

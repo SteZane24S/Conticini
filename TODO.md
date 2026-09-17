@@ -1,14 +1,14 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 0.1 chiuso il 17/09/2026.
-**Prossimo giro:** 0.2 — Server Fastify, vedi `fasi/fase-0-fondamenta/PIANO.md`.
+**Stato:** giro 0.2 chiuso il 17/09/2026.
+**Prossimo giro:** 0.3 — Web, vedi `fasi/fase-0-fondamenta/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
 
 ### Fase 0 — Fondamenta
 - [x] 0.1 Monorepo, TypeScript, ESLint (confine di `dominio`), Prettier, Vitest, gate, better-sqlite3 verificato
-- [ ] 0.2 Server Fastify: cartella dati, DB, migrazioni, `meta`, `/api/salute`, localhost + `Host`, istanza singola, heartbeat
+- [x] 0.2 Server Fastify: cartella dati, DB, migrazioni, `meta`, `/api/salute`, localhost + `Host`, istanza singola, heartbeat
 - [ ] 0.3 Web: Vite + proxy, layout provvisorio con navigazione, build servita da Fastify
 
 ### Fase 1 — Dominio puro
@@ -41,7 +41,7 @@
 - [ ] Richiede una nuova sessione di pianificazione su Opus
 
 ## Pendenze aperte
-- `npm run dev` dalla radice fallirà con `Missing script: dev` finché i giri 0.2 (script `dev` di `packages/server`) e 0.3 (script `dev` di `packages/web`) non lo completeranno. Non è un debito né un rilievo scartato: è la sequenza pianificata dal `PIANO.md` di fase 0.
+- `npm run dev` dalla radice fallirà con `Missing script: dev` finché il giro 0.3 non aggiungerà lo script `dev` di `packages/web`. Non è un debito né un rilievo scartato: è la sequenza pianificata dal `PIANO.md` di fase 0.
 - Nessun rilievo fondato ma fuori scope oltre a quanto già detto sopra (che è pianificato, non un debito).
 - Nessuna domanda in attesa dell'utente.
 - Nessun debito accettato.
