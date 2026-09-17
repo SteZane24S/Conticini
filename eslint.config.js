@@ -8,7 +8,7 @@ export default tseslint.config(
     ignores: ['node_modules', 'dist', 'coverage'],
   },
   {
-    files: ['packages/**/src/**/*.ts'],
+    files: ['packages/**/src/**/*.{ts,tsx}'],
     extends: [tseslint.configs.recommended],
   },
   {

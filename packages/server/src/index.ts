@@ -69,6 +69,7 @@ async function main(): Promise<void> {
     port: env.port,
     datasetId: meta.datasetId,
     versione: readVersione(),
+    webDistPath: path.join(currentDir, '../../web/dist'),
   });
 
   if (!env.dev) {

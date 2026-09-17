@@ -1,9 +1,14 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
+import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 export interface AppDeps {
   port: number;
   datasetId: string;
   versione: string;
+  webDistPath?: string;
 }
 
 export interface BuiltApp {
@@ -36,6 +41,28 @@ export function buildApp(deps: AppDeps): BuiltApp {
     lastHeartbeatMs = Date.now();
     return { ok: true };
   });
+
+  const indexHtmlPath = deps.webDistPath
+    ? path.join(deps.webDistPath, 'index.html')
+    : undefined;
+
+  if (indexHtmlPath && existsSync(indexHtmlPath)) {
+    app.register(fastifyStatic, {
+      root: deps.webDistPath,
+    });
+
+    app.setNotFoundHandler((request, reply) => {
+      if (request.raw.url?.startsWith('/api')) {
+        reply.code(404).send({ ok: false, errore: 'non trovato' });
+        return;
+      }
+      reply.sendFile('index.html');
+    });
+  } else if (deps.webDistPath && existsSync(deps.webDistPath)) {
+    app.log.warn(
+      `webDistPath (${deps.webDistPath}) esiste ma non contiene index.html: file statici non serviti`,
+    );
+  }
 
   return { app, getLastHeartbeatMs: () => lastHeartbeatMs };
 }
