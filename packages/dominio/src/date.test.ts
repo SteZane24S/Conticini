@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   aggiungiMesi,
+  annoDi,
+  costruisciData,
   confrontaDate,
   isDataISO,
+  meseDi,
   oggiLocale,
   parseDataISO,
   ultimoGiornoDelMese,
@@ -28,6 +31,25 @@ describe('aggiungiMesi', () => {
 
   it('attraversa la fine dellanno', () => {
     expect(aggiungiMesi(parseDataISO('2023-11-30'), 2)).toBe('2024-01-30');
+  });
+
+  it('lancia se n non e un numero intero', () => {
+    expect(() => aggiungiMesi(parseDataISO('2023-01-15'), 1.5)).toThrow(
+      'n deve essere un numero intero: 1.5',
+    );
+  });
+});
+
+describe('annoDi, meseDi e costruisciData', () => {
+  it('estrae anno e mese da una data ISO', () => {
+    const data = parseDataISO('2023-05-10');
+
+    expect(annoDi(data)).toBe(2023);
+    expect(meseDi(data)).toBe(5);
+  });
+
+  it('costruisce una data con mese e giorno zero-padded', () => {
+    expect(costruisciData(2023, 5, 9)).toBe('2023-05-09');
   });
 });
 

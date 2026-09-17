@@ -22,7 +22,23 @@ export function parseDataISO(value: string): DataISO {
     throw new Error('data non valida: ' + value);
   }
 
-  return value as DataISO;
+  return value;
+}
+
+export function annoDi(data: DataISO): number {
+  return Number(data.slice(0, 4));
+}
+
+export function meseDi(data: DataISO): number {
+  return Number(data.slice(5, 7));
+}
+
+export function costruisciData(
+  anno: number,
+  mese: number,
+  giorno: number,
+): DataISO {
+  return `${String(anno).padStart(4, '0')}-${String(mese).padStart(2, '0')}-${String(giorno).padStart(2, '0')}` as DataISO;
 }
 
 export function confrontaDate(a: DataISO, b: DataISO): number {
@@ -42,8 +58,12 @@ export function ultimoGiornoDelMese(anno: number, mese: number): number {
 }
 
 export function aggiungiMesi(data: DataISO, n: number): DataISO {
-  const anno = Number(data.slice(0, 4));
-  const mese = Number(data.slice(5, 7));
+  if (!Number.isInteger(n)) {
+    throw new Error('n deve essere un numero intero: ' + n);
+  }
+
+  const anno = annoDi(data);
+  const mese = meseDi(data);
   const giorno = Number(data.slice(8, 10));
   const idx = anno * 12 + (mese - 1) + n;
   const nuovoAnno = Math.floor(idx / 12);
@@ -54,5 +74,5 @@ export function aggiungiMesi(data: DataISO, n: number): DataISO {
     ultimoGiornoDelMese(nuovoAnno, nuovoMese),
   );
 
-  return `${nuovoAnno}-${String(nuovoMese).padStart(2, '0')}-${String(nuovoGiorno).padStart(2, '0')}` as DataISO;
+  return costruisciData(nuovoAnno, nuovoMese, nuovoGiorno);
 }

@@ -1,4 +1,11 @@
-import { confrontaDate, type DataISO, ultimoGiornoDelMese } from './date.js';
+import {
+  annoDi,
+  confrontaDate,
+  costruisciData,
+  type DataISO,
+  meseDi,
+  ultimoGiornoDelMese,
+} from './date.js';
 
 export interface Occorrenza {
   periodo: string;
@@ -47,6 +54,10 @@ export function everyNMonths(
   startDate: DataISO,
   endDate?: DataISO,
 ): RicorrenzaOgniNMesi {
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error('n deve essere un intero positivo: ' + n);
+  }
+
   return {
     tipo: 'every_n_months',
     n,
@@ -68,18 +79,6 @@ export function yearly(
 
 function indiceMese(anno: number, mese: number): number {
   return anno * 12 + (mese - 1);
-}
-
-function anno(data: DataISO): number {
-  return Number(data.slice(0, 4));
-}
-
-function mese(data: DataISO): number {
-  return Number(data.slice(5, 7));
-}
-
-function creaData(anno: number, mese: number, giorno: number): DataISO {
-  return `${String(anno).padStart(4, '0')}-${String(mese).padStart(2, '0')}-${String(giorno).padStart(2, '0')}` as DataISO;
 }
 
 function aggiungiOccorrenza(
@@ -108,10 +107,10 @@ export function occorrenzeTra(
 
   if (regola.tipo === 'monthly') {
     const min = Math.max(
-      indiceMese(anno(regola.startDate), mese(regola.startDate)),
-      indiceMese(anno(da), mese(da)),
+      indiceMese(annoDi(regola.startDate), meseDi(regola.startDate)),
+      indiceMese(annoDi(da), meseDi(da)),
     );
-    const max = indiceMese(anno(a), mese(a));
+    const max = indiceMese(annoDi(a), meseDi(a));
 
     for (let idx = min; idx <= max; idx += 1) {
       const annoCorrente = Math.floor(idx / 12);
@@ -120,51 +119,47 @@ export function occorrenzeTra(
         regola.anchorDay,
         ultimoGiornoDelMese(annoCorrente, meseCorrente),
       );
-      const scadenza = creaData(annoCorrente, meseCorrente, giorno);
+      const scadenza = costruisciData(annoCorrente, meseCorrente, giorno);
 
       aggiungiOccorrenza(occorrenze, regola, scadenza, da, a);
     }
   }
 
   if (regola.tipo === 'yearly') {
-    const min = Math.max(anno(regola.startDate), anno(da));
-    const max = anno(a);
+    const min = Math.max(annoDi(regola.startDate), annoDi(da));
+    const max = annoDi(a);
 
     for (let annoCorrente = min; annoCorrente <= max; annoCorrente += 1) {
       const giorno = Math.min(
         regola.anchorDay,
         ultimoGiornoDelMese(annoCorrente, regola.anchorMonth),
       );
-      const scadenza = creaData(annoCorrente, regola.anchorMonth, giorno);
+      const scadenza = costruisciData(annoCorrente, regola.anchorMonth, giorno);
 
       aggiungiOccorrenza(occorrenze, regola, scadenza, da, a);
     }
   }
 
   if (regola.tipo === 'every_n_months') {
-    const ref = indiceMese(anno(regola.startDate), regola.anchorMonth);
+    const ref = indiceMese(annoDi(regola.startDate), regola.anchorMonth);
     const minIdx = Math.max(
-      indiceMese(anno(regola.startDate), mese(regola.startDate)),
-      indiceMese(anno(da), mese(da)),
+      indiceMese(annoDi(regola.startDate), meseDi(regola.startDate)),
+      indiceMese(annoDi(da), meseDi(da)),
     );
-    const maxIdx = indiceMese(anno(a), mese(a));
+    const maxIdx = indiceMese(annoDi(a), meseDi(a));
 
     for (
       let k = Math.ceil((minIdx - ref) / regola.n), idx = ref + k * regola.n;
       idx <= maxIdx;
       k += 1, idx = ref + k * regola.n
     ) {
-      if (idx < minIdx) {
-        continue;
-      }
-
       const annoCorrente = Math.floor(idx / 12);
       const meseCorrente = idx - annoCorrente * 12 + 1;
       const giorno = Math.min(
         regola.anchorDay,
         ultimoGiornoDelMese(annoCorrente, meseCorrente),
       );
-      const scadenza = creaData(annoCorrente, meseCorrente, giorno);
+      const scadenza = costruisciData(annoCorrente, meseCorrente, giorno);
 
       aggiungiOccorrenza(occorrenze, regola, scadenza, da, a);
     }

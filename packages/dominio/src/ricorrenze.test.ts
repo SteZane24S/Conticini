@@ -93,3 +93,11 @@ describe('occorrenzeTra', () => {
     );
   });
 });
+
+describe('everyNMonths', () => {
+  it.each([0, -3, 1.5])('lancia se n non e un intero positivo: %s', (n) => {
+    expect(() => everyNMonths(n, 1, 15, parseDataISO('2023-01-01'))).toThrow(
+      'n deve essere un intero positivo: ' + n,
+    );
+  });
+});
