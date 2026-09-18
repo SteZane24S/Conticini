@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 3.1 chiuso il 18/09/2026.
-**Prossimo giro:** 3.2 — Movimenti (inserimento rapido, elenco, modifica), vedi fasi/fase-3-ui-provvisoria/PIANO.md.
+**Stato:** giro 3.2 chiuso il 18/09/2026.
+**Prossimo giro:** 3.3 — Stipendio; spese fisse; in attesa, vedi fasi/fase-3-ui-provvisoria/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -24,7 +24,7 @@
 
 ### Fase 3 — UI provvisoria
 - [x] 3.1 Conti e trasferimenti; settori, categorie e regole
-- [ ] 3.2 Movimenti (inserimento rapido, elenco, modifica)
+- [x] 3.2 Movimenti (inserimento rapido, elenco, modifica)
 - [ ] 3.3 Stipendio; spese fisse; in attesa
 - [ ] 3.4 Previsioni; prospetto
 
@@ -47,10 +47,13 @@
 - Debito di copertura test nella cascata delle spese fisse: le asserzioni verificano `amountCents`, ma non esplicitamente `contoId`/`categoriaId`/`mode`; la correttezza è stata verificata manualmente e il debito è accettato.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 2.4, tranne il debito di copertura test sul leak tra override di cicli diversi nel prospetto multi-ciclo (comportamento verificato manualmente come corretto, asserzione automatica assente).
 - Durante il giro 2.4 la pool Codex si è esaurita per quota; le correzioni di U3, il wiring U4 e il fix di formattazione sono girati in ricaduta su Sonnet — da tenere presente nel confronto dei pesi fra giri nel registro dei consumi, perché queste sessioni lasciano traccia nei transcript a differenza di quelle Codex.
-- Il prossimo giro è il 3.1 — Conti e trasferimenti; settori, categorie e regole (prima UI provvisoria funzionale), da `fasi/fase-3-ui-provvisoria/PIANO.md`. Da qui in avanti ogni giro si chiude con `live-testing` (il giro 2.4 non lo richiedeva, perché non tocca `packages/web`).
+- Il prossimo giro è il 3.3 — Stipendio; spese fisse; in attesa, da `fasi/fase-3-ui-provvisoria/PIANO.md`. Da qui in avanti ogni giro si chiude con `live-testing` (il giro 2.4 non lo richiedeva, perché non tocca `packages/web`).
 - Query N+1 in `elencaTrasferimenti` (`packages/server/src/repositories/trasferimenti.ts`): debito accettato, trascurabile per il volume dati di un'app personale.
 - Messaggio del vincolo "settore con categorie attive" include l'UUID tecnico in coda al testo (`packages/server/src/errori.ts`, `erroreSettoreConCategorie`): cosmetico, da pulire in un giro futuro se si tocca di nuovo quel file.
 - Messaggio d'errore del form trasferimento non si pulisce automaticamente quando l'utente corregge un campo prima di ri-sottomettere (`packages/web/src/pages/Conti.tsx`, `TrasferimentoForm`): debito di UX minore, accettato per la fase "UI provvisoria".
 - Il giro 3.1 è girato interamente in ricaduta su Sonnet (Codex non disponibile): da tenere presente nel confronto dei pesi fra giri nel registro dei consumi, perché queste sessioni lasciano traccia nei transcript a differenza di quelle Codex.
-- Il prossimo giro è il 3.2 — Movimenti (inserimento rapido, elenco, modifica), da `fasi/fase-3-ui-provvisoria/PIANO.md`. Da qui in avanti ogni giro continua a chiudersi con `live-testing`, come già stabilito.
-- La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, comparso in un giro precedente, decisione dell'utente se tenerlo/cancellarlo) resta invariata: non è stata generata né modificata nel giro 3.1.
+- Il prossimo giro è il 3.3 — Stipendio; spese fisse; in attesa, da `fasi/fase-3-ui-provvisoria/PIANO.md`. Da qui in avanti ogni giro continua a chiudersi con `live-testing`, come già stabilito.
+- La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, comparso in un giro precedente, decisione dell’utente se tenerlo/cancellarlo) resta invariata: non è stata generata né modificata nel giro 3.1.
+- Paginazione a offset instabile in `useMovimenti` se il dataset cambia durante lo scaricamento di più pagine: debito accettato, trascurabile per il volume di un’app personale locale mono-utente.
+- Aprire “Modifica” su una riga dell’elenco movimenti sovrascrive senza avviso un form di modifica non salvato su un’altra riga: debito minore di UX per la fase “UI provvisoria”.
+- Rischio trascurabile di race condition UI se l’utente cambia il tipo del movimento esattamente durante la creazione asincrona di una categoria al volo.
