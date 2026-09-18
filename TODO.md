@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 3.3 chiuso il 18/09/2026.
-**Prossimo giro:** 3.4 — Previsioni; prospetto, vedi fasi/fase-3-ui-provvisoria/PIANO.md.
+**Stato:** giro 3.4 chiuso il 18/09/2026 — Fase 3 completata.
+**Prossimo giro:** 4.1 — Grafici, vedi fasi/fase-4-grafici-backup-rilascio/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -26,7 +26,7 @@
 - [x] 3.1 Conti e trasferimenti; settori, categorie e regole
 - [x] 3.2 Movimenti (inserimento rapido, elenco, modifica)
 - [x] 3.3 Stipendio; spese fisse; in attesa
-- [ ] 3.4 Previsioni; prospetto
+- [x] 3.4 Previsioni; prospetto
 
 ### Fase 4 — Grafici, backup, rilascio
 - [ ] 4.1 Grafici
@@ -62,3 +62,8 @@
 - La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 3.3.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 3.3: tutti gli otto rilievi di review e il difetto trovato dal collaudo sono stati corretti e riverificati.
 - Il prossimo giro è il 3.4 — Previsioni; prospetto, da `fasi/fase-3-ui-provvisoria/PIANO.md`. Chiude la fase 3 e include lo scenario di accettazione completo descritto in fondo al piano. Continua a chiudersi con `live-testing`.
+- Fase 3 — UI provvisoria è chiusa con questo giro: tutti i giri 3.1-3.4 completati.
+- Il catch-up delle occorrenze fisse non si attiva alla creazione o modifica runtime di una spesa fissa con date retroattive: parte solo all'avvio del server o al cambio di giorno via heartbeat. Limite noto, riconfermato durante il collaudo del giro 3.4; da valutare in un giro futuro che tocchi di nuovo `packages/server`.
+- La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, decisione dell'utente se tenerlo, cancellarlo o ignorarlo) resta invariata: non è stata generata né modificata in questo giro.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 3.4: entrambi i rilievi fondati sono stati corretti e riverificati.
+- Prossimo giro: 4.1 — Grafici, da `fasi/fase-4-grafici-backup-rilascio/PIANO.md`. Apre la Fase 4 — Grafici, backup, rilascio.

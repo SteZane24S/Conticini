@@ -34,6 +34,13 @@ export const collegaOccorrenzaSchema = z.object({
 });
 export type CollegaOccorrenzaInput = z.infer<typeof collegaOccorrenzaSchema>;
 
+export const richiestaElencoOccorrenzeSchema = z.object({
+  tutte: z.literal('true').optional(),
+});
+export type RichiestaElencoOccorrenze = z.infer<
+  typeof richiestaElencoOccorrenzeSchema
+>;
+
 export const elencoOccorrenzeRispostaSchema = z.object({
   ok: z.literal(true),
   occorrenze: z.array(occorrenzaSchema),

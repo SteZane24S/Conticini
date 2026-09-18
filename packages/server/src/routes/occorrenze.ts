@@ -1,6 +1,7 @@
 import {
   collegaOccorrenzaSchema,
   confermaOccorrenzaSchema,
+  richiestaElencoOccorrenzeSchema,
 } from '@conticini/contratti';
 import type { FastifyInstance } from 'fastify';
 
@@ -8,6 +9,7 @@ import { erroreValidazione } from '../errori.js';
 import {
   collegaOccorrenza,
   confermaOccorrenza,
+  creaRepositorioOccorrenze,
   elencaOccorrenzePending,
   saltaOccorrenza,
 } from '../repositories/occorrenze.js';
@@ -17,10 +19,23 @@ export function registraRotteOccorrenze(
   app: FastifyInstance,
   ctx: ContestoScrittura,
 ): void {
-  app.get('/api/occorrenze', async () => ({
-    ok: true,
-    occorrenze: elencaOccorrenzePending(ctx),
-  }));
+  app.get('/api/occorrenze', async (request) => {
+    const risultato = richiestaElencoOccorrenzeSchema.safeParse(request.query);
+    if (!risultato.success) {
+      const issue = risultato.error.issues[0];
+      throw erroreValidazione(
+        issue?.message ?? 'Richiesta non valida.',
+        issue && issue.path.length > 0 ? issue.path.join('.') : undefined,
+      );
+    }
+    return {
+      ok: true,
+      occorrenze:
+        risultato.data.tutte === 'true'
+          ? await creaRepositorioOccorrenze(ctx).elenca()
+          : elencaOccorrenzePending(ctx),
+    };
+  });
 
   app.post('/api/occorrenze/:id/conferma', async (request) => {
     const { id } = request.params as { id: string };

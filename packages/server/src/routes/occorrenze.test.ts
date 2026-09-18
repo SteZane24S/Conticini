@@ -109,6 +109,29 @@ describe('rotte occorrenze', () => {
     });
   });
 
+  it('elenca tutte le occorrenze quando richiesto', async () => {
+    const applicazione = creaApp();
+    await applicazione.inject({
+      method: 'POST',
+      url: '/api/occorrenze/pending-1/salta',
+    });
+
+    const tutte = await applicazione.inject({
+      method: 'GET',
+      url: '/api/occorrenze?tutte=true',
+    });
+    const pending = await applicazione.inject({
+      method: 'GET',
+      url: '/api/occorrenze',
+    });
+
+    expect(tutte.json()).toMatchObject({
+      ok: true,
+      occorrenze: [{ id: 'pending-1', stato: 'skipped' }],
+    });
+    expect(pending.json()).toMatchObject({ ok: true, occorrenze: [] });
+  });
+
   it('salta un occorrenza pending', async () => {
     const response = await creaApp().inject({
       method: 'POST',
