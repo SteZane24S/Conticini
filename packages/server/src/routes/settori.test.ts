@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { registraGestoreErrori } from '../errori.js';
 import { runMigrations } from '../migrations-runner.js';
+import { registraRotteCategorie } from './categorie.js';
 import { registraRotteSettori } from './settori.js';
 
 describe('rotte settori', () => {
@@ -33,6 +34,7 @@ describe('rotte settori', () => {
     app = Fastify();
     registraGestoreErrori(app);
     registraRotteSettori(app, { db, deviceId: 'device-test' });
+    registraRotteCategorie(app, { db, deviceId: 'device-test' });
     return app;
   }
 
@@ -178,6 +180,32 @@ describe('rotte settori', () => {
       url: `/api/settori/${id}`,
     });
     expect(ottenuto.statusCode).toBe(404);
+  });
+
+  it("rifiuta l'eliminazione di un settore con categorie attive", async () => {
+    const applicazione = creaApp();
+    const creato = await creaSettore(applicazione);
+    const id = creato.json().settore.id;
+
+    await applicazione.inject({
+      method: 'POST',
+      url: '/api/categorie',
+      payload: { nome: 'Affitto', kind: 'uscita', settoreId: id },
+    });
+
+    const response = await applicazione.inject({
+      method: 'DELETE',
+      url: `/api/settori/${id}`,
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json().errore.codice).toBe('settore_con_categorie');
+
+    const ottenuto = await applicazione.inject({
+      method: 'GET',
+      url: `/api/settori/${id}`,
+    });
+    expect(ottenuto.statusCode).toBe(200);
   });
 
   it('permette di riusare un nome dopo DELETE', async () => {

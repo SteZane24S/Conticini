@@ -8,6 +8,7 @@ import { erroreNonTrovato, erroreValidazione } from '../errori.js';
 import {
   aggiornaTrasferimento,
   creaTrasferimento,
+  elencaTrasferimenti,
   eliminaTrasferimento,
   ottieniTrasferimento,
 } from '../repositories/trasferimenti.js';
@@ -17,6 +18,11 @@ export function registraRotteTrasferimenti(
   app: FastifyInstance,
   ctx: ContestoScrittura,
 ): void {
+  app.get('/api/trasferimenti', async () => ({
+    ok: true,
+    trasferimenti: elencaTrasferimenti(ctx),
+  }));
+
   app.post('/api/trasferimenti', async (request, reply) => {
     const risultato = creaTrasferimentoSchema.safeParse(request.body);
     if (!risultato.success) {

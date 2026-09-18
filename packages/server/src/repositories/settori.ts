@@ -3,7 +3,11 @@ import { randomUUID } from 'node:crypto';
 import type { RepositorioSettori, Settore } from '@conticini/dominio';
 import Database from 'better-sqlite3';
 
-import { erroreNomeDuplicato, erroreNonTrovato } from '../errori.js';
+import {
+  erroreNomeDuplicato,
+  erroreNonTrovato,
+  erroreSettoreConCategorie,
+} from '../errori.js';
 import {
   aggiorna as aggiornaRiga,
   cancella,
@@ -113,6 +117,14 @@ export function creaRepositorioSettori(
 
     async elimina(id) {
       const baseRevision = leggiRevisione(id);
+      const categoriaAttiva = ctx.db
+        .prepare(
+          `SELECT 1 FROM categories WHERE sector_id = ? AND ${SOLO_ATTIVI}`,
+        )
+        .get(id);
+      if (categoriaAttiva) {
+        throw erroreSettoreConCategorie(id);
+      }
       cancella(ctx, 'sectors', 'sectors', id, baseRevision);
     },
   };

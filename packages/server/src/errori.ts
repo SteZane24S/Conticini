@@ -59,6 +59,14 @@ export function erroreNomeDuplicato(campo: string, valore: string): ErroreApi {
   );
 }
 
+export function erroreSettoreConCategorie(id: string): ErroreApi {
+  return new ErroreApi(
+    409,
+    'settore_con_categorie',
+    `Il settore ha categorie attive: elimina prima le categorie. (${id})`,
+  );
+}
+
 export function erroreDominio(
   motivo: MotivoDominio,
   campo?: string,

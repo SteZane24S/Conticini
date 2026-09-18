@@ -222,6 +222,25 @@ export function ottieniTrasferimento(
   );
 }
 
+export function elencaTrasferimenti(ctx: ContestoScrittura): Trasferimento[] {
+  const gruppi = ctx.db
+    .prepare(
+      `SELECT transfer_group_id, MAX(date) AS ultima_data FROM transactions WHERE transfer_group_id IS NOT NULL AND ${SOLO_ATTIVI} GROUP BY transfer_group_id ORDER BY ultima_data DESC`,
+    )
+    .all() as { transfer_group_id: string; ultima_data: string }[];
+
+  return gruppi
+    .map((riga) =>
+      costruisciTrasferimento(
+        riga.transfer_group_id,
+        leggiRigheGruppo(ctx, riga.transfer_group_id),
+      ),
+    )
+    .filter(
+      (trasferimento): trasferimento is Trasferimento => trasferimento !== null,
+    );
+}
+
 export function aggiornaTrasferimento(
   ctx: ContestoScrittura,
   transferGroupId: string,

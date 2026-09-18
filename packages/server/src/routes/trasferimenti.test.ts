@@ -77,6 +77,29 @@ describe('rotte trasferimenti', () => {
     ).toEqual([-1200, 1200]);
   });
 
+  it('elenca i trasferimenti esistenti, dal più recente', async () => {
+    const applicazione = creaApp();
+    await applicazione.inject({
+      method: 'POST',
+      url: '/api/trasferimenti',
+      payload: payload({ data: '2026-02-10' }),
+    });
+    await applicazione.inject({
+      method: 'POST',
+      url: '/api/trasferimenti',
+      payload: payload({ data: '2026-03-01' }),
+    });
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/trasferimenti',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().trasferimenti).toHaveLength(2);
+    expect(response.json().trasferimenti[0].data).toBe('2026-03-01');
+  });
+
   it('restituisce gli errori di conto, schema e apertura', async () => {
     const applicazione = creaApp();
     const inesistente = await applicazione.inject({

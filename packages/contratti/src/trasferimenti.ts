@@ -66,3 +66,11 @@ export const trasferimentoRispostaSchema = z.object({
   trasferimento: trasferimentoSchema,
 });
 export type TrasferimentoRisposta = z.infer<typeof trasferimentoRispostaSchema>;
+
+export const elencoTrasferimentiRispostaSchema = z.object({
+  ok: z.literal(true),
+  trasferimenti: z.array(trasferimentoSchema),
+});
+export type ElencoTrasferimentiRisposta = z.infer<
+  typeof elencoTrasferimentiRispostaSchema
+>;
