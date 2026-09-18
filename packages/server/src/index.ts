@@ -68,6 +68,8 @@ async function main(): Promise<void> {
   const { app, getLastHeartbeatMs } = buildApp({
     port: env.port,
     datasetId: meta.datasetId,
+    db,
+    deviceId: meta.deviceId,
     versione: readVersione(),
     webDistPath: path.join(currentDir, '../../web/dist'),
   });

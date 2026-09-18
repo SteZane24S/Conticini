@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "declaration": true,
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

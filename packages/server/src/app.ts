@@ -2,13 +2,24 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import fastifyStatic from '@fastify/static';
+import type Database from 'better-sqlite3';
 import Fastify, { type FastifyInstance } from 'fastify';
+
+import { registraGestoreErrori } from './errori.js';
+import { registraRotteCategorie } from './routes/categorie.js';
+import { registraRotteConti } from './routes/conti.js';
+import { registraRotteMovimenti } from './routes/movimenti.js';
+import { registraRotteSettori } from './routes/settori.js';
+import { registraRotteTrasferimenti } from './routes/trasferimenti.js';
+import type { ContestoScrittura } from './scrittura.js';
 
 export interface AppDeps {
   port: number;
   datasetId: string;
   versione: string;
   webDistPath?: string;
+  db?: Database.Database;
+  deviceId?: string;
 }
 
 export interface BuiltApp {
@@ -29,6 +40,7 @@ export function buildApp(deps: AppDeps): BuiltApp {
       return reply.code(421).send();
     }
   });
+  registraGestoreErrori(app);
 
   app.get('/api/salute', async () => ({
     ok: true,
@@ -42,6 +54,15 @@ export function buildApp(deps: AppDeps): BuiltApp {
     return { ok: true };
   });
 
+  if (deps.db && deps.deviceId) {
+    const ctx: ContestoScrittura = { db: deps.db, deviceId: deps.deviceId };
+    registraRotteConti(app, ctx);
+    registraRotteSettori(app, ctx);
+    registraRotteCategorie(app, ctx);
+    registraRotteMovimenti(app, ctx);
+    registraRotteTrasferimenti(app, ctx);
+  }
+
   const indexHtmlPath = deps.webDistPath
     ? path.join(deps.webDistPath, 'index.html')
     : undefined;
@@ -50,19 +71,26 @@ export function buildApp(deps: AppDeps): BuiltApp {
     app.register(fastifyStatic, {
       root: deps.webDistPath,
     });
-
-    app.setNotFoundHandler((request, reply) => {
-      if (request.raw.url?.startsWith('/api')) {
-        reply.code(404).send({ ok: false, errore: 'non trovato' });
-        return;
-      }
-      reply.sendFile('index.html');
-    });
   } else if (deps.webDistPath && existsSync(deps.webDistPath)) {
     app.log.warn(
       `webDistPath (${deps.webDistPath}) esiste ma non contiene index.html: file statici non serviti`,
     );
   }
+
+  app.setNotFoundHandler((request, reply) => {
+    if (request.raw.url?.startsWith('/api')) {
+      reply.code(404).send({
+        ok: false,
+        errore: { codice: 'non_trovato', messaggio: 'non trovato' },
+      });
+      return;
+    }
+    if (indexHtmlPath && existsSync(indexHtmlPath)) {
+      reply.sendFile('index.html');
+      return;
+    }
+    reply.code(404).send();
+  });
 
   return { app, getLastHeartbeatMs: () => lastHeartbeatMs };
 }

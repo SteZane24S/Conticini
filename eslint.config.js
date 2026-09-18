@@ -5,7 +5,7 @@ const dominioMessage =
 
 export default tseslint.config(
   {
-    ignores: ['node_modules', 'dist', 'coverage'],
+    ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**'],
   },
   {
     files: ['packages/**/src/**/*.{ts,tsx}'],

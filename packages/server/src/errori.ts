@@ -1,0 +1,103 @@
+import type { FastifyInstance } from 'fastify';
+import type {
+  MotivoMovimentoAnterioreApertura,
+  MotivoSegnoNonCoerente,
+  MotivoTrasferimentoNonValido,
+  MotivoVincoloPrevisioneFissa,
+} from '@conticini/dominio';
+
+export class ErroreApi extends Error {
+  readonly status: number;
+  readonly codice: string;
+  readonly campo?: string;
+
+  constructor(
+    status: number,
+    codice: string,
+    messaggio: string,
+    campo?: string,
+  ) {
+    super(messaggio);
+    this.name = 'ErroreApi';
+    this.status = status;
+    this.codice = codice;
+    this.campo = campo;
+  }
+}
+
+type MotivoDominio =
+  | MotivoTrasferimentoNonValido
+  | MotivoSegnoNonCoerente
+  | MotivoMovimentoAnterioreApertura
+  | MotivoVincoloPrevisioneFissa;
+
+const MESSAGGI_DOMINIO: Record<MotivoDominio, string> = {
+  numero_movimenti: 'Un trasferimento richiede esattamente due movimenti.',
+  stesso_conto: 'Le due gambe del trasferimento devono avere conti diversi.',
+  date_diverse: 'Le due gambe del trasferimento devono avere la stessa data.',
+  importi_non_opposti:
+    'Gli importi delle due gambe del trasferimento devono essere opposti.',
+  categoria_non_nulla: 'Un trasferimento non può avere una categoria.',
+  segno_non_coerente:
+    "Il segno dell'importo non è coerente con il tipo della categoria.",
+  movimento_anteriore_apertura:
+    'La data del movimento è precedente alla data di apertura del conto.',
+  previsione_e_fissa_su_stessa_categoria:
+    'Una categoria con previsione non può avere spese fisse attive, e viceversa.',
+};
+
+export function erroreNonTrovato(entita: string, id: string): ErroreApi {
+  return new ErroreApi(404, 'non_trovato', `${entita} non trovato: ${id}`);
+}
+
+export function erroreNomeDuplicato(campo: string, valore: string): ErroreApi {
+  return new ErroreApi(
+    409,
+    'nome_duplicato',
+    `Esiste già un elemento con questo nome: ${valore}`,
+    campo,
+  );
+}
+
+export function erroreDominio(
+  motivo: MotivoDominio,
+  campo?: string,
+): ErroreApi {
+  return new ErroreApi(
+    422,
+    motivo,
+    MESSAGGI_DOMINIO[motivo] ?? 'Regola di dominio non rispettata.',
+    campo,
+  );
+}
+
+export function erroreValidazione(
+  messaggio: string,
+  campo?: string,
+): ErroreApi {
+  return new ErroreApi(400, 'richiesta_non_valida', messaggio, campo);
+}
+
+export function registraGestoreErrori(app: FastifyInstance): void {
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof ErroreApi) {
+      reply.code(error.status).send({
+        ok: false,
+        errore: {
+          codice: error.codice,
+          messaggio: error.message,
+          ...(error.campo !== undefined ? { campo: error.campo } : {}),
+        },
+      });
+      return;
+    }
+    app.log.error(error);
+    reply.code(500).send({
+      ok: false,
+      errore: {
+        codice: 'errore_interno',
+        messaggio: 'Errore interno del server.',
+      },
+    });
+  });
+}

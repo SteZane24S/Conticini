@@ -1,0 +1,9 @@
+# Guida di sviluppo — giro 2.2
+
+Le API del giro sono state costruite attorno a un envelope di errore unico e a schemi Zod condivisi, così validazione, risposte HTTP e messaggi di dominio restano coerenti tra risorse diverse. Le tre correzioni infrastrutturali si sono rese necessarie quando il server ha importato per la prima volta tipi da `@conticini/dominio` con uno specificatore di pacchetto: mancavano i metadati di risoluzione nei pacchetti, le dichiarazioni `.d.ts` e un ignore ESLint valido per `dist` a qualunque profondità. Il problema era quindi latente fin dal giro 0.1, ma non era stato attivato da import tra pacchetti.
+
+Movimenti e trasferimenti hanno richiesto due passaggi di correzione ciascuno. In entrambi i casi la prima correzione della review ha risolto il rilievo iniziale ma, rileggendo il codice, ha fatto emergere una conseguenza diversa: nei movimenti il merge di `categoriaId: null` avrebbe permesso uno stato invalido per un movimento normale; nei trasferimenti una scrittura condizionata solo in apparenza avrebbe comunque aggiornato la gamba non modificata. Le correzioni finali mantengono quindi la validazione di dominio e impediscono scritture a vuoto sulle due gambe.
+
+`PUT` resta l’endpoint di aggiornamento dei trasferimenti anche se le altre risorse usano `PATCH`: la divergenza è prescritta esplicitamente da `PIANO.md` e non va uniformata in futuro senza modificare prima quella decisione congelata.
+
+Le scritture devono continuare a passare dal pattern di `scrittura.ts`, che mantiene revisioni, tombstone e `change_log` nella stessa transazione. I repository condivisi `mappaMovimento` e `leggiConto` sono ora esportati da `movimenti.ts` e riusati da `trasferimenti.ts`: non duplicarli. Restano inoltre deliberatamente fuori dal giro il test artificioso del rollback del secondo insert nelle categorie e ogni modifica ad `AGENTS.md`; il primo è un limite noto accettato, il secondo una pendenza preesistente.

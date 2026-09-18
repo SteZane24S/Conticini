@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 2.1 chiuso il 17/09/2026.
-**Prossimo giro:** 2.2 — Fase 2, Persistenza e API: API conti, settori/categorie, movimenti, trasferimenti, vedi fasi/fase-2-persistenza-api/PIANO.md.
+**Stato:** giro 2.2 chiuso il 18/09/2026.
+**Prossimo giro:** 2.3 — Fase 2, Persistenza e API: API stipendi/cicli, spese fisse, occorrenze, catch-up, vedi fasi/fase-2-persistenza-api/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -18,7 +18,7 @@
 
 ### Fase 2 — Persistenza e API
 - [x] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
-- [ ] 2.2 API conti, settori/categorie, movimenti, trasferimenti
+- [x] 2.2 API conti, settori/categorie, movimenti, trasferimenti
 - [ ] 2.3 API stipendi/cicli, spese fisse, occorrenze, catch-up
 - [ ] 2.4 API previsioni, prospetto, regole e suggerimenti
 
@@ -42,6 +42,6 @@
 
 ## Pendenze aperte
 - Il file `AGENTS.md` non tracciato alla radice resta una pendenza preesistente invariata: è comparso durante sessioni Codex di un giro precedente, non è richiesto dai brief e non è incluso in alcun commit; la decisione se tenerlo, cancellarlo o ignorarlo è dell’utente.
-- Nessun rilievo fondato ma fuori scope è emerso nel giro 2.1; nessuna domanda è in attesa dell’utente.
-- Prossimo giro: 2.2 — API conti, settori/categorie, movimenti, trasferimenti; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
-- Debiti accettati consapevolmente: nessuno.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 2.2, tranne la nota su `PUT` invece di `PATCH` per i trasferimenti: è deliberata da `PIANO.md`, non una pendenza.
+- Test di rollback non aggiunto in categorie per il secondo insert di `creaCategoriaConSettoreEventuale`: debito accettato consapevolmente, per non introdurre un test fragile basato su mock.
+- Il prossimo giro è il 2.3 — API stipendi/cicli, spese fisse, occorrenze, catch-up; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
