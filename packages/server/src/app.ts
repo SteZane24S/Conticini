@@ -2,14 +2,20 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import fastifyStatic from '@fastify/static';
+import { type DataISO, oggiLocale } from '@conticini/dominio';
 import type Database from 'better-sqlite3';
 import Fastify, { type FastifyInstance } from 'fastify';
 
+import { eseguiCatchUp } from './catchUp.js';
 import { registraGestoreErrori } from './errori.js';
 import { registraRotteCategorie } from './routes/categorie.js';
+import { registraRotteCicli } from './routes/cicli.js';
 import { registraRotteConti } from './routes/conti.js';
 import { registraRotteMovimenti } from './routes/movimenti.js';
+import { registraRotteOccorrenze } from './routes/occorrenze.js';
 import { registraRotteSettori } from './routes/settori.js';
+import { registraRotteSpeseFisse } from './routes/speseFisse.js';
+import { registraRotteStipendi } from './routes/stipendi.js';
 import { registraRotteTrasferimenti } from './routes/trasferimenti.js';
 import type { ContestoScrittura } from './scrittura.js';
 
@@ -49,18 +55,34 @@ export function buildApp(deps: AppDeps): BuiltApp {
   }));
 
   let lastHeartbeatMs = Date.now();
+  let ctx: ContestoScrittura | undefined;
+  let ultimoGiornoCatchUp: DataISO | undefined;
+
   app.post('/api/heartbeat', async () => {
     lastHeartbeatMs = Date.now();
+    if (ctx) {
+      const oggi = oggiLocale(new Date());
+      if (oggi !== ultimoGiornoCatchUp) {
+        eseguiCatchUp(ctx, oggi);
+        ultimoGiornoCatchUp = oggi;
+      }
+    }
     return { ok: true };
   });
 
   if (deps.db && deps.deviceId) {
-    const ctx: ContestoScrittura = { db: deps.db, deviceId: deps.deviceId };
+    ctx = { db: deps.db, deviceId: deps.deviceId };
+    ultimoGiornoCatchUp = oggiLocale(new Date());
+    eseguiCatchUp(ctx, ultimoGiornoCatchUp);
     registraRotteConti(app, ctx);
     registraRotteSettori(app, ctx);
     registraRotteCategorie(app, ctx);
     registraRotteMovimenti(app, ctx);
     registraRotteTrasferimenti(app, ctx);
+    registraRotteStipendi(app, ctx);
+    registraRotteCicli(app, ctx);
+    registraRotteSpeseFisse(app, ctx);
+    registraRotteOccorrenze(app, ctx);
   }
 
   const indexHtmlPath = deps.webDistPath

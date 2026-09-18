@@ -76,3 +76,20 @@ export function aggiungiMesi(data: DataISO, n: number): DataISO {
 
   return costruisciData(nuovoAnno, nuovoMese, nuovoGiorno);
 }
+
+export function aggiungiGiorni(data: DataISO, n: number): DataISO {
+  if (!Number.isInteger(n)) {
+    throw new Error('n deve essere un numero intero: ' + n);
+  }
+
+  const anno = annoDi(data);
+  const mese = meseDi(data);
+  const giorno = Number(data.slice(8, 10));
+  const nuovaData = new Date(anno, mese - 1, giorno + n);
+
+  return costruisciData(
+    nuovaData.getFullYear(),
+    nuovaData.getMonth() + 1,
+    nuovaData.getDate(),
+  );
+}

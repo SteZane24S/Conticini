@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  aggiungiGiorni,
   aggiungiMesi,
   annoDi,
   costruisciData,
@@ -11,6 +12,20 @@ import {
   parseDataISO,
   ultimoGiornoDelMese,
 } from './date.js';
+
+describe('aggiungiGiorni', () => {
+  it('attraversa la fine del mese', () => {
+    expect(aggiungiGiorni(parseDataISO('2026-01-31'), 1)).toBe('2026-02-01');
+  });
+
+  it('attraversa la fine dellanno', () => {
+    expect(aggiungiGiorni(parseDataISO('2026-12-31'), 1)).toBe('2027-01-01');
+  });
+
+  it('gestisce giorni negativi', () => {
+    expect(aggiungiGiorni(parseDataISO('2026-03-01'), -1)).toBe('2026-02-28');
+  });
+});
 
 describe('aggiungiMesi', () => {
   it('clampa il giorno allultimo del mese non bisestile', () => {

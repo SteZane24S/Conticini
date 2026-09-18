@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 2.2 chiuso il 18/09/2026.
-**Prossimo giro:** 2.3 — Fase 2, Persistenza e API: API stipendi/cicli, spese fisse, occorrenze, catch-up, vedi fasi/fase-2-persistenza-api/PIANO.md.
+**Stato:** giro 2.3 chiuso il 18/09/2026.
+**Prossimo giro:** 2.4 — API previsioni, prospetto, regole e suggerimenti, vedi fasi/fase-2-persistenza-api/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -19,7 +19,7 @@
 ### Fase 2 — Persistenza e API
 - [x] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
 - [x] 2.2 API conti, settori/categorie, movimenti, trasferimenti
-- [ ] 2.3 API stipendi/cicli, spese fisse, occorrenze, catch-up
+- [x] 2.3 API stipendi/cicli, spese fisse, occorrenze, catch-up
 - [ ] 2.4 API previsioni, prospetto, regole e suggerimenti
 
 ### Fase 3 — UI provvisoria
@@ -44,4 +44,5 @@
 - Il file `AGENTS.md` non tracciato alla radice resta una pendenza preesistente invariata: è comparso durante sessioni Codex di un giro precedente, non è richiesto dai brief e non è incluso in alcun commit; la decisione se tenerlo, cancellarlo o ignorarlo è dell’utente.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 2.2, tranne la nota su `PUT` invece di `PATCH` per i trasferimenti: è deliberata da `PIANO.md`, non una pendenza.
 - Test di rollback non aggiunto in categorie per il secondo insert di `creaCategoriaConSettoreEventuale`: debito accettato consapevolmente, per non introdurre un test fragile basato su mock.
-- Il prossimo giro è il 2.3 — API stipendi/cicli, spese fisse, occorrenze, catch-up; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
+- Debito di copertura test nella cascata delle spese fisse: le asserzioni verificano `amountCents`, ma non esplicitamente `contoId`/`categoriaId`/`mode`; la correttezza è stata verificata manualmente e il debito è accettato.
+- Il prossimo giro è il 2.4 — API previsioni, prospetto, regole e suggerimenti; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
