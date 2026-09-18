@@ -74,4 +74,18 @@ describe('rotte cicli', () => {
       ciclo: { expectedNextDate: '2026-02-01' },
     });
   });
+
+  it('elenca i cicli', async () => {
+    const applicazione = creaApp();
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/cicli',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().cicli).toContainEqual(
+      expect.objectContaining({ id: 'ciclo-1' }),
+    );
+  });
 });

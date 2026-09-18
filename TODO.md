@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 2.3 chiuso il 18/09/2026.
-**Prossimo giro:** 2.4 — API previsioni, prospetto, regole e suggerimenti, vedi fasi/fase-2-persistenza-api/PIANO.md.
+**Stato:** giro 2.4 chiuso il 18/09/2026.
+**Prossimo giro:** 3.1 — Conti e trasferimenti; Settori, categorie e regole, vedi fasi/fase-3-ui-provvisoria/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -20,7 +20,7 @@
 - [x] 2.1 Schema 001, colonne di sincronizzazione, `change_log`, repository
 - [x] 2.2 API conti, settori/categorie, movimenti, trasferimenti
 - [x] 2.3 API stipendi/cicli, spese fisse, occorrenze, catch-up
-- [ ] 2.4 API previsioni, prospetto, regole e suggerimenti
+- [x] 2.4 API previsioni, prospetto, regole e suggerimenti
 
 ### Fase 3 — UI provvisoria
 - [ ] 3.1 Conti e trasferimenti; settori, categorie e regole
@@ -45,4 +45,6 @@
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 2.2, tranne la nota su `PUT` invece di `PATCH` per i trasferimenti: è deliberata da `PIANO.md`, non una pendenza.
 - Test di rollback non aggiunto in categorie per il secondo insert di `creaCategoriaConSettoreEventuale`: debito accettato consapevolmente, per non introdurre un test fragile basato su mock.
 - Debito di copertura test nella cascata delle spese fisse: le asserzioni verificano `amountCents`, ma non esplicitamente `contoId`/`categoriaId`/`mode`; la correttezza è stata verificata manualmente e il debito è accettato.
-- Il prossimo giro è il 2.4 — API previsioni, prospetto, regole e suggerimenti; il lavoro riparte da `fasi/fase-2-persistenza-api/PIANO.md`.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 2.4, tranne il debito di copertura test sul leak tra override di cicli diversi nel prospetto multi-ciclo (comportamento verificato manualmente come corretto, asserzione automatica assente).
+- Durante il giro 2.4 la pool Codex si è esaurita per quota; le correzioni di U3, il wiring U4 e il fix di formattazione sono girati in ricaduta su Sonnet — da tenere presente nel confronto dei pesi fra giri nel registro dei consumi, perché queste sessioni lasciano traccia nei transcript a differenza di quelle Codex.
+- Il prossimo giro è il 3.1 — Conti e trasferimenti; settori, categorie e regole (prima UI provvisoria funzionale), da `fasi/fase-3-ui-provvisoria/PIANO.md`. Da qui in avanti ogni giro si chiude con `live-testing` (il giro 2.4 non lo richiedeva, perché non tocca `packages/web`).

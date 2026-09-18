@@ -13,9 +13,13 @@ import { registraRotteCicli } from './routes/cicli.js';
 import { registraRotteConti } from './routes/conti.js';
 import { registraRotteMovimenti } from './routes/movimenti.js';
 import { registraRotteOccorrenze } from './routes/occorrenze.js';
+import { registraRottePrevisioni } from './routes/previsioni.js';
+import { registraRotteProspetto } from './routes/prospetto.js';
+import { registraRotteRegole } from './routes/regole.js';
 import { registraRotteSettori } from './routes/settori.js';
 import { registraRotteSpeseFisse } from './routes/speseFisse.js';
 import { registraRotteStipendi } from './routes/stipendi.js';
+import { registraRotteSuggerimenti } from './routes/suggerimenti.js';
 import { registraRotteTrasferimenti } from './routes/trasferimenti.js';
 import type { ContestoScrittura } from './scrittura.js';
 
@@ -83,6 +87,10 @@ export function buildApp(deps: AppDeps): BuiltApp {
     registraRotteCicli(app, ctx);
     registraRotteSpeseFisse(app, ctx);
     registraRotteOccorrenze(app, ctx);
+    registraRottePrevisioni(app, ctx);
+    registraRotteProspetto(app, ctx);
+    registraRotteRegole(app, ctx);
+    registraRotteSuggerimenti(app, ctx);
   }
 
   const indexHtmlPath = deps.webDistPath

@@ -136,10 +136,12 @@ export interface RepositorioBudgetOverride {
 export interface RepositorioRegoleCategoria {
   elenca(): Promise<RegolaCategoria[]>;
   ottieni(id: string): Promise<RegolaCategoria | null>;
-  crea(dati: Omit<RegolaCategoria, 'id'>): Promise<RegolaCategoria>;
+  crea(
+    dati: Omit<RegolaCategoria, 'id' | 'deletedAt' | 'createdAt'>,
+  ): Promise<RegolaCategoria>;
   aggiorna(
     id: string,
-    dati: Partial<Omit<RegolaCategoria, 'id'>>,
+    dati: Partial<Omit<RegolaCategoria, 'id' | 'deletedAt' | 'createdAt'>>,
   ): Promise<RegolaCategoria>;
   elimina(id: string): Promise<void>;
 }

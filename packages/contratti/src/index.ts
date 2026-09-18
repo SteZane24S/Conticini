@@ -9,3 +9,6 @@ export * from './speseFisse.js';
 export * from './stipendi.js';
 export * from './movimenti.js';
 export * from './trasferimenti.js';
+export * from './previsioni.js';
+export * from './prospetto.js';
+export * from './regole.js';

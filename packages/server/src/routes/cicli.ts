@@ -11,6 +11,8 @@ export function registraRotteCicli(
 ): void {
   const repo = creaRepositorioCicli(ctx);
 
+  app.get('/api/cicli', async () => ({ ok: true, cicli: await repo.elenca() }));
+
   app.patch('/api/cicli/:id', async (request) => {
     const { id } = request.params as { id: string };
     const risultato = aggiornaCicloSchema.safeParse(request.body);

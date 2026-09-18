@@ -26,3 +26,9 @@ export const cicloRispostaSchema = z.object({
   ciclo: cicloSchema,
 });
 export type CicloRisposta = z.infer<typeof cicloRispostaSchema>;
+
+export const elencoCicliRispostaSchema = z.object({
+  ok: z.literal(true),
+  cicli: z.array(cicloSchema),
+});
+export type ElencoCicliRisposta = z.infer<typeof elencoCicliRispostaSchema>;
