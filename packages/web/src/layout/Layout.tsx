@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
 import { avviaHeartbeat } from '../heartbeat.js';
+import { useConteggioOccorrenzePending } from '../pages/in-attesa/dati.js';
 
 const VOCI_MENU = [
   { percorso: '/', etichetta: 'Prospetto' },
@@ -18,6 +19,7 @@ const VOCI_MENU = [
 
 export function Layout() {
   useEffect(() => avviaHeartbeat(), []);
+  const conteggioOccorrenzePending = useConteggioOccorrenzePending();
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -26,7 +28,11 @@ export function Layout() {
           {VOCI_MENU.map((voce) => (
             <li key={voce.percorso}>
               <NavLink to={voce.percorso} end={voce.percorso === '/'}>
-                {voce.etichetta}
+                {voce.percorso === '/in-attesa' &&
+                conteggioOccorrenzePending !== null &&
+                conteggioOccorrenzePending > 0
+                  ? `${voce.etichetta} (${conteggioOccorrenzePending})`
+                  : voce.etichetta}
               </NavLink>
             </li>
           ))}

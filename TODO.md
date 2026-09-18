@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 3.2 chiuso il 18/09/2026.
-**Prossimo giro:** 3.3 — Stipendio; spese fisse; in attesa, vedi fasi/fase-3-ui-provvisoria/PIANO.md.
+**Stato:** giro 3.3 chiuso il 18/09/2026.
+**Prossimo giro:** 3.4 — Previsioni; prospetto, vedi fasi/fase-3-ui-provvisoria/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -25,7 +25,7 @@
 ### Fase 3 — UI provvisoria
 - [x] 3.1 Conti e trasferimenti; settori, categorie e regole
 - [x] 3.2 Movimenti (inserimento rapido, elenco, modifica)
-- [ ] 3.3 Stipendio; spese fisse; in attesa
+- [x] 3.3 Stipendio; spese fisse; in attesa
 - [ ] 3.4 Previsioni; prospetto
 
 ### Fase 4 — Grafici, backup, rilascio
@@ -56,4 +56,9 @@
 - La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, comparso in un giro precedente, decisione dell’utente se tenerlo/cancellarlo) resta invariata: non è stata generata né modificata nel giro 3.1.
 - Paginazione a offset instabile in `useMovimenti` se il dataset cambia durante lo scaricamento di più pagine: debito accettato, trascurabile per il volume di un’app personale locale mono-utente.
 - Aprire “Modifica” su una riga dell’elenco movimenti sovrascrive senza avviso un form di modifica non salvato su un’altra riga: debito minore di UX per la fase “UI provvisoria”.
-- Rischio trascurabile di race condition UI se l’utente cambia il tipo del movimento esattamente durante la creazione asincrona di una categoria al volo.
+- Rischio trascurabile di race condition UI se l'utente cambia il tipo del movimento esattamente durante la creazione asincrona di una categoria al volo.
+- Limite noto: il catch-up delle occorrenze fisse non si attiva alla creazione o modifica di una spesa fissa a runtime, solo all'avvio del server o al cambio di giorno via heartbeat (`packages/server/src/app.ts`, `packages/server/src/catchUp.ts`, codice del giro 2.3). Da valutare in un giro futuro che tocchi di nuovo `packages/server`.
+- La pool Codex si è esaurita due volte durante il giro 3.3; le unità 2 e 3 sono girate in parte in ricaduta su Sonnet (`Explore`/`general-purpose`). Da tenere presente nel confronto dei pesi fra giri nel registro dei consumi.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 3.3.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 3.3: tutti gli otto rilievi di review e il difetto trovato dal collaudo sono stati corretti e riverificati.
+- Il prossimo giro è il 3.4 — Previsioni; prospetto, da `fasi/fase-3-ui-provvisoria/PIANO.md`. Chiude la fase 3 e include lo scenario di accettazione completo descritto in fondo al piano. Continua a chiudersi con `live-testing`.
