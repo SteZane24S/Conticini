@@ -15,6 +15,7 @@ import { registraRotteMovimenti } from './routes/movimenti.js';
 import { registraRotteOccorrenze } from './routes/occorrenze.js';
 import { registraRottePrevisioni } from './routes/previsioni.js';
 import { registraRotteProspetto } from './routes/prospetto.js';
+import { registraRotteGrafici } from './routes/grafici.js';
 import { registraRotteRegole } from './routes/regole.js';
 import { registraRotteSettori } from './routes/settori.js';
 import { registraRotteSpeseFisse } from './routes/speseFisse.js';
@@ -89,6 +90,7 @@ export function buildApp(deps: AppDeps): BuiltApp {
     registraRotteOccorrenze(app, ctx);
     registraRottePrevisioni(app, ctx);
     registraRotteProspetto(app, ctx);
+    registraRotteGrafici(app, ctx);
     registraRotteRegole(app, ctx);
     registraRotteSuggerimenti(app, ctx);
   }

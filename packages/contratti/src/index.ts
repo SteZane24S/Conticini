@@ -11,4 +11,5 @@ export * from './movimenti.js';
 export * from './trasferimenti.js';
 export * from './previsioni.js';
 export * from './prospetto.js';
+export * from './grafici.js';
 export * from './regole.js';

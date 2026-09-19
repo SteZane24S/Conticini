@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 3.4 chiuso il 18/09/2026 — Fase 3 completata.
-**Prossimo giro:** 4.1 — Grafici, vedi fasi/fase-4-grafici-backup-rilascio/PIANO.md.
+**Stato:** giro 4.1 chiuso il 19/09/2026 — Grafici implementati (Fase 4 in corso).
+**Prossimo giro:** 4.2 — Backup, ripristino, export, vedi fasi/fase-4-grafici-backup-rilascio/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -29,7 +29,7 @@
 - [x] 3.4 Previsioni; prospetto
 
 ### Fase 4 — Grafici, backup, rilascio
-- [ ] 4.1 Grafici
+- [x] 4.1 Grafici
 - [ ] 4.2 Backup e ripristino, export CSV e JSON
 - [ ] 4.3 Build in `app/`, launcher, icona, aggiornamento
 
@@ -67,3 +67,7 @@
 - La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, decisione dell'utente se tenerlo, cancellarlo o ignorarlo) resta invariata: non è stata generata né modificata in questo giro.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 3.4: entrambi i rilievi fondati sono stati corretti e riverificati.
 - Prossimo giro: 4.1 — Grafici, da `fasi/fase-4-grafici-backup-rilascio/PIANO.md`. Apre la Fase 4 — Grafici, backup, rilascio.
+- La pendenza preesistente su AGENTS.md (file non tracciato alla radice, decisione dell'utente se tenerlo, cancellarlo o ignorarlo) resta invariata: non è stata generata né modificata nel giro 4.1.
+- Nessun rilievo fondato è rimasto fuori scope nel giro 4.1: i due rilievi fondati (validazione zod incompleta in packages/contratti/src/grafici.ts) sono stati corretti e riverificati; i tre rilievi di conformity sull'assenza di `ricarica` negli hook di packages/web/src/pages/grafici/dati.ts sono stati istruiti dal checker e giudicati infondati (pagina di sola lettura, nessuna mutazione).
+- Il collaudo del giro 4.1 ha trovato un difetto cosmetico nel tooltip del grafico "Saldo giornaliero" (etichetta del campo grezzo invece di "Saldo"): corretto con una modifica di una riga, verificata con build ma non ricollaudata per intero in Chrome (fix senza impatto logico).
+- Prossimo giro: 4.2 — Backup, ripristino, export, da fasi/fase-4-grafici-backup-rilascio/PIANO.md.

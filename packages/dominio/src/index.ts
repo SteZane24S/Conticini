@@ -5,6 +5,7 @@ export * from './ricorrenze.js';
 export * from './saldi.js';
 export * from './cicli.js';
 export * from './prospetto.js';
+export * from './aggregazioni.js';
 export * from './testo.js';
 export * from './regole.js';
 export * from './validazioni.js';
