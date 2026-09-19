@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { buildApp } from './app.js';
+import { eseguiBackupAutomaticoSeNecessario } from './backup.js';
 import { openDatabase } from './database.js';
 import { loadEnv } from './env.js';
 import { ensureMeta } from './meta.js';
@@ -62,6 +63,11 @@ async function main(): Promise<void> {
   }
 
   const db = openDatabase(env.dataDir);
+  await eseguiBackupAutomaticoSeNecessario(db, env.dataDir).catch(
+    (errore: unknown) => {
+      console.error("Backup automatico all'avvio fallito:", errore);
+    },
+  );
   runMigrations(db);
   const meta = ensureMeta(db);
 
@@ -69,6 +75,7 @@ async function main(): Promise<void> {
     port: env.port,
     datasetId: meta.datasetId,
     db,
+    dataDir: env.dataDir,
     deviceId: meta.deviceId,
     versione: readVersione(),
     webDistPath: path.join(currentDir, '../../web/dist'),

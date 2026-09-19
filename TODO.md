@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 4.1 chiuso il 19/09/2026 — Grafici implementati (Fase 4 in corso).
-**Prossimo giro:** 4.2 — Backup, ripristino, export, vedi fasi/fase-4-grafici-backup-rilascio/PIANO.md.
+**Stato:** giro 4.2 chiuso il 19/09/2026 — Backup, ripristino ed export implementati (Fase 4 in corso).
+**Prossimo giro:** 4.3 — Rilascio in `app/`, vedi fasi/fase-4-grafici-backup-rilascio/PIANO.md.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -30,7 +30,7 @@
 
 ### Fase 4 — Grafici, backup, rilascio
 - [x] 4.1 Grafici
-- [ ] 4.2 Backup e ripristino, export CSV e JSON
+- [x] 4.2 Backup e ripristino, export CSV e JSON
 - [ ] 4.3 Build in `app/`, launcher, icona, aggiornamento
 
 ### Fase 5 — Restyling con Claude Design
@@ -71,3 +71,7 @@
 - Nessun rilievo fondato è rimasto fuori scope nel giro 4.1: i due rilievi fondati (validazione zod incompleta in packages/contratti/src/grafici.ts) sono stati corretti e riverificati; i tre rilievi di conformity sull'assenza di `ricarica` negli hook di packages/web/src/pages/grafici/dati.ts sono stati istruiti dal checker e giudicati infondati (pagina di sola lettura, nessuna mutazione).
 - Il collaudo del giro 4.1 ha trovato un difetto cosmetico nel tooltip del grafico "Saldo giornaliero" (etichetta del campo grezzo invece di "Saldo"): corretto con una modifica di una riga, verificata con build ma non ricollaudata per intero in Chrome (fix senza impatto logico).
 - Prossimo giro: 4.2 — Backup, ripristino, export, da fasi/fase-4-grafici-backup-rilascio/PIANO.md.
+- Nessun rilievo fondato è rimasto fuori scope nel giro 4.2: i rilievi delle quattro unità, del bug-hunter finale e del collaudo sono stati corretti e riverificati; il rilievo sul pattern Promise in `useBackup` è stato confermato fondato ma scartato dall'orchestratore, perché il file di riferimento usa già entrambi gli stili.
+- Il presunto status 503 sull'export CSV del giro 4.2 è stato verificato come falso positivo dello strumento di automazione browser nella gestione dei download; le richieste dirette e tramite proxy hanno risposto 200.
+- Prossimo giro: 4.3 — Rilascio in `app/`, da fasi/fase-4-grafici-backup-rilascio/PIANO.md.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 4.2.

@@ -8,9 +8,11 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { eseguiCatchUp } from './catchUp.js';
 import { registraGestoreErrori } from './errori.js';
+import { registraRotteBackup } from './routes/backup.js';
 import { registraRotteCategorie } from './routes/categorie.js';
 import { registraRotteCicli } from './routes/cicli.js';
 import { registraRotteConti } from './routes/conti.js';
+import { registraRotteExport } from './routes/export.js';
 import { registraRotteMovimenti } from './routes/movimenti.js';
 import { registraRotteOccorrenze } from './routes/occorrenze.js';
 import { registraRottePrevisioni } from './routes/previsioni.js';
@@ -29,6 +31,7 @@ export interface AppDeps {
   datasetId: string;
   versione: string;
   webDistPath?: string;
+  dataDir?: string;
   db?: Database.Database;
   deviceId?: string;
 }
@@ -93,6 +96,10 @@ export function buildApp(deps: AppDeps): BuiltApp {
     registraRotteGrafici(app, ctx);
     registraRotteRegole(app, ctx);
     registraRotteSuggerimenti(app, ctx);
+    registraRotteExport(app, ctx);
+    if (deps.dataDir) {
+      registraRotteBackup(app, ctx, deps.dataDir);
+    }
   }
 
   const indexHtmlPath = deps.webDistPath

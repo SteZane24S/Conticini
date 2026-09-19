@@ -165,11 +165,11 @@ interface RepositorioMovimentiServer extends Omit<
   crea(dati: DatiCreazioneMovimento): Promise<MovimentoConDettagli>;
 }
 
-export function cercaMovimenti(
-  ctx: ContestoScrittura,
-  filtri: FiltriRicercaMovimenti,
-  paginazione: PaginazioneMovimenti,
-): RisultatoMovimenti {
+function costruisciFiltro(filtri: FiltriRicercaMovimenti): {
+  where: string;
+  join: string;
+  parametri: string[];
+} {
   const condizioni = [`transactions.${SOLO_ATTIVI}`];
   const parametri: string[] = [];
   const unisceCategorie = filtri.settoreId !== undefined;
@@ -203,6 +203,15 @@ export function cercaMovimenti(
     ? 'JOIN categories ON transactions.category_id = categories.id'
     : '';
   const where = condizioni.join(' AND ');
+  return { where, join, parametri };
+}
+
+export function cercaMovimenti(
+  ctx: ContestoScrittura,
+  filtri: FiltriRicercaMovimenti,
+  paginazione: PaginazioneMovimenti,
+): RisultatoMovimenti {
+  const { where, join, parametri } = costruisciFiltro(filtri);
   const totale = ctx.db
     .prepare(
       `SELECT COUNT(*) as totale FROM transactions ${join} WHERE ${where}`,
@@ -216,6 +225,19 @@ export function cercaMovimenti(
     .all(...parametri, paginazione.perPagina, offset) as RigaMovimento[];
 
   return { elementi: righe.map(mappaMovimento), totale: totale.totale };
+}
+
+export function elencaMovimentiFiltrati(
+  ctx: ContestoScrittura,
+  filtri: FiltriRicercaMovimenti,
+): MovimentoConDettagli[] {
+  const { where, join, parametri } = costruisciFiltro(filtri);
+  const righe = ctx.db
+    .prepare(
+      `SELECT transactions.* FROM transactions ${join} WHERE ${where} ORDER BY date DESC, transactions.created_at DESC`,
+    )
+    .all(...parametri) as RigaMovimento[];
+  return righe.map(mappaMovimento);
 }
 
 export function creaRepositorioMovimenti(

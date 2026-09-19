@@ -7,6 +7,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { buildApp } from './app.js';
+import { ensureMeta } from './meta.js';
 import { runMigrations } from './migrations-runner.js';
 
 describe('buildApp', () => {
@@ -303,5 +304,76 @@ describe('buildApp — rotte dati', () => {
     });
 
     expect(response.statusCode).toBe(404);
+  });
+
+  it('collega le rotte di backup quando dataDir è fornito', async () => {
+    const database = apriDatabase();
+    const headers = { host: '127.0.0.1:47300' };
+    const applicazione = (app = buildApp({
+      port: 47300,
+      datasetId: 'dataset-test',
+      versione: '0.0.0',
+      db: database,
+      deviceId: 'device-test',
+      dataDir: dir,
+    }).app);
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/backup',
+      headers,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      ok: true,
+      impostazioni: expect.any(Object),
+      backups: expect.any(Array),
+      ultimo: null,
+      ultimoVecchio: false,
+    });
+  });
+
+  it('non registra le rotte di backup senza dataDir', async () => {
+    const database = apriDatabase();
+    const applicazione = (app = buildApp({
+      port: 47300,
+      datasetId: 'dataset-test',
+      versione: '0.0.0',
+      db: database,
+      deviceId: 'device-test',
+    }).app);
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/backup',
+      headers: { host: '127.0.0.1:47300' },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      ok: false,
+      errore: { codice: 'non_trovato', messaggio: 'non trovato' },
+    });
+  });
+
+  it('collega le rotte di export con un database reale', async () => {
+    const database = apriDatabase();
+    ensureMeta(database);
+    const applicazione = (app = buildApp({
+      port: 47300,
+      datasetId: 'dataset-test',
+      versione: '0.0.0',
+      db: database,
+      deviceId: 'device-test',
+    }).app);
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/export/completo.json',
+      headers: { host: '127.0.0.1:47300' },
+    });
+
+    expect(response.statusCode).toBe(200);
   });
 });

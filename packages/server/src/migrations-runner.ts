@@ -9,6 +9,10 @@ const migrationsDir = path.join(
   '../migrations',
 );
 
+function elencaFileMigrazioni(): string[] {
+  return readdirSync(migrationsDir).filter((file) => file.endsWith('.sql'));
+}
+
 export function runMigrations(db: Database.Database): void {
   db.exec(
     'CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)',
@@ -22,9 +26,7 @@ export function runMigrations(db: Database.Database): void {
     ).map((row) => row.name),
   );
 
-  const files = readdirSync(migrationsDir).filter((file) =>
-    file.endsWith('.sql'),
-  );
+  const files = elencaFileMigrazioni();
   for (const file of files) {
     if (!/^\d{3}-.+\.sql$/.test(file)) {
       throw new Error(`Nome migrazione non valido: ${file}`);
@@ -44,4 +46,8 @@ export function runMigrations(db: Database.Database): void {
     });
     apply();
   }
+}
+
+export function contaMigrazioniDisponibili(): number {
+  return elencaFileMigrazioni().length;
 }

@@ -67,6 +67,10 @@ export function erroreSettoreConCategorie(id: string): ErroreApi {
   );
 }
 
+export function erroreBackupNonValido(messaggio: string): ErroreApi {
+  return new ErroreApi(400, 'backup_non_valido', messaggio);
+}
+
 export function erroreDominio(
   motivo: MotivoDominio,
   campo?: string,
