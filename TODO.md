@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 5.4 chiuso il 20/09/2026 — Restyling di Spese fisse e In attesa completato.
-**Prossimo giro:** giro 5.5 — Previsioni, Grafici, Backup — chiude la fase, da `fasi/fase-5-design/PIANO.md`.
+**Stato:** giro 5.5 chiuso il 20/09/2026 — Previsioni, Grafici, Backup completati: la Fase 5 è chiusa.
+**Prossimo giro:** Fase 6 — Mobile e sincronizzazione, richiede una nuova sessione di pianificazione su Opus.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -39,7 +39,7 @@
 - [x] 5.2 Prospetto e Movimenti
 - [x] 5.3 Stipendio, Conti, Categorie e regole
 - [x] 5.4 Spese fisse, In attesa
-- [ ] Giro 5.5 definito in `fasi/fase-5-design/PIANO.md`, da eseguire
+- [x] 5.5 Previsioni, Grafici, Backup — chiude la Fase 5
 
 ### Fase 6 — Mobile e sincronizzazione
 - [ ] Richiede una nuova sessione di pianificazione su Opus
@@ -104,3 +104,9 @@
 - Dato di prova rimasto in `.dati-dev` dal collaudo del giro 5.4 (non nei dati reali dell'utente in `app/dati/`): un'occorrenza manuale di "Netflix" (scadenza 2026-09-10) è stata marcata come "saltata" per verificare il percorso di successo dell'azione — non annullabile dall'interfaccia.
 - Nell'unità Spese fisse del giro 5.4 la sessione Codex è andata in timeout (nessuna risposta per 1800s) prima di restituire il report finale, ma il lavoro era comunque scritto correttamente su disco: l'orchestratore lo ha verificato indipendentemente con build/test/lint/format, tutti verdi, prima di procedere alla review. Da tenere presente nel confronto dei pesi fra giri nel registro dei consumi.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.4: i tre rilievi fondati (1 su Spese fisse, 2 su In attesa) sono stati corretti e riverificati; l'unico rilievo scartato (conformity su Spese fisse, campi Modalità/Attiva fuori dal componente `Campo`) è stato giudicato infondato perché richiesto esplicitamente dal brief e coerente con un pattern già in uso nel progetto (`packages/web/src/pages/movimenti/InserimentoRapido.tsx`).
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 5.5; `npm run format:check` continua a fallire solo per quel file, non per i sei file toccati dal giro.
+- Difetto trovato dal collaudo del giro 5.5, non corretto perché preesistente e non introdotto da questo giro: nel form Impostazioni di Backup, un valore non valido (es. "0") nel campo "Ogni quanti backup mantenerne" blocca il salvataggio ma non mostra il messaggio d'errore applicativo, perché la validazione nativa HTML (`type="number" min={1}`) impedisce all'evento submit di React di scattare — limite sistemico presente su tutti i campi numerici min/max del progetto (nessuna pagina usa `noValidate`), da valutare in un giro futuro che tocchi la validazione dei form in generale.
+- Nota tecnica sull'ambiente, giro 5.5: rilevata e ripulita un'accumulazione di 23 processi `node.exe` orfani di `npm run dev` mai fermati nei giri precedenti (risalenti fino al 18/09/2026); raccomandazione per i giri futuri: verificare a inizio ciclo se esistono già istanze di sviluppo in ascolto prima di avviarne una nuova.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.5: i cinque rilievi fondati (2 costanti di stile morte, 3 di concorrenza/UX sul dialogo di ripristino di Backup) sono stati corretti e riverificati con build/lint/format/test, tutti verdi.
+- La Fase 5 — Restyling con Claude Design è chiusa con questo giro: tutti i giri 5.1-5.5 completati.
+- Prossimo passo: Fase 6 — Mobile e sincronizzazione. Richiede una nuova sessione di pianificazione su Opus: nessun piano di dettaglio esiste ancora per questa fase.

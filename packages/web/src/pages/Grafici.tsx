@@ -23,6 +23,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { Bottone, Campo, ControlloSegmentato } from '../components/index.js';
 import { useAlbero } from './categorie-regole/useAlbero.js';
 import {
   type SelezioneIntervallo,
@@ -32,9 +33,12 @@ import {
 } from './grafici/dati.js';
 import {
   STILE_ERRORE_GENERALE,
+  STILE_INTESTAZIONE,
+  STILE_NOTA_ATTENUATA,
   STILE_PAGINA,
   STILE_SELETTORE,
   STILE_SEZIONE,
+  STILE_TITOLO_SEZIONE,
 } from './grafici/stili.js';
 import { useStipendio } from './stipendio/dati.js';
 
@@ -131,43 +135,45 @@ export function Grafici() {
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Grafici</h1>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Grafici</h1>
+        <ControlloSegmentato
+          nome="grafici-modalita"
+          valore={modalita}
+          onCambio={(valore) => setModalita(valore as 'ciclo' | 'periodo')}
+          opzioni={[
+            { valore: 'ciclo', etichetta: 'Ciclo' },
+            { valore: 'periodo', etichetta: 'Periodo' },
+          ]}
+        />
+      </div>
       <section style={STILE_SEZIONE}>
-        <h2>Intervallo</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Intervallo</h2>
+        </div>
         <div style={STILE_SELETTORE}>
-          <label>
-            <input
-              type="radio"
-              checked={modalita === 'ciclo'}
-              onChange={() => setModalita('ciclo')}
-            />{' '}
-            Ciclo
-          </label>
-          <label>
-            <input
-              type="radio"
-              checked={modalita === 'periodo'}
-              onChange={() => setModalita('periodo')}
-            />{' '}
-            Periodo
-          </label>
           {modalita === 'ciclo' ? (
-            <select
-              value={cicloId}
-              onChange={(evento) => setCicloId(evento.target.value)}
-            >
-              <option value="">Seleziona un ciclo</option>
-              {cicliOrdinati.map((ciclo) => (
-                <option key={ciclo.id} value={ciclo.id}>
-                  Ciclo dal {ciclo.startDate}
-                </option>
-              ))}
-            </select>
+            <Campo etichetta="Ciclo" idCampo="grafici-ciclo">
+              <select
+                id="grafici-ciclo"
+                className="input"
+                value={cicloId}
+                onChange={(evento) => setCicloId(evento.target.value)}
+              >
+                <option value="">Seleziona un ciclo</option>
+                {cicliOrdinati.map((ciclo) => (
+                  <option key={ciclo.id} value={ciclo.id}>
+                    Ciclo dal {ciclo.startDate}
+                  </option>
+                ))}
+              </select>
+            </Campo>
           ) : (
             <>
-              <label>
-                Da
+              <Campo etichetta="Da" idCampo="grafici-da">
                 <input
+                  id="grafici-da"
+                  className="input"
                   type="date"
                   value={dataInizio}
                   onChange={(evento) =>
@@ -175,10 +181,11 @@ export function Grafici() {
                   }
                   required
                 />
-              </label>
-              <label>
-                A
+              </Campo>
+              <Campo etichetta="A" idCampo="grafici-a">
                 <input
+                  id="grafici-a"
+                  className="input"
                   type="date"
                   value={dataFine}
                   onChange={(evento) =>
@@ -186,18 +193,20 @@ export function Grafici() {
                   }
                   required
                 />
-              </label>
+              </Campo>
             </>
           )}
         </div>
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Spese per settore</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Spese per settore</h2>
+        </div>
         {settoreSelezionato !== null && (
-          <button type="button" onClick={() => setSettoreSelezionato(null)}>
+          <Bottone variante="ghost" onClick={() => setSettoreSelezionato(null)}>
             ← Torna ai settori
-          </button>
+          </Bottone>
         )}
         {spesePerSettore.caricando && <p>Caricamento…</p>}
         {spesePerSettore.errore && (
@@ -238,12 +247,14 @@ export function Grafici() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p>Nessun dato disponibile.</p>
+            <p style={STILE_NOTA_ATTENUATA}>Nessun dato disponibile.</p>
           ))}
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Saldo giornaliero</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Saldo giornaliero</h2>
+        </div>
         {saldoGiornaliero.caricando && <p>Caricamento…</p>}
         {saldoGiornaliero.errore && (
           <p style={STILE_ERRORE_GENERALE}>{saldoGiornaliero.errore}</p>
@@ -269,14 +280,18 @@ export function Grafici() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p>Nessun dato disponibile.</p>
+            <p style={STILE_NOTA_ATTENUATA}>Nessun dato disponibile.</p>
           ))}
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Previsto e speso</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Previsto e speso</h2>
+        </div>
         {modalita === 'periodo' ? (
-          <p>Disponibile solo selezionando un ciclo.</p>
+          <p style={STILE_NOTA_ATTENUATA}>
+            Disponibile solo selezionando un ciclo.
+          </p>
         ) : (
           <>
             {previstoSpeso.caricando && <p>Caricamento…</p>}

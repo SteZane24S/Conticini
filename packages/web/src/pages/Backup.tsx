@@ -1,19 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { ErroreApi } from '../api.js';
-import { ConfermaInline } from '../components/ConfermaInline.js';
+import { Bottone, Campo, Dialogo, Tabella } from '../components/index.js';
 import { useBackup } from './backup/dati.js';
 import {
   STILE_AZIONI,
-  STILE_AVVISO,
-  STILE_CAMPO,
-  STILE_CELLA,
-  STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
   STILE_FORM,
+  STILE_INTESTAZIONE,
   STILE_PAGINA,
   STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_TITOLO_SEZIONE,
 } from './backup/stili.js';
 
 function formattaDimensione(byte: number): string {
@@ -39,7 +36,7 @@ export function Backup() {
     ripristina,
   } = useBackup();
   const [backupInCorso, setBackupInCorso] = useState(false);
-  const [ripristinoInCorso, setRipristinoInCorso] = useState<string | null>(
+  const [backupDaConfermare, setBackupDaConfermare] = useState<string | null>(
     null,
   );
   const [ripristinoEseguendo, setRipristinoEseguendo] = useState<string | null>(
@@ -78,20 +75,20 @@ export function Backup() {
     }
   }
 
-  async function gestisciRipristino(nomeFile: string) {
+  async function gestisciRipristino(nomeFile: string): Promise<boolean> {
     setErroreAzione(null);
     setMessaggioAzione(null);
     setRipristinoEseguendo(nomeFile);
-    setRipristinoInCorso(null);
     try {
       await ripristina(nomeFile);
       setMessaggioAzione('Ripristino completato.');
+      return true;
     } catch (err) {
       setErroreAzione(
         err instanceof ErroreApi ? err.message : 'Errore imprevisto.',
       );
+      return false;
     } finally {
-      setRipristinoInCorso(null);
       setRipristinoEseguendo(null);
     }
   }
@@ -137,84 +134,126 @@ export function Backup() {
     parametri.set('dataA', dataA);
   }
   const query = parametri.size > 0 ? `?${parametri.toString()}` : '';
+  const statoColore = !ultimo
+    ? 'var(--rosso)'
+    : ultimoVecchio
+      ? 'var(--ambra)'
+      : 'var(--verde)';
+  const backupSelezionato =
+    backupDaConfermare === null
+      ? null
+      : (backups.find((backup) => backup.nomeFile === backupDaConfermare) ??
+        null);
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Backup</h1>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Backup</h1>
+      </div>
 
       <section style={STILE_SEZIONE}>
-        <h2>Stato</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Stato</h2>
+        </div>
         {caricando && <p>Caricamento…</p>}
         {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
         {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
         {messaggioAzione && <p>{messaggioAzione}</p>}
         {!caricando && ultimo && (
-          <p>
+          <p
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+            }}
+          >
+            <span
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: statoColore,
+              }}
+            />
             Ultimo backup: {ultimo.quando.replace('T', ' ')} (
             {ultimo.dimensioneByte} byte,{' '}
             {formattaDimensione(ultimo.dimensioneByte)})
           </p>
         )}
-        {!caricando && !ultimo && <p>Nessun backup eseguito finora.</p>}
+        {!caricando && !ultimo && (
+          <p
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+            }}
+          >
+            <span
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: statoColore,
+              }}
+            />
+            Nessun backup eseguito finora.
+          </p>
+        )}
         {!caricando && ultimoVecchio && (
-          <p style={STILE_AVVISO}>L'ultimo backup ha più di 7 giorni.</p>
+          <p style={{ color: 'var(--ambra)' }}>
+            L'ultimo backup ha più di 7 giorni.
+          </p>
         )}
         <div style={STILE_AZIONI}>
-          <button
-            type="button"
+          <Bottone
+            variante="primaria"
             onClick={() => void gestisciBackup()}
             disabled={backupInCorso}
           >
             {backupInCorso ? 'Backup in corso…' : 'Esegui backup ora'}
-          </button>
+          </Bottone>
         </div>
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Backup disponibili</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Backup disponibili</h2>
+        </div>
         {!caricando && backups.length > 0 && (
-          <table style={STILE_TABELLA}>
+          <Tabella>
             <thead>
               <tr>
-                <th style={STILE_CELLA}>Nome file</th>
-                <th style={STILE_CELLA}>Quando</th>
-                <th style={STILE_CELLA}>Dimensione</th>
-                <th style={STILE_CELLA}>Azioni</th>
+                <th>Nome file</th>
+                <th>Quando</th>
+                <th>Dimensione</th>
+                <th>Azioni</th>
               </tr>
             </thead>
             <tbody>
               {backups.map((backup) => (
                 <tr key={backup.nomeFile}>
-                  <td style={STILE_CELLA}>{backup.nomeFile}</td>
-                  <td style={STILE_CELLA}>{backup.quando.replace('T', ' ')}</td>
-                  <td style={STILE_CELLA}>
+                  <td>{backup.nomeFile}</td>
+                  <td>{backup.quando.replace('T', ' ')}</td>
+                  <td>
                     {backup.dimensioneByte} byte (
                     {formattaDimensione(backup.dimensioneByte)})
                   </td>
-                  <td style={STILE_CELLA}>
-                    {ripristinoInCorso === backup.nomeFile ? (
-                      <ConfermaInline
-                        domanda="Ripristinare da questo backup? Tutti i dati attuali verranno sostituiti con quelli del backup."
-                        onConferma={() =>
-                          void gestisciRipristino(backup.nomeFile)
-                        }
-                        onAnnulla={() => setRipristinoInCorso(null)}
-                      />
-                    ) : ripristinoEseguendo === backup.nomeFile ? (
+                  <td>
+                    {ripristinoEseguendo === backup.nomeFile ? (
                       <span>Ripristino in corso…</span>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => setRipristinoInCorso(backup.nomeFile)}
+                      <Bottone
+                        variante="ghost"
+                        onClick={() => setBackupDaConfermare(backup.nomeFile)}
                       >
                         Ripristina
-                      </button>
+                      </Bottone>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Tabella>
         )}
         {!caricando && backups.length === 0 && (
           <p>Nessun backup disponibile.</p>
@@ -222,31 +261,36 @@ export function Backup() {
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Impostazioni</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Impostazioni</h2>
+        </div>
         {impostazioni && (
           <form
             style={STILE_FORM}
             onSubmit={(evento) => void gestisciSalva(evento)}
           >
-            <div style={STILE_CAMPO}>
-              <label htmlFor="backup-cartella">Cartella</label>
+            <Campo
+              etichetta="Cartella"
+              idCampo="backup-cartella"
+              errore={erroriCampo.cartella}
+            >
               <input
                 id="backup-cartella"
+                className="input"
                 value={cartella}
                 onChange={(evento) => setCartella(evento.target.value)}
                 disabled={salvando}
                 required
               />
-              {erroriCampo.cartella && (
-                <span style={STILE_ERRORE_CAMPO}>{erroriCampo.cartella}</span>
-              )}
-            </div>
-            <div style={STILE_CAMPO}>
-              <label htmlFor="backup-rotazione">
-                Ogni quanti backup mantenerne
-              </label>
+            </Campo>
+            <Campo
+              etichetta="Ogni quanti backup mantenerne"
+              idCampo="backup-rotazione"
+              errore={erroriCampo.rotazione}
+            >
               <input
                 id="backup-rotazione"
+                className="input"
                 type="number"
                 min={1}
                 value={rotazione}
@@ -254,49 +298,96 @@ export function Backup() {
                 disabled={salvando}
                 required
               />
-              {erroriCampo.rotazione && (
-                <span style={STILE_ERRORE_CAMPO}>{erroriCampo.rotazione}</span>
-              )}
-            </div>
+            </Campo>
             {erroreGenerale && (
               <div style={STILE_ERRORE_GENERALE}>{erroreGenerale}</div>
             )}
             <div style={STILE_AZIONI}>
-              <button type="submit" disabled={salvando}>
+              <Bottone variante="primaria" type="submit" disabled={salvando}>
                 {salvando ? 'Salvataggio…' : 'Salva'}
-              </button>
+              </Bottone>
             </div>
           </form>
         )}
       </section>
 
       <section style={STILE_SEZIONE}>
-        <h2>Esportazione dati</h2>
+        <div style={STILE_TITOLO_SEZIONE}>
+          <h2 style={{ margin: 0, fontSize: '17px' }}>Esportazione dati</h2>
+        </div>
         <div style={STILE_FORM}>
-          <div style={STILE_CAMPO}>
-            <label htmlFor="export-data-da">Da</label>
+          <Campo etichetta="Da" idCampo="export-data-da">
             <input
               id="export-data-da"
+              className="input"
               type="date"
               value={dataDa}
               onChange={(evento) => setDataDa(evento.target.value)}
             />
-          </div>
-          <div style={STILE_CAMPO}>
-            <label htmlFor="export-data-a">A</label>
+          </Campo>
+          <Campo etichetta="A" idCampo="export-data-a">
             <input
               id="export-data-a"
+              className="input"
               type="date"
               value={dataA}
               onChange={(evento) => setDataA(evento.target.value)}
             />
-          </div>
-          <a href={`/api/export/movimenti.csv${query}`}>
+          </Campo>
+          <a
+            className="btn btn-secondary"
+            href={`/api/export/movimenti.csv${query}`}
+          >
             Scarica CSV movimenti
           </a>
-          <a href="/api/export/completo.json">Scarica export completo (JSON)</a>
+          <a className="btn btn-secondary" href="/api/export/completo.json">
+            Scarica export completo (JSON)
+          </a>
         </div>
       </section>
+      <Dialogo
+        aperto={backupDaConfermare !== null}
+        titolo="Ripristinare da questo backup?"
+        onChiudi={() => setBackupDaConfermare(null)}
+        azioni={
+          <>
+            <Bottone
+              variante="primaria"
+              disabled={
+                backupDaConfermare !== null &&
+                ripristinoEseguendo === backupDaConfermare
+              }
+              onClick={() => {
+                const nomeFile = backupDaConfermare!;
+                void gestisciRipristino(nomeFile).then((successo) => {
+                  if (successo) {
+                    setBackupDaConfermare((corrente) =>
+                      corrente === nomeFile ? null : corrente,
+                    );
+                  }
+                });
+              }}
+            >
+              Ripristina
+            </Bottone>
+            <Bottone
+              variante="secondaria"
+              onClick={() => setBackupDaConfermare(null)}
+            >
+              Annulla
+            </Bottone>
+          </>
+        }
+      >
+        {backupSelezionato && (
+          <p>
+            «{backupSelezionato.nomeFile}»,{' '}
+            {backupSelezionato.quando.replace('T', ' ')}. Tutti i dati attuali
+            verranno sostituiti con quelli di questo backup.
+          </p>
+        )}
+        {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
+      </Dialogo>
     </div>
   );
 }

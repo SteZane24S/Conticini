@@ -1,56 +1,73 @@
 import type { CSSProperties } from 'react';
 
 export const STILE_PAGINA: CSSProperties = {
-  padding: '1.5rem',
   display: 'flex',
   flexDirection: 'column',
-  gap: '2rem',
-  maxWidth: '900px',
+  gap: 'var(--space-6)',
 };
 
-export const STILE_SEZIONE: CSSProperties = {
+export const STILE_INTESTAZIONE: CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: '0.75rem',
+  alignItems: 'flex-end',
+  justifyContent: 'space-between',
+  gap: 'var(--space-6)',
+  flexWrap: 'wrap',
+  borderBottom: '2px solid var(--color-divider)',
+  paddingBottom: 'var(--space-3)',
 };
 
-export const STILE_TABELLA: CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-};
-
-export const STILE_CELLA: CSSProperties = {
-  borderBottom: '1px solid #ddd',
-  padding: '0.5rem',
-  textAlign: 'left',
+export const STILE_CAMPO_SELETTORE: CSSProperties = {
+  maxWidth: '200px',
 };
 
 export const STILE_FORM: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.5rem',
-  border: '1px solid #ccc',
-  padding: '1rem',
-  maxWidth: '400px',
-};
-
-export const STILE_CAMPO: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.25rem',
+  gap: 'var(--space-4)',
 };
 
 export const STILE_ERRORE_CAMPO: CSSProperties = {
-  color: '#b00020',
-  fontSize: '0.85rem',
+  color: 'var(--rosso)',
+  fontSize: '13px',
 };
 
 export const STILE_ERRORE_GENERALE: CSSProperties = {
-  color: '#b00020',
+  color: 'var(--rosso)',
+};
+
+export const STILE_RIGA_CARD: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  border: '1px solid var(--color-divider)',
+};
+
+export const STILE_CELLA_CARD: CSSProperties = {
+  padding: 'var(--space-4)',
+  borderRight: '1px solid var(--color-divider)',
+};
+
+export const STILE_KICKER: CSSProperties = {
+  fontSize: '10px',
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  color: 'var(--muted)',
+};
+
+export const STILE_VALORE_CARD: CSSProperties = {
+  fontFamily: 'var(--font-heading)',
+  fontWeight: 800,
+  fontSize: '26px',
+  fontVariantNumeric: 'tabular-nums',
+  marginTop: 'var(--space-2)',
+};
+
+export const STILE_CELLA_DESTRA: CSSProperties = {
+  textAlign: 'right',
+  fontVariantNumeric: 'tabular-nums',
 };
 
 export const STILE_AZIONI: CSSProperties = {
   display: 'flex',
-  gap: '0.5rem',
+  gap: 'var(--space-3)',
   alignItems: 'center',
 };

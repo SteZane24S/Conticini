@@ -2,18 +2,22 @@ import { formatImporto, parseImporto } from '@conticini/dominio';
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { ErroreApi } from '../api.js';
+import { Bottone, Campo, Tabella } from '../components/index.js';
 import { useAlbero } from './categorie-regole/useAlbero.js';
 import { dataRiferimentoCiclo, usePrevisioni } from './previsioni/dati.js';
 import {
   STILE_AZIONI,
-  STILE_CAMPO,
-  STILE_CELLA,
+  STILE_CAMPO_SELETTORE,
+  STILE_CELLA_CARD,
+  STILE_CELLA_DESTRA,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
   STILE_FORM,
+  STILE_INTESTAZIONE,
+  STILE_KICKER,
   STILE_PAGINA,
-  STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_RIGA_CARD,
+  STILE_VALORE_CARD,
 } from './previsioni/stili.js';
 import { useStipendio } from './stipendio/dati.js';
 
@@ -82,30 +86,34 @@ function ModificaPrevisioneForm({
 
   return (
     <form style={STILE_FORM} onSubmit={(evento) => void gestisciSalva(evento)}>
-      <div style={STILE_CAMPO}>
-        <label htmlFor={id}>Importo</label>
+      <Campo etichetta="Importo" idCampo={id} errore={erroriCampo.amountCents}>
         <input
           id={id}
+          className="input"
+          type="text"
           value={importoTesto}
           onChange={(evento) => setImportoTesto(evento.target.value)}
+          style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
         />
-        {erroriCampo.amountCents && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.amountCents}</span>
-        )}
-        {erroriCampo.categoriaId && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.categoriaId}</span>
-        )}
-      </div>
+      </Campo>
+      {erroriCampo.categoriaId && (
+        <span style={STILE_ERRORE_CAMPO}>{erroriCampo.categoriaId}</span>
+      )}
       {erroreGenerale && (
         <div style={STILE_ERRORE_GENERALE}>{erroreGenerale}</div>
       )}
       <div style={STILE_AZIONI}>
-        <button type="submit" disabled={salvando}>
+        <Bottone variante="primaria" type="submit" disabled={salvando}>
           {salvando ? 'Salvataggio…' : 'Salva'}
-        </button>
-        <button type="button" disabled={salvando} onClick={onAnnulla}>
+        </Bottone>
+        <Bottone
+          variante="secondaria"
+          type="button"
+          disabled={salvando}
+          onClick={onAnnulla}
+        >
           Annulla
-        </button>
+        </Bottone>
       </div>
     </form>
   );
@@ -114,6 +122,7 @@ function ModificaPrevisioneForm({
 export function Previsioni() {
   const {
     categorie,
+    settori,
     caricamento: caricamentoCategorie,
     erroreCaricamento: erroreCategorie,
   } = useAlbero();
@@ -147,6 +156,21 @@ export function Previsioni() {
   const categorieUscita = categorie.filter(
     (categoria) => categoria.kind === 'uscita',
   );
+  const totalePrevisto = categorieUscita.reduce(
+    (totale, categoria) =>
+      totale +
+      (categorieCiclo.find((voce) => voce.categoriaId === categoria.id)
+        ?.previstoCents ?? 0),
+    0,
+  );
+  const cicloSelezionato = cicli.find(
+    (ciclo) => ciclo.id === cicloSelezionatoId,
+  );
+  const margine =
+    cicloSelezionato?.expectedAmountCents === null ||
+    cicloSelezionato?.expectedAmountCents === undefined
+      ? null
+      : cicloSelezionato.expectedAmountCents - totalePrevisto;
 
   function apriPannello(categoriaId: string, modo: PannelloAperto['modo']) {
     setPannelloAperto({ categoriaId, modo });
@@ -154,25 +178,48 @@ export function Previsioni() {
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Previsioni</h1>
-      <section style={STILE_SEZIONE}>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="previsioni-ciclo">Ciclo</label>
-          <select
-            id="previsioni-ciclo"
-            value={cicloSelezionatoId}
-            onChange={(evento) => {
-              setCicloSelezionatoId(evento.target.value);
-              setPannelloAperto(null);
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Previsioni</h1>
+        <div style={STILE_CAMPO_SELETTORE}>
+          <Campo etichetta="Ciclo" idCampo="previsioni-ciclo">
+            <select
+              id="previsioni-ciclo"
+              className="input"
+              value={cicloSelezionatoId}
+              onChange={(evento) => {
+                setCicloSelezionatoId(evento.target.value);
+                setPannelloAperto(null);
+              }}
+            >
+              {cicli.map((ciclo, indice) => (
+                <option key={ciclo.id} value={ciclo.id}>
+                  {`${ciclo.startDate}${indice === 0 ? ' (aperto)' : ''}`}
+                </option>
+              ))}
+            </select>
+          </Campo>
+        </div>
+      </div>
+      <div style={STILE_RIGA_CARD}>
+        <div style={STILE_CELLA_CARD}>
+          <div style={STILE_KICKER}>Totale previsto</div>
+          <div style={STILE_VALORE_CARD}>{formatImporto(totalePrevisto)}</div>
+        </div>
+        <div style={STILE_CELLA_CARD}>
+          <div style={STILE_KICKER}>Margine sull'accredito</div>
+          <div
+            style={{
+              ...STILE_VALORE_CARD,
+              ...(margine === null
+                ? {}
+                : { color: margine >= 0 ? 'var(--verde)' : 'var(--rosso)' }),
             }}
           >
-            {cicli.map((ciclo, indice) => (
-              <option key={ciclo.id} value={ciclo.id}>
-                {`${ciclo.startDate}${indice === 0 ? ' (aperto)' : ''}`}
-              </option>
-            ))}
-          </select>
+            {margine === null ? '—' : formatImporto(margine)}
+          </div>
         </div>
+      </div>
+      <section>
         {(caricamentoCategorie ||
           caricamentoCicli ||
           caricamentoPrevisioni) && <p>Caricamento…</p>}
@@ -183,16 +230,17 @@ export function Previsioni() {
         {errorePrevisioni && (
           <p style={STILE_ERRORE_GENERALE}>{errorePrevisioni}</p>
         )}
-        <table style={STILE_TABELLA}>
+        <Tabella>
           <thead>
             <tr>
-              <th style={STILE_CELLA}>Categoria</th>
-              <th style={STILE_CELLA}>Valore predefinito</th>
-              <th style={STILE_CELLA}>Previsto nel ciclo</th>
-              <th style={STILE_CELLA}>Speso</th>
-              <th style={STILE_CELLA}>Residuo</th>
-              <th style={STILE_CELLA}>Sforamento</th>
-              <th style={STILE_CELLA}>Azioni</th>
+              <th>Categoria</th>
+              <th>Settore</th>
+              <th>Valore predefinito</th>
+              <th>Previsto nel ciclo</th>
+              <th>Speso</th>
+              <th>Residuo</th>
+              <th>Sforamento</th>
+              <th>Azioni</th>
             </tr>
           </thead>
           <tbody>
@@ -203,6 +251,9 @@ export function Previsioni() {
               const categoriaCiclo = categorieCiclo.find(
                 (voce) => voce.categoriaId === categoria.id,
               );
+              const settore = settori.find(
+                (elemento) => elemento.id === categoria.settoreId,
+              );
               const modificaDefault =
                 pannelloAperto?.categoriaId === categoria.id &&
                 pannelloAperto.modo === 'default';
@@ -212,8 +263,9 @@ export function Previsioni() {
 
               return (
                 <tr key={categoria.id}>
-                  <td style={STILE_CELLA}>{categoria.nome}</td>
-                  <td style={STILE_CELLA}>
+                  <td>{categoria.nome}</td>
+                  <td>{settore?.nome ?? categoria.settoreId}</td>
+                  <td style={STILE_CELLA_DESTRA}>
                     {modificaDefault ? (
                       <ModificaPrevisioneForm
                         categoriaId={categoria.id}
@@ -231,7 +283,7 @@ export function Previsioni() {
                       '—'
                     )}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td style={STILE_CELLA_DESTRA}>
                     {modificaOverride ? (
                       <ModificaPrevisioneForm
                         categoriaId={categoria.id}
@@ -253,39 +305,41 @@ export function Previsioni() {
                       '—'
                     )}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td style={STILE_CELLA_DESTRA}>
                     {categoriaCiclo
                       ? formatImporto(categoriaCiclo.speseCents)
                       : '—'}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td style={STILE_CELLA_DESTRA}>
                     {categoriaCiclo
                       ? formatImporto(categoriaCiclo.residuoCents)
                       : '—'}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td style={STILE_CELLA_DESTRA}>
                     {categoriaCiclo
                       ? formatImporto(categoriaCiclo.sforamentoCents)
                       : '—'}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td>
                     {!modificaDefault && !modificaOverride && (
                       <span style={STILE_AZIONI}>
-                        <button
+                        <Bottone
+                          variante="ghost"
                           type="button"
                           onClick={() => apriPannello(categoria.id, 'default')}
                         >
                           Modifica
-                        </button>
+                        </Bottone>
                         {budgetDefault && (
-                          <button
+                          <Bottone
+                            variante="ghost"
                             type="button"
                             onClick={() =>
                               apriPannello(categoria.id, 'override')
                             }
                           >
                             Override
-                          </button>
+                          </Bottone>
                         )}
                       </span>
                     )}
@@ -294,7 +348,7 @@ export function Previsioni() {
               );
             })}
           </tbody>
-        </table>
+        </Tabella>
       </section>
     </div>
   );
