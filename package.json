@@ -15,10 +15,12 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "concurrently -n server,web \"npm run dev -w packages/server\" \"npm run dev -w packages/web\""
+    "dev": "concurrently -n server,web \"npm run dev -w packages/server\" \"npm run dev -w packages/web\"",
+    "release": "node scripts/release.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.1",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",

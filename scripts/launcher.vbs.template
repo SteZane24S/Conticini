@@ -1,0 +1,93 @@
+Option Explicit
+
+Dim appDir, serverScript, dataDir, salutUrl, shell, fso
+Dim giaAttivo, tentativi, attivato
+
+Set shell = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+
+appDir = fso.GetParentFolderName(WScript.ScriptFullName)
+serverScript = appDir & "\programma\server\dist\server.mjs"
+dataDir = appDir & "\dati"
+salutUrl = "http://127.0.0.1:47300/api/salute"
+
+giaAttivo = VerificaSalute()
+
+If Not giaAttivo Then
+    If Not NodeDisponibile() Then
+        MsgBox "Node.js 24 o superiore non è installato, oppure non è nel PATH di sistema." & vbCrLf & _
+               "Installalo da https://nodejs.org e riprova.", vbCritical, "Conticini"
+        WScript.Quit 1
+    End If
+
+    shell.Environment("PROCESS")("CONTICINI_DATA_DIR") = dataDir
+    shell.Run "node.exe " & Chr(34) & serverScript & Chr(34), 0, False
+
+    tentativi = 0
+    Do While Not VerificaSalute() And tentativi < 30
+        WScript.Sleep 500
+        tentativi = tentativi + 1
+    Loop
+
+    If Not VerificaSalute() Then
+        MsgBox "Conticini non si è avviato in tempo. Controlla che la porta 47300 sia libera.", vbCritical, "Conticini"
+        WScript.Quit 1
+    End If
+
+    ApriFinestra
+Else
+    attivato = False
+    On Error Resume Next
+    attivato = shell.AppActivate("Conticini")
+    On Error Goto 0
+    If Not attivato Then
+        ApriFinestra
+    End If
+End If
+
+Function VerificaSalute()
+    Dim richiesta
+    VerificaSalute = False
+    On Error Resume Next
+    Set richiesta = CreateObject("WinHttp.WinHttpRequest.5.1")
+    richiesta.SetTimeouts 1500, 1500, 1500, 1500
+    richiesta.Open "GET", salutUrl, False
+    richiesta.Send
+    If Err.Number = 0 Then
+        If richiesta.Status = 200 Then
+            VerificaSalute = True
+        End If
+    End If
+    On Error Goto 0
+End Function
+
+Function NodeDisponibile()
+    Dim esecuzione, output, riga, parti
+    NodeDisponibile = False
+    On Error Resume Next
+    Set esecuzione = shell.Exec("node.exe --version")
+    If Err.Number <> 0 Then Exit Function
+    On Error Goto 0
+    Do While esecuzione.Status = 0
+        WScript.Sleep 100
+    Loop
+    output = esecuzione.StdOut.ReadAll()
+    riga = Replace(Replace(Trim(output), vbCr, ""), vbLf, "")
+    If Left(riga, 1) = "v" Then riga = Mid(riga, 2)
+    parti = Split(riga, ".")
+    If UBound(parti) >= 0 Then
+        If IsNumeric(parti(0)) Then
+            NodeDisponibile = (CInt(parti(0)) >= 24)
+        End If
+    End If
+End Function
+
+Sub ApriFinestra()
+    On Error Resume Next
+    shell.Run "msedge.exe --app=http://127.0.0.1:47300", 1, False
+    If Err.Number <> 0 Then
+        Err.Clear
+        shell.Run "chrome.exe --app=http://127.0.0.1:47300", 1, False
+    End If
+    On Error Goto 0
+End Sub
