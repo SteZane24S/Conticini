@@ -5,32 +5,53 @@ import type {
   RicorrenzaFissaDto,
 } from '@conticini/contratti';
 import {
+  aggiungiMesi,
   formatImporto,
+  occorrenzeTra,
   oggiLocale,
   parseImporto,
   type DataISO,
+  type RegolaRicorrenza,
 } from '@conticini/dominio';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 import { ErroreApi } from '../api.js';
-import { ConfermaInline } from '../components/ConfermaInline.js';
+import {
+  Bottone,
+  Campo,
+  ControlloSegmentato,
+  Dialogo,
+  Etichetta,
+  Scheda,
+} from '../components/index.js';
 import { useAlbero } from './categorie-regole/useAlbero.js';
 import { useConti } from './conti/dati.js';
 import { useSpeseFisse } from './spese-fisse/dati.js';
 import {
   STILE_AZIONI,
-  STILE_CAMPO,
-  STILE_CELLA,
-  STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
   STILE_FORM,
+  STILE_GRID_SEZIONI,
+  STILE_IMPORTO_SPESA,
+  STILE_INTESTAZIONE,
+  STILE_META_SPESA,
+  STILE_NOME_SPESA,
+  STILE_NOTA_ATTENUATA,
   STILE_PAGINA,
-  STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_RIGA_SPESA,
 } from './spese-fisse/stili.js';
 
 function formatImportoPerCampo(cents: number): string {
   return formatImporto(cents).replace(/\s?€$/, '');
+}
+
+function prossimaScadenzaDi(
+  regola: RicorrenzaFissaDto['regola'],
+): string | null {
+  const oggi = oggiLocale(new Date());
+  const orizzonte = aggiungiMesi(oggi, 14);
+  const occorrenze = occorrenzeTra(regola as RegolaRicorrenza, oggi, orizzonte);
+  return occorrenze[0]?.scadenza ?? null;
 }
 
 interface SpesaFissaFormProps {
@@ -85,6 +106,26 @@ function SpesaFissaForm({
   const [erroreGenerale, setErroreGenerale] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
 
+  useEffect(() => {
+    if (
+      spesaFissaIniziale === undefined &&
+      contoId === '' &&
+      conti[0] !== undefined
+    ) {
+      setContoId(conti[0].id);
+    }
+  }, [contoId, conti, spesaFissaIniziale]);
+
+  useEffect(() => {
+    if (
+      spesaFissaIniziale === undefined &&
+      categoriaId === '' &&
+      categorie[0] !== undefined
+    ) {
+      setCategoriaId(categorie[0].id);
+    }
+  }, [categorie, categoriaId, spesaFissaIniziale]);
+
   async function gestisciSalva(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErroriCampo({});
@@ -135,33 +176,42 @@ function SpesaFissaForm({
 
   return (
     <form style={STILE_FORM} onSubmit={(evento) => void gestisciSalva(evento)}>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-nome">Nome</label>
+      <Campo
+        etichetta="Nome"
+        idCampo="spesa-fissa-nome"
+        errore={erroriCampo.nome}
+      >
         <input
           id="spesa-fissa-nome"
+          className="input"
           value={nome}
           onChange={(evento) => setNome(evento.target.value)}
           required
         />
-        {erroriCampo.nome && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.nome}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-importo">Importo</label>
+      </Campo>
+      <Campo
+        etichetta="Importo"
+        idCampo="spesa-fissa-importo"
+        errore={erroriCampo.amountCents}
+      >
         <input
           id="spesa-fissa-importo"
+          className="input"
+          type="text"
+          inputMode="decimal"
           value={importoTesto}
           onChange={(evento) => setImportoTesto(evento.target.value)}
+          style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
         />
-        {erroriCampo.amountCents && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.amountCents}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-conto">Conto</label>
+      </Campo>
+      <Campo
+        etichetta="Conto"
+        idCampo="spesa-fissa-conto"
+        errore={erroriCampo.contoId}
+      >
         <select
           id="spesa-fissa-conto"
+          className="input"
           value={contoId}
           onChange={(evento) => setContoId(evento.target.value)}
           required
@@ -172,14 +222,15 @@ function SpesaFissaForm({
             </option>
           ))}
         </select>
-        {erroriCampo.contoId && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.contoId}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-categoria">Categoria</label>
+      </Campo>
+      <Campo
+        etichetta="Categoria"
+        idCampo="spesa-fissa-categoria"
+        errore={erroriCampo.categoriaId}
+      >
         <select
           id="spesa-fissa-categoria"
+          className="input"
           value={categoriaId}
           onChange={(evento) => setCategoriaId(evento.target.value)}
           required
@@ -190,14 +241,15 @@ function SpesaFissaForm({
             </option>
           ))}
         </select>
-        {erroriCampo.categoriaId && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.categoriaId}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-tipo">Tipo di ricorrenza</label>
+      </Campo>
+      <Campo
+        etichetta="Tipo di ricorrenza"
+        idCampo="spesa-fissa-tipo"
+        errore={erroriCampo.regola}
+      >
         <select
           id="spesa-fissa-tipo"
+          className="input"
           value={tipo}
           onChange={(evento) =>
             setTipo(evento.target.value as RicorrenzaFissaDto['regola']['tipo'])
@@ -207,14 +259,11 @@ function SpesaFissaForm({
           <option value="every_n_months">Ogni N mesi</option>
           <option value="yearly">Annuale</option>
         </select>
-        {erroriCampo.regola && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.regola}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-giorno">Giorno del mese</label>
+      </Campo>
+      <Campo etichetta="Giorno del mese" idCampo="spesa-fissa-giorno">
         <input
           id="spesa-fissa-giorno"
+          className="input"
           type="number"
           min="1"
           max="31"
@@ -222,25 +271,25 @@ function SpesaFissaForm({
           onChange={(evento) => setAnchorDay(evento.target.value)}
           required
         />
-      </div>
+      </Campo>
       {tipo === 'every_n_months' && (
-        <div style={STILE_CAMPO}>
-          <label htmlFor="spesa-fissa-n">N mesi</label>
+        <Campo etichetta="N mesi" idCampo="spesa-fissa-n">
           <input
             id="spesa-fissa-n"
+            className="input"
             type="number"
             min="1"
             value={n}
             onChange={(evento) => setN(evento.target.value)}
             required
           />
-        </div>
+        </Campo>
       )}
       {tipo !== 'monthly' && (
-        <div style={STILE_CAMPO}>
-          <label htmlFor="spesa-fissa-mese">Mese di ancoraggio</label>
+        <Campo etichetta="Mese di ancoraggio" idCampo="spesa-fissa-mese">
           <input
             id="spesa-fissa-mese"
+            className="input"
             type="number"
             min="1"
             max="12"
@@ -248,61 +297,67 @@ function SpesaFissaForm({
             onChange={(evento) => setAnchorMonth(evento.target.value)}
             required
           />
-        </div>
+        </Campo>
       )}
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-inizio">Data di inizio</label>
+      <Campo etichetta="Data di inizio" idCampo="spesa-fissa-inizio">
         <input
           id="spesa-fissa-inizio"
+          className="input"
           type="date"
           value={startDate}
           onChange={(evento) => setStartDate(evento.target.value)}
           required
         />
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-fine">Data di fine</label>
+      </Campo>
+      <Campo etichetta="Data di fine" idCampo="spesa-fissa-fine">
         <input
           id="spesa-fissa-fine"
+          className="input"
           type="date"
           value={endDate}
           onChange={(evento) => setEndDate(evento.target.value)}
         />
+      </Campo>
+      <div className="field">
+        <span>Modalità</span>
+        <ControlloSegmentato
+          nome="spesa-fissa-modalita"
+          valore={mode}
+          onCambio={(valore) => setMode(valore as 'auto' | 'manual')}
+          opzioni={[
+            { valore: 'auto', etichetta: 'Automatica' },
+            { valore: 'manual', etichetta: 'Manuale' },
+          ]}
+        />
+        {erroriCampo.mode && <span>{erroriCampo.mode}</span>}
       </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-modalita">Modalità</label>
-        <select
-          id="spesa-fissa-modalita"
-          value={mode}
-          onChange={(evento) =>
-            setMode(evento.target.value as 'auto' | 'manual')
-          }
-        >
-          <option value="auto">Automatica</option>
-          <option value="manual">Manuale</option>
-        </select>
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor="spesa-fissa-attiva">
-          <input
-            id="spesa-fissa-attiva"
-            type="checkbox"
-            checked={active}
-            onChange={(evento) => setActive(evento.target.checked)}
-          />{' '}
-          Attiva
-        </label>
-      </div>
+      <label
+        style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
+      >
+        <input
+          id="spesa-fissa-attiva"
+          type="checkbox"
+          checked={active}
+          onChange={(evento) => setActive(evento.target.checked)}
+        />
+        Attiva
+      </label>
       {erroreGenerale && (
         <div style={STILE_ERRORE_GENERALE}>{erroreGenerale}</div>
       )}
       <div style={STILE_AZIONI}>
-        <button type="submit" disabled={salvando}>
-          {salvando ? 'Salvataggio…' : 'Salva'}
-        </button>
-        <button type="button" onClick={onAnnulla}>
-          Annulla
-        </button>
+        <Bottone variante="primaria" type="submit" disabled={salvando}>
+          {salvando
+            ? 'Salvataggio…'
+            : spesaFissaIniziale
+              ? 'Salva modifiche'
+              : 'Crea spesa fissa'}
+        </Bottone>
+        {spesaFissaIniziale !== undefined && (
+          <Bottone variante="secondaria" type="button" onClick={onAnnulla}>
+            Annulla
+          </Bottone>
+        )}
       </div>
     </form>
   );
@@ -327,15 +382,38 @@ export function SpeseFisse() {
   const categorieUscita = categorie.filter(
     (categoria) => categoria.kind === 'uscita',
   );
-  const [formAperto, setFormAperto] = useState<string | null>(null);
+  const [spesaFissaInModificaId, setSpesaFissaInModificaId] = useState<
+    string | null
+  >(null);
+  const [formNuovaVersione, setFormNuovaVersione] = useState(0);
   const [eliminazioneInCorso, setEliminazioneInCorso] = useState<string | null>(
     null,
   );
   const [erroreAzione, setErroreAzione] = useState<string | null>(null);
   const spesaFissaInModifica =
-    formAperto !== null && formAperto !== 'nuovo'
-      ? speseFisse.find((spesaFissa) => spesaFissa.id === formAperto)
-      : undefined;
+    spesaFissaInModificaId === null
+      ? undefined
+      : speseFisse.find(
+          (spesaFissa) => spesaFissa.id === spesaFissaInModificaId,
+        );
+  const spesaFissaDaEliminare =
+    eliminazioneInCorso === null
+      ? undefined
+      : speseFisse.find((spesaFissa) => spesaFissa.id === eliminazioneInCorso);
+  const speseFisseOrdinate = speseFisse
+    .map((spesaFissa) => ({
+      spesaFissa,
+      prossimaScadenza: prossimaScadenzaDi(spesaFissa.regola),
+    }))
+    .sort((a, b) => {
+      if (a.prossimaScadenza === null) {
+        return b.prossimaScadenza === null ? 0 : 1;
+      }
+      if (b.prossimaScadenza === null) {
+        return -1;
+      }
+      return a.prossimaScadenza.localeCompare(b.prossimaScadenza);
+    });
   const nomeConto = (id: string) =>
     conti.find((conto) => conto.id === id)?.nome ?? id;
   const nomeCategoria = (id: string) =>
@@ -366,121 +444,141 @@ export function SpeseFisse() {
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Spese fisse</h1>
-      <section style={STILE_SEZIONE}>
-        {caricando && <p>Caricamento…</p>}
-        {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
-        {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
-        {!caricando && speseFisse.length > 0 && (
-          <table style={STILE_TABELLA}>
-            <thead>
-              <tr>
-                {[
-                  'Nome',
-                  'Importo',
-                  'Conto',
-                  'Categoria',
-                  'Ricorrenza',
-                  'Modalità',
-                  'Stato',
-                  'Azioni',
-                ].map((titolo) => (
-                  <th key={titolo} style={STILE_CELLA}>
-                    {titolo}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {speseFisse.map((spesaFissa) => (
-                <tr key={spesaFissa.id}>
-                  <td style={STILE_CELLA}>{spesaFissa.nome}</td>
-                  <td style={STILE_CELLA}>
-                    {formatImporto(spesaFissa.amountCents)}
-                  </td>
-                  <td style={STILE_CELLA}>{nomeConto(spesaFissa.contoId)}</td>
-                  <td style={STILE_CELLA}>
-                    {nomeCategoria(spesaFissa.categoriaId)}
-                  </td>
-                  <td style={STILE_CELLA}>
-                    {descriviRicorrenza(spesaFissa.regola)}
-                  </td>
-                  <td style={STILE_CELLA}>
-                    {spesaFissa.mode === 'auto' ? 'Automatica' : 'Manuale'}
-                  </td>
-                  <td style={STILE_CELLA}>
-                    {spesaFissa.active ? 'Attiva' : 'Disattivata'}
-                  </td>
-                  <td style={STILE_CELLA}>
-                    {eliminazioneInCorso === spesaFissa.id ? (
-                      <ConfermaInline
-                        domanda="Eliminare la spesa fissa?"
-                        onConferma={() =>
-                          void gestisciEliminazione(spesaFissa.id)
-                        }
-                        onAnnulla={() => setEliminazioneInCorso(null)}
-                      />
-                    ) : (
-                      <span style={STILE_AZIONI}>
-                        <button
-                          type="button"
-                          onClick={() => setFormAperto(spesaFissa.id)}
-                        >
-                          Modifica
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void gestisciAttivazione(spesaFissa)}
-                        >
-                          {spesaFissa.active ? 'Disattiva' : 'Attiva'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEliminazioneInCorso(spesaFissa.id)}
-                        >
-                          Elimina
-                        </button>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Spese fisse</h1>
+      </div>
+      <div style={STILE_GRID_SEZIONI}>
+        <div>
+          {caricando && <p>Caricamento…</p>}
+          {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
+          {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
+          {!caricando && speseFisseOrdinate.length > 0 && (
+            <div>
+              {speseFisseOrdinate.map(({ spesaFissa, prossimaScadenza }) => (
+                <div key={spesaFissa.id} style={STILE_RIGA_SPESA}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={STILE_NOME_SPESA}>
+                      {spesaFissa.nome}
+                      <span
+                        style={{
+                          background:
+                            spesaFissa.mode === 'auto'
+                              ? 'var(--neu-bg)'
+                              : 'var(--ambra-bg)',
+                          color:
+                            spesaFissa.mode === 'auto'
+                              ? 'var(--neu)'
+                              : 'var(--ambra)',
+                          fontSize: '10px',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          padding: '2px 7px',
+                        }}
+                      >
+                        {spesaFissa.mode === 'auto' ? 'Automatica' : 'Manuale'}
                       </span>
-                    )}
-                  </td>
-                </tr>
+                      {!spesaFissa.active && (
+                        <Etichetta variante="outline">Disattivata</Etichetta>
+                      )}
+                    </div>
+                    <div style={STILE_META_SPESA}>
+                      {`${descriviRicorrenza(spesaFissa.regola)} · prossima ${prossimaScadenza ?? '—'} · ${nomeCategoria(spesaFissa.categoriaId)} · ${nomeConto(spesaFissa.contoId)}`}
+                    </div>
+                  </div>
+                  <div
+                    style={{ ...STILE_IMPORTO_SPESA, color: 'var(--rosso)' }}
+                  >
+                    {formatImporto(spesaFissa.amountCents)}
+                  </div>
+                  <Bottone
+                    variante="ghost"
+                    onClick={() => setSpesaFissaInModificaId(spesaFissa.id)}
+                  >
+                    Modifica
+                  </Bottone>
+                  <Bottone
+                    variante="ghost"
+                    onClick={() => void gestisciAttivazione(spesaFissa)}
+                  >
+                    {spesaFissa.active ? 'Disattiva' : 'Attiva'}
+                  </Bottone>
+                  <Bottone
+                    variante="ghost"
+                    onClick={() => setEliminazioneInCorso(spesaFissa.id)}
+                  >
+                    Elimina
+                  </Bottone>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
-        {!caricando && speseFisse.length === 0 && (
-          <p>Nessuna spesa fissa presente.</p>
-        )}
-        {formAperto === null && (
-          <button type="button" onClick={() => setFormAperto('nuovo')}>
-            Nuova spesa fissa
-          </button>
-        )}
-        {formAperto === 'nuovo' && (
-          <SpesaFissaForm
-            conti={conti}
-            categorie={categorieUscita}
-            onSalva={async (dati) => {
-              await crea(dati);
-              setFormAperto(null);
-            }}
-            onAnnulla={() => setFormAperto(null)}
-          />
-        )}
-        {spesaFissaInModifica && (
-          <SpesaFissaForm
-            key={spesaFissaInModifica.id}
-            conti={conti}
-            categorie={categorieUscita}
-            spesaFissaIniziale={spesaFissaInModifica}
-            onSalva={async (dati) => {
-              await aggiorna(spesaFissaInModifica.id, dati);
-              setFormAperto(null);
-            }}
-            onAnnulla={() => setFormAperto(null)}
-          />
-        )}
-      </section>
+            </div>
+          )}
+          {!caricando && speseFisseOrdinate.length === 0 && (
+            <p style={STILE_NOTA_ATTENUATA}>Nessuna spesa fissa presente.</p>
+          )}
+        </div>
+        <Scheda
+          titolo={
+            spesaFissaInModifica === undefined
+              ? 'Nuova spesa fissa'
+              : 'Modifica spesa fissa'
+          }
+        >
+          {spesaFissaInModifica === undefined ? (
+            <SpesaFissaForm
+              key={`nuova-${formNuovaVersione}`}
+              conti={conti}
+              categorie={categorieUscita}
+              onSalva={async (dati) => {
+                await crea(dati);
+                setSpesaFissaInModificaId(null);
+                setFormNuovaVersione((versione) => versione + 1);
+              }}
+              onAnnulla={() => setSpesaFissaInModificaId(null)}
+            />
+          ) : (
+            <SpesaFissaForm
+              key={spesaFissaInModifica.id}
+              conti={conti}
+              categorie={categorieUscita}
+              spesaFissaIniziale={spesaFissaInModifica}
+              onSalva={async (dati) => {
+                await aggiorna(spesaFissaInModifica.id, dati);
+                setSpesaFissaInModificaId(null);
+              }}
+              onAnnulla={() => setSpesaFissaInModificaId(null)}
+            />
+          )}
+        </Scheda>
+      </div>
+      {spesaFissaDaEliminare && (
+        <Dialogo
+          aperto={eliminazioneInCorso !== null}
+          titolo="Eliminare la spesa fissa?"
+          onChiudi={() => setEliminazioneInCorso(null)}
+          azioni={
+            <>
+              <Bottone
+                variante="primaria"
+                onClick={() => void gestisciEliminazione(eliminazioneInCorso!)}
+              >
+                Elimina
+              </Bottone>
+              <Bottone
+                variante="secondaria"
+                onClick={() => setEliminazioneInCorso(null)}
+              >
+                Annulla
+              </Bottone>
+            </>
+          }
+        >
+          <p>
+            «{spesaFissaDaEliminare.nome}»,{' '}
+            {formatImporto(spesaFissaDaEliminare.amountCents)}. Sparisce dal
+            prospetto e dalle occorrenze future.
+          </p>
+        </Dialogo>
+      )}
     </div>
   );
 }

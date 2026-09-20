@@ -8,9 +8,7 @@ import {
 import { useRef, useState, type FormEvent } from 'react';
 
 import { ErroreApi } from '../api.js';
-import { ConfermaInline } from '../components/ConfermaInline.js';
-import { useAlbero } from './categorie-regole/useAlbero.js';
-import { useConti } from './conti/dati.js';
+import { Bottone, Campo, Dialogo } from '../components/index.js';
 import {
   cercaCandidatiCollegamento,
   useOccorrenzeInAttesa,
@@ -18,23 +16,34 @@ import {
 } from './in-attesa/dati.js';
 import {
   STILE_AZIONI,
-  STILE_CAMPO,
-  STILE_CELLA,
+  STILE_CARD,
+  STILE_DESCRIZIONE,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
   STILE_FORM,
+  STILE_INTESTAZIONE,
+  STILE_INTESTAZIONE_CARD,
+  STILE_LISTA,
+  STILE_NOME_OCCORRENZA,
   STILE_PAGINA,
-  STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_VUOTO,
 } from './in-attesa/stili.js';
 
 function formatImportoPerCampo(cents: number): string {
   return formatImporto(cents).replace(/\s?€$/, '');
 }
 
+function giorniDiScarto(scadenza: string, oggi: string): number {
+  return Math.round(
+    (new Date(`${scadenza}T00:00:00Z`).getTime() -
+      new Date(`${oggi}T00:00:00Z`).getTime()) /
+      -86400000,
+  );
+}
+
 interface PannelloAperto {
   id: string;
-  modo: 'conferma' | 'salta' | 'collega';
+  modo: 'conferma' | 'collega';
 }
 
 function ConfermaForm({
@@ -53,6 +62,7 @@ function ConfermaForm({
   const [erroriCampo, setErroriCampo] = useState<Record<string, string>>({});
   const [erroreGenerale, setErroreGenerale] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+
   async function gestisciSalva(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErroriCampo({});
@@ -76,55 +86,59 @@ function ConfermaForm({
       setSalvando(false);
     }
   }
+
   return (
     <form style={STILE_FORM} onSubmit={(evento) => void gestisciSalva(evento)}>
-      <div style={STILE_CAMPO}>
-        <label htmlFor={`occorrenza-data-${occorrenza.id}`}>Data</label>
+      <Campo
+        etichetta="Data"
+        idCampo={`occorrenza-data-${occorrenza.id}`}
+        errore={erroriCampo.data}
+      >
         <input
           id={`occorrenza-data-${occorrenza.id}`}
+          className="input"
           type="date"
           value={data}
           onChange={(evento) => setData(evento.target.value)}
           required
         />
-        {erroriCampo.data && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.data}</span>
-        )}
-      </div>
-      <div style={STILE_CAMPO}>
-        <label htmlFor={`occorrenza-importo-${occorrenza.id}`}>Importo</label>
+      </Campo>
+      <Campo
+        etichetta="Importo"
+        idCampo={`occorrenza-importo-${occorrenza.id}`}
+        errore={erroriCampo.amountCents}
+      >
         <input
           id={`occorrenza-importo-${occorrenza.id}`}
+          className="input"
+          type="text"
           value={importoTesto}
           onChange={(evento) => setImportoTesto(evento.target.value)}
+          style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
         />
-        {erroriCampo.amountCents && (
-          <span style={STILE_ERRORE_CAMPO}>{erroriCampo.amountCents}</span>
-        )}
-      </div>
+      </Campo>
       {erroreGenerale && (
         <div style={STILE_ERRORE_GENERALE}>{erroreGenerale}</div>
       )}
       <div style={STILE_AZIONI}>
-        <button type="submit" disabled={salvando}>
+        <Bottone variante="primaria" type="submit" disabled={salvando}>
           {salvando ? 'Salvataggio…' : 'Salva'}
-        </button>
-        <button type="button" onClick={onAnnulla}>
+        </Bottone>
+        <Bottone variante="secondaria" onClick={onAnnulla}>
           Annulla
-        </button>
+        </Bottone>
       </div>
     </form>
   );
 }
 
 export function InAttesa() {
-  const { conti } = useConti();
-  const { categorie } = useAlbero();
   const { occorrenze, caricando, errore, conferma, salta, collega } =
     useOccorrenzeInAttesa();
   const [pannelloAperto, setPannelloAperto] = useState<PannelloAperto | null>(
     null,
   );
+  const [idDaSaltare, setIdDaSaltare] = useState<string | null>(null);
   const pannelloApertoRef = useRef<string | null>(null);
   const [candidati, setCandidati] = useState<MovimentoDto[]>([]);
   const [caricandoCandidati, setCaricandoCandidati] = useState(false);
@@ -133,25 +147,27 @@ export function InAttesa() {
     string | null
   >(null);
   const oggi = oggiLocale(new Date());
-  const scadute = occorrenze.filter((occorrenza) => occorrenza.scadenza < oggi);
-  const prossime = occorrenze.filter(
-    (occorrenza) => occorrenza.scadenza >= oggi,
+  const occorrenzeOrdinate = [...occorrenze].sort((prima, seconda) =>
+    prima.scadenza.localeCompare(seconda.scadenza),
   );
-  function nomeConto(contoId: string) {
-    return conti.find((conto) => conto.id === contoId)?.nome ?? contoId;
-  }
-  function nomeCategoria(categoriaId: string | null) {
-    return categoriaId === null
-      ? '—'
-      : (categorie.find((categoria) => categoria.id === categoriaId)?.nome ??
-          categoriaId);
-  }
+  const occorrenzaDaSaltare =
+    idDaSaltare === null
+      ? null
+      : (occorrenze.find((occorrenza) => occorrenza.id === idDaSaltare) ??
+        null);
+
   function apriPannello(id: string, modo: PannelloAperto['modo']) {
     pannelloApertoRef.current = id;
     setErroreAzione(null);
     setErroreCampoCollegamento(null);
     setPannelloAperto({ id, modo });
   }
+
+  function chiudiPannello() {
+    setPannelloAperto(null);
+    pannelloApertoRef.current = null;
+  }
+
   async function caricaCandidati(occorrenza: OccorrenzaInAttesa) {
     apriPannello(occorrenza.id, 'collega');
     setCandidati([]);
@@ -171,25 +187,26 @@ export function InAttesa() {
       }
     }
   }
-  async function gestisciSalto(id: string) {
+
+  async function gestisciSalto(id: string): Promise<boolean> {
     setErroreAzione(null);
     try {
       await salta(id);
-      setPannelloAperto(null);
-      pannelloApertoRef.current = null;
+      return true;
     } catch (err) {
       setErroreAzione(
         err instanceof ErroreApi ? err.message : 'Errore imprevisto.',
       );
+      return false;
     }
   }
+
   async function gestisciCollegamento(id: string, movimentoId: string) {
     setErroreAzione(null);
     setErroreCampoCollegamento(null);
     try {
       await collega(id, { movimentoId });
-      setPannelloAperto(null);
-      pannelloApertoRef.current = null;
+      chiudiPannello();
     } catch (err) {
       if (err instanceof ErroreApi) {
         if (err.campo) setErroreCampoCollegamento(err.message);
@@ -197,35 +214,80 @@ export function InAttesa() {
       } else setErroreAzione('Errore imprevisto.');
     }
   }
-  function tabella(occorrenzeSezione: OccorrenzaInAttesa[]) {
-    return (
-      <table style={STILE_TABELLA}>
-        <thead>
-          <tr>
-            <th style={STILE_CELLA}>Nome</th>
-            <th style={STILE_CELLA}>Scadenza</th>
-            <th style={STILE_CELLA}>Importo previsto</th>
-            <th style={STILE_CELLA}>Conto</th>
-            <th style={STILE_CELLA}>Categoria</th>
-            <th style={STILE_CELLA}>Azioni</th>
-          </tr>
-        </thead>
-        <tbody>
-          {occorrenzeSezione.map((occorrenza) => {
-            const pannelloDiQuestaRiga = pannelloAperto?.id === occorrenza.id;
-            return (
-              <tr key={occorrenza.id}>
-                <td style={STILE_CELLA}>{occorrenza.nome}</td>
-                <td style={STILE_CELLA}>{occorrenza.scadenza}</td>
-                <td style={STILE_CELLA}>
-                  {formatImporto(occorrenza.amountCentsPrevisto)}
-                </td>
-                <td style={STILE_CELLA}>{nomeConto(occorrenza.contoId)}</td>
-                <td style={STILE_CELLA}>
-                  {nomeCategoria(occorrenza.categoriaId)}
-                </td>
-                <td style={STILE_CELLA}>
-                  {pannelloDiQuestaRiga &&
+
+  return (
+    <div style={STILE_PAGINA}>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>In attesa</h1>
+        {occorrenze.length > 0 && (
+          <span style={{ color: 'var(--muted)', fontSize: '14px' }}>
+            {occorrenze.length}{' '}
+            {occorrenze.length === 1
+              ? 'occorrenza da confermare'
+              : 'occorrenze da confermare'}
+          </span>
+        )}
+      </div>
+      <p style={STILE_DESCRIZIONE}>
+        Occorrenze di spese fisse manuali arrivate a scadenza: conferma con
+        l'importo reale, salta il ciclo, oppure collegale a un movimento già
+        registrato.
+      </p>
+      {caricando && <p>Caricamento…</p>}
+      {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
+      {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
+      {!caricando && (
+        <div style={STILE_LISTA}>
+          {occorrenzeOrdinate.length === 0 ? (
+            <div style={STILE_VUOTO}>
+              Niente in attesa: tutte le occorrenze manuali sono confermate o
+              saltate.
+            </div>
+          ) : (
+            occorrenzeOrdinate.map((occorrenza) => {
+              const giorni = giorniDiScarto(occorrenza.scadenza, oggi);
+              const stato =
+                giorni > 0
+                  ? `arretrata di ${giorni} ${giorni === 1 ? 'giorno' : 'giorni'}`
+                  : giorni === 0
+                    ? 'in scadenza oggi'
+                    : `in arrivo tra ${-giorni} ${-giorni === 1 ? 'giorno' : 'giorni'}`;
+              const coloreStato = giorni > 0 ? 'var(--rosso)' : 'var(--ambra)';
+              const coloreBordo =
+                giorni > 0 ? 'var(--color-accent)' : 'var(--ambra)';
+              const pannelloDiQuestaCard = pannelloAperto?.id === occorrenza.id;
+
+              return (
+                <div
+                  key={occorrenza.id}
+                  style={{
+                    ...STILE_CARD,
+                    borderLeft: `4px solid ${coloreBordo}`,
+                  }}
+                >
+                  <div style={STILE_INTESTAZIONE_CARD}>
+                    <span style={STILE_NOME_OCCORRENZA}>{occorrenza.nome}</span>
+                    <span
+                      style={{
+                        color: coloreStato,
+                        fontSize: '12px',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {stato}
+                    </span>
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        color: 'var(--muted)',
+                        fontSize: '12.5px',
+                      }}
+                    >
+                      previsti {formatImporto(occorrenza.amountCentsPrevisto)}
+                    </span>
+                  </div>
+                  {pannelloDiQuestaCard &&
                   pannelloAperto.modo === 'conferma' ? (
                     <ConfermaForm
                       occorrenza={occorrenza}
@@ -234,40 +296,28 @@ export function InAttesa() {
                           data: data as DataISO,
                           amountCents,
                         });
-                        setPannelloAperto(null);
-                        pannelloApertoRef.current = null;
+                        chiudiPannello();
                       }}
-                      onAnnulla={() => {
-                        setPannelloAperto(null);
-                        pannelloApertoRef.current = null;
-                      }}
+                      onAnnulla={chiudiPannello}
                     />
-                  ) : pannelloDiQuestaRiga &&
-                    pannelloAperto.modo === 'salta' ? (
-                    <ConfermaInline
-                      domanda="Saltare questa occorrenza?"
-                      onConferma={() => void gestisciSalto(occorrenza.id)}
-                      onAnnulla={() => {
-                        setPannelloAperto(null);
-                        pannelloApertoRef.current = null;
-                      }}
-                    />
-                  ) : pannelloDiQuestaRiga &&
+                  ) : pannelloDiQuestaCard &&
                     pannelloAperto.modo === 'collega' ? (
-                    <div style={STILE_SEZIONE}>
+                    <div style={STILE_FORM}>
                       {caricandoCandidati && <p>Caricamento…</p>}
                       {!caricandoCandidati && candidati.length === 0 && (
                         <p>Nessun movimento simile trovato.</p>
                       )}
                       {!caricandoCandidati && candidati.length > 0 && (
-                        <ul>
+                        <div style={STILE_FORM}>
                           {candidati.map((movimento) => (
-                            <li key={movimento.id}>
-                              {movimento.data} —{' '}
-                              {formatImporto(movimento.amountCents)} —{' '}
-                              {movimento.descrizione}{' '}
-                              <button
-                                type="button"
+                            <div key={movimento.id} style={STILE_AZIONI}>
+                              <span>
+                                {movimento.data} —{' '}
+                                {formatImporto(movimento.amountCents)} —{' '}
+                                {movimento.descrizione}
+                              </span>
+                              <Bottone
+                                variante="ghost"
                                 onClick={() =>
                                   void gestisciCollegamento(
                                     occorrenza.id,
@@ -276,82 +326,79 @@ export function InAttesa() {
                                 }
                               >
                                 Collega
-                              </button>
-                            </li>
+                              </Bottone>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       )}
                       {erroreCampoCollegamento && (
                         <span style={STILE_ERRORE_CAMPO}>
                           {erroreCampoCollegamento}
                         </span>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPannelloAperto(null);
-                          pannelloApertoRef.current = null;
-                        }}
-                      >
-                        Annulla
-                      </button>
+                      <div style={STILE_AZIONI}>
+                        <Bottone variante="secondaria" onClick={chiudiPannello}>
+                          Annulla
+                        </Bottone>
+                      </div>
                     </div>
                   ) : (
-                    <span style={STILE_AZIONI}>
-                      <button
-                        type="button"
+                    <div style={STILE_AZIONI}>
+                      <Bottone
+                        variante="primaria"
                         onClick={() => apriPannello(occorrenza.id, 'conferma')}
                       >
                         Conferma
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => apriPannello(occorrenza.id, 'salta')}
+                      </Bottone>
+                      <Bottone
+                        variante="secondaria"
+                        onClick={() => setIdDaSaltare(occorrenza.id)}
                       >
                         Salta
-                      </button>
-                      <button
-                        type="button"
+                      </Bottone>
+                      <Bottone
+                        variante="ghost"
                         onClick={() => void caricaCandidati(occorrenza)}
                       >
                         Collega a un movimento esistente
-                      </button>
-                    </span>
+                      </Bottone>
+                    </div>
                   )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
-  }
-  return (
-    <div style={STILE_PAGINA}>
-      <h1>In attesa</h1>
-      {caricando && <p>Caricamento…</p>}
-      {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
-      {erroreAzione && <p style={STILE_ERRORE_GENERALE}>{erroreAzione}</p>}
-      {!caricando && (
-        <>
-          <section style={STILE_SEZIONE}>
-            <h2>Scadute</h2>
-            {scadute.length > 0 ? (
-              tabella(scadute)
-            ) : (
-              <p>Nessuna occorrenza scaduta.</p>
-            )}
-          </section>
-          <section style={STILE_SEZIONE}>
-            <h2>Prossime</h2>
-            {prossime.length > 0 ? (
-              tabella(prossime)
-            ) : (
-              <p>Nessuna occorrenza in arrivo.</p>
-            )}
-          </section>
-        </>
+                </div>
+              );
+            })
+          )}
+        </div>
       )}
+      <Dialogo
+        aperto={idDaSaltare !== null}
+        titolo="Saltare questa occorrenza?"
+        onChiudi={() => setIdDaSaltare(null)}
+        azioni={
+          <>
+            <Bottone
+              variante="primaria"
+              onClick={() =>
+                void gestisciSalto(idDaSaltare!).then((successo) => {
+                  if (successo) setIdDaSaltare(null);
+                })
+              }
+            >
+              Salta
+            </Bottone>
+            <Bottone variante="secondaria" onClick={() => setIdDaSaltare(null)}>
+              Annulla
+            </Bottone>
+          </>
+        }
+      >
+        {occorrenzaDaSaltare && (
+          <>
+            «{occorrenzaDaSaltare.nome}» non verrà registrata per la scadenza
+            del {occorrenzaDaSaltare.scadenza} e uscirà dal prospetto.
+          </>
+        )}
+      </Dialogo>
     </div>
   );
 }

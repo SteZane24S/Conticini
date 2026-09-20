@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 5.3 chiuso il 20/09/2026 — Restyling di Stipendio, Conti, Categorie e regole completato.
-**Prossimo giro:** giro 5.4 — Spese fisse, In attesa, da `fasi/fase-5-design/PIANO.md`.
+**Stato:** giro 5.4 chiuso il 20/09/2026 — Restyling di Spese fisse e In attesa completato.
+**Prossimo giro:** giro 5.5 — Previsioni, Grafici, Backup — chiude la fase, da `fasi/fase-5-design/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -38,7 +38,8 @@
 - [x] 5.1 Fondamenta: token, design system, componenti condivisi, layout
 - [x] 5.2 Prospetto e Movimenti
 - [x] 5.3 Stipendio, Conti, Categorie e regole
-- [ ] Giri 5.4-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
+- [x] 5.4 Spese fisse, In attesa
+- [ ] Giro 5.5 definito in `fasi/fase-5-design/PIANO.md`, da eseguire
 
 ### Fase 6 — Mobile e sincronizzazione
 - [ ] Richiede una nuova sessione di pianificazione su Opus
@@ -96,3 +97,10 @@
 - Dato di prova rimasto in `.dati-dev` dal collaudo del giro 5.3 (non nei dati reali dell'utente in `app/dati/`): uno stipendio di collaudo da 1,00€ sul conto "TEST-live-testing" con ciclo 2026-09-20→2026-11-20; non rimovibile perché l'app non espone un'azione di eliminazione per un ciclo stipendio già registrato — limite noto, non un difetto del giro.
 - Nel giro 5.3 l'unità Categorie e regole è girata in parte in ricaduta su Sonnet (review di conformità e correzione del suo rilievo) per esaurimento della quota Codex: da tenere presente nel confronto dei pesi fra giri nel registro dei consumi, perché queste sessioni lasciano traccia nei transcript a differenza di quelle Codex.
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.3: tutti e tre i rilievi (2 su Stipendio, 1 su Categorie e regole) sono stati corretti e riverificati.
+- Prossimo giro: 5.5 — Previsioni, Grafici, Backup, da `fasi/fase-5-design/PIANO.md`. Chiude la Fase 5 con `live-testing` su tutte e tre le pagine, in tema chiaro e scuro.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 5.4.
+- Osservazione non bloccante emersa nel collaudo del giro 5.4, non risolta: nel form "Nuova spesa fissa" il campo Importo interpreta un punto digitato (es. "1.23") come separatore delle migliaia anziché decimale, producendo "1.230,00" — comportamento della maschera numerica esistente (`parseImporto` di dominio, non introdotto da questo giro), da valutare in un giro futuro che tocchi di nuovo la formattazione degli importi.
+- Non verificato in browser nel collaudo del giro 5.4 (mancavano strumenti di intercettazione di rete nella sessione): il percorso di fallimento dell'azione "Salta" in In attesa, cioè che il dialogo resti aperto con messaggio d'errore invece di chiudersi quando la chiamata API fallisce; la correzione è stata verificata a livello di codice dal `checker` con citazione testuale, rischio residuo considerato basso.
+- Dato di prova rimasto in `.dati-dev` dal collaudo del giro 5.4 (non nei dati reali dell'utente in `app/dati/`): un'occorrenza manuale di "Netflix" (scadenza 2026-09-10) è stata marcata come "saltata" per verificare il percorso di successo dell'azione — non annullabile dall'interfaccia.
+- Nell'unità Spese fisse del giro 5.4 la sessione Codex è andata in timeout (nessuna risposta per 1800s) prima di restituire il report finale, ma il lavoro era comunque scritto correttamente su disco: l'orchestratore lo ha verificato indipendentemente con build/test/lint/format, tutti verdi, prima di procedere alla review. Da tenere presente nel confronto dei pesi fra giri nel registro dei consumi.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.4: i tre rilievi fondati (1 su Spese fisse, 2 su In attesa) sono stati corretti e riverificati; l'unico rilievo scartato (conformity su Spese fisse, campi Modalità/Attiva fuori dal componente `Campo`) è stato giudicato infondato perché richiesto esplicitamente dal brief e coerente con un pattern già in uso nel progetto (`packages/web/src/pages/movimenti/InserimentoRapido.tsx`).
