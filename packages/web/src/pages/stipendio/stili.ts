@@ -1,56 +1,56 @@
 import type { CSSProperties } from 'react';
 
 export const STILE_PAGINA: CSSProperties = {
-  padding: '1.5rem',
   display: 'flex',
   flexDirection: 'column',
-  gap: '2rem',
-  maxWidth: '900px',
+  gap: 'var(--space-6)',
 };
 
-export const STILE_SEZIONE: CSSProperties = {
+export const STILE_INTESTAZIONE: CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: '0.75rem',
+  alignItems: 'flex-end',
+  justifyContent: 'space-between',
+  gap: 'var(--space-6)',
+  flexWrap: 'wrap',
+  borderBottom: '2px solid var(--color-divider)',
+  paddingBottom: 'var(--space-3)',
 };
 
-export const STILE_TABELLA: CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
+export const STILE_GRID_SEZIONI: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(300px, 400px) minmax(340px, 1fr)',
+  gap: 'var(--space-8)',
+  alignItems: 'start',
 };
 
-export const STILE_CELLA: CSSProperties = {
-  borderBottom: '1px solid #ddd',
-  padding: '0.5rem',
-  textAlign: 'left',
+export const STILE_TITOLO_SEZIONE: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'baseline',
+  borderBottom: '2px solid var(--color-divider)',
+  paddingBottom: 'var(--space-2)',
 };
 
 export const STILE_FORM: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.5rem',
-  border: '1px solid #ccc',
-  padding: '1rem',
-  maxWidth: '400px',
-};
-
-export const STILE_CAMPO: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.25rem',
+  gap: 'var(--space-4)',
 };
 
 export const STILE_ERRORE_CAMPO: CSSProperties = {
-  color: '#b00020',
-  fontSize: '0.85rem',
+  color: 'var(--rosso)',
 };
 
 export const STILE_ERRORE_GENERALE: CSSProperties = {
-  color: '#b00020',
+  color: 'var(--rosso)',
 };
 
 export const STILE_AZIONI: CSSProperties = {
   display: 'flex',
-  gap: '0.5rem',
+  gap: 'var(--space-3)',
   alignItems: 'center',
+};
+
+export const STILE_MESSAGGIO_SUCCESSO: CSSProperties = {
+  color: 'var(--verde)',
 };

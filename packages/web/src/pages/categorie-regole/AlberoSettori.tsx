@@ -1,81 +1,28 @@
-import { useState, type CSSProperties, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import type { CategoriaDto, SettoreDto } from '@conticini/contratti';
 
 import { ErroreApi } from '../../api.js';
 import { ConfermaInline } from '../../components/ConfermaInline.js';
+import { Bottone, Campo } from '../../components/index.js';
 import type { NuovaCategoriaInput, UseAlberoRisultato } from './useAlbero.js';
 import {
+  STILE_AZIONI,
+  STILE_BADGE_ENTRATA,
+  STILE_BADGE_USCITA,
+  STILE_ELENCO_CATEGORIE,
+  STILE_ELENCO_SETTORI,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
+  STILE_FORM,
+  STILE_INTESTAZIONE_SETTORE,
+  STILE_NOME_CATEGORIA,
+  STILE_NOME_SETTORE,
+  STILE_RIGA_CATEGORIA,
+  STILE_RIGA_SETTORE,
   STILE_SEZIONE,
+  STILE_TITOLO_SEZIONE,
   messaggioErrore,
 } from './stili.js';
-
-const STILE_INTESTAZIONE_PAGINA: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '0.5rem',
-};
-const STILE_ELENCO_SETTORI: CSSProperties = {
-  listStyle: 'none',
-  padding: 0,
-  margin: '1rem 0 0',
-};
-const STILE_RIGA_SETTORE: CSSProperties = {
-  border: '1px solid #ddd',
-  borderRadius: 4,
-  padding: '0.75rem',
-  marginBottom: '0.75rem',
-};
-const STILE_INTESTAZIONE_SETTORE: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '0.5rem',
-};
-const STILE_NOME_SETTORE: CSSProperties = {
-  fontWeight: 600,
-  fontSize: '1.05rem',
-};
-const STILE_AZIONI: CSSProperties = { display: 'flex', gap: '0.5rem' };
-const STILE_ELENCO_CATEGORIE: CSSProperties = {
-  listStyle: 'none',
-  padding: 0,
-  margin: '0.5rem 0 0 1rem',
-};
-const STILE_RIGA_CATEGORIA: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '0.5rem',
-  padding: '0.35rem 0',
-};
-const STILE_NOME_CATEGORIA: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-};
-const STILE_BADGE_ENTRATA: CSSProperties = {
-  fontSize: '0.75rem',
-  padding: '0.1rem 0.4rem',
-  borderRadius: 3,
-  background: '#e6f4ea',
-  color: '#1e7e34',
-};
-const STILE_BADGE_USCITA: CSSProperties = {
-  fontSize: '0.75rem',
-  padding: '0.1rem 0.4rem',
-  borderRadius: 3,
-  background: '#fdecea',
-  color: '#c0392b',
-};
-const STILE_FORM_INLINE: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  alignItems: 'flex-start',
-  margin: '0.5rem 0',
-};
 
 function badgeKind(kind: CategoriaDto['kind']) {
   return (
@@ -98,9 +45,9 @@ function FormNuovoSettore({ creaSettore }: FormNuovoSettoreProps) {
 
   if (!aperto) {
     return (
-      <button type="button" onClick={() => setAperto(true)}>
+      <Bottone variante="ghost" onClick={() => setAperto(true)}>
         + nuovo settore
-      </button>
+      </Bottone>
     );
   }
 
@@ -126,24 +73,29 @@ function FormNuovoSettore({ creaSettore }: FormNuovoSettoreProps) {
 
   return (
     <form onSubmit={(evento) => void gestisciCreazioneSettore(evento)}>
-      <div style={STILE_FORM_INLINE}>
+      <div style={STILE_FORM}>
         <div>
-          <input
-            type="text"
-            value={nome}
-            onChange={(evento) => setNome(evento.target.value)}
-            placeholder="Nome settore"
-            aria-label="Nome nuovo settore"
-            autoFocus
-          />
+          <Campo etichetta="Nome settore" idCampo="nuovo-settore-nome">
+            <input
+              id="nuovo-settore-nome"
+              className="input"
+              type="text"
+              value={nome}
+              onChange={(evento) => setNome(evento.target.value)}
+              placeholder="Nome settore"
+              aria-label="Nome nuovo settore"
+              autoFocus
+            />
+          </Campo>
           {erroreCampo !== null ? (
             <p style={STILE_ERRORE_CAMPO}>{erroreCampo}</p>
           ) : null}
         </div>
-        <button type="submit" disabled={invio}>
+        <Bottone variante="primaria" type="submit" disabled={invio}>
           Salva
-        </button>
-        <button
+        </Bottone>
+        <Bottone
+          variante="secondaria"
           type="button"
           onClick={() => {
             setAperto(false);
@@ -153,7 +105,7 @@ function FormNuovoSettore({ creaSettore }: FormNuovoSettoreProps) {
           }}
         >
           Annulla
-        </button>
+        </Bottone>
       </div>
       {erroreGenerale !== null ? (
         <p style={STILE_ERRORE_GENERALE}>{erroreGenerale}</p>
@@ -200,36 +152,47 @@ function FormNuovaCategoria({
 
   return (
     <form onSubmit={(evento) => void gestisciCreazioneCategoria(evento)}>
-      <div style={STILE_FORM_INLINE}>
+      <div style={STILE_FORM}>
         <div>
-          <input
-            type="text"
-            value={nome}
-            onChange={(evento) => setNome(evento.target.value)}
-            placeholder="Nome categoria"
-            aria-label="Nome nuova categoria"
-            autoFocus
-          />
+          <Campo
+            etichetta="Nome categoria"
+            idCampo={`nuova-categoria-${settoreId}`}
+          >
+            <input
+              id={`nuova-categoria-${settoreId}`}
+              className="input"
+              type="text"
+              value={nome}
+              onChange={(evento) => setNome(evento.target.value)}
+              placeholder="Nome categoria"
+              aria-label="Nome nuova categoria"
+              autoFocus
+            />
+          </Campo>
           {erroreCampo !== null ? (
             <p style={STILE_ERRORE_CAMPO}>{erroreCampo}</p>
           ) : null}
         </div>
-        <select
-          value={kind}
-          onChange={(evento) =>
-            setKind(evento.target.value as NuovaCategoriaInput['kind'])
-          }
-          aria-label="Tipo categoria"
-        >
-          <option value="uscita">uscita</option>
-          <option value="entrata">entrata</option>
-        </select>
-        <button type="submit" disabled={invio}>
+        <Campo etichetta="Tipo" idCampo={`nuova-categoria-kind-${settoreId}`}>
+          <select
+            id={`nuova-categoria-kind-${settoreId}`}
+            className="input"
+            value={kind}
+            onChange={(evento) =>
+              setKind(evento.target.value as NuovaCategoriaInput['kind'])
+            }
+            aria-label="Tipo categoria"
+          >
+            <option value="uscita">uscita</option>
+            <option value="entrata">entrata</option>
+          </select>
+        </Campo>
+        <Bottone variante="primaria" type="submit" disabled={invio}>
           Salva
-        </button>
-        <button type="button" onClick={onChiudi}>
+        </Bottone>
+        <Bottone variante="secondaria" type="button" onClick={onChiudi}>
           Annulla
-        </button>
+        </Bottone>
       </div>
       {erroreGenerale !== null ? (
         <p style={STILE_ERRORE_GENERALE}>{erroreGenerale}</p>
@@ -276,21 +239,31 @@ function RigaCategoria({
     return (
       <li style={STILE_RIGA_CATEGORIA}>
         <form onSubmit={(evento) => void gestisciRinominaCategoria(evento)}>
-          <div style={STILE_FORM_INLINE}>
+          <div style={STILE_FORM}>
             <div>
-              <input
-                type="text"
-                value={nome}
-                onChange={(evento) => setNome(evento.target.value)}
-                aria-label={`Nuovo nome per ${categoria.nome}`}
-                autoFocus
-              />
+              <Campo
+                etichetta="Nome categoria"
+                idCampo={`rinomina-categoria-${categoria.id}`}
+              >
+                <input
+                  id={`rinomina-categoria-${categoria.id}`}
+                  className="input"
+                  type="text"
+                  value={nome}
+                  onChange={(evento) => setNome(evento.target.value)}
+                  aria-label={`Nuovo nome per ${categoria.nome}`}
+                  autoFocus
+                />
+              </Campo>
               {erroreCampo !== null ? (
                 <p style={STILE_ERRORE_CAMPO}>{erroreCampo}</p>
               ) : null}
             </div>
-            <button type="submit">Salva</button>
-            <button
+            <Bottone variante="primaria" type="submit">
+              Salva
+            </Bottone>
+            <Bottone
+              variante="secondaria"
               type="button"
               onClick={() => {
                 setInModifica(false);
@@ -299,7 +272,7 @@ function RigaCategoria({
               }}
             >
               Annulla
-            </button>
+            </Bottone>
           </div>
         </form>
       </li>
@@ -337,12 +310,12 @@ function RigaCategoria({
         {badgeKind(categoria.kind)}
       </span>
       <span style={STILE_AZIONI}>
-        <button type="button" onClick={() => setInModifica(true)}>
+        <Bottone variante="ghost" onClick={() => setInModifica(true)}>
           Rinomina
-        </button>
-        <button type="button" onClick={() => setInConferma(true)}>
+        </Bottone>
+        <Bottone variante="ghost" onClick={() => setInConferma(true)}>
           Elimina
-        </button>
+        </Bottone>
       </span>
     </li>
   );
@@ -397,21 +370,31 @@ function RigaSettore({ settore, categorie, risultato }: RigaSettoreProps) {
       <div style={STILE_INTESTAZIONE_SETTORE}>
         {inModifica ? (
           <form onSubmit={(evento) => void gestisciRinominaSettore(evento)}>
-            <div style={STILE_FORM_INLINE}>
+            <div style={STILE_FORM}>
               <div>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(evento) => setNome(evento.target.value)}
-                  aria-label={`Nuovo nome per ${settore.nome}`}
-                  autoFocus
-                />
+                <Campo
+                  etichetta="Nome settore"
+                  idCampo={`rinomina-settore-${settore.id}`}
+                >
+                  <input
+                    id={`rinomina-settore-${settore.id}`}
+                    className="input"
+                    type="text"
+                    value={nome}
+                    onChange={(evento) => setNome(evento.target.value)}
+                    aria-label={`Nuovo nome per ${settore.nome}`}
+                    autoFocus
+                  />
+                </Campo>
                 {erroreCampo !== null ? (
                   <p style={STILE_ERRORE_CAMPO}>{erroreCampo}</p>
                 ) : null}
               </div>
-              <button type="submit">Salva</button>
-              <button
+              <Bottone variante="primaria" type="submit">
+                Salva
+              </Bottone>
+              <Bottone
+                variante="secondaria"
                 type="button"
                 onClick={() => {
                   setInModifica(false);
@@ -420,7 +403,7 @@ function RigaSettore({ settore, categorie, risultato }: RigaSettoreProps) {
                 }}
               >
                 Annulla
-              </button>
+              </Bottone>
             </div>
           </form>
         ) : (
@@ -440,18 +423,18 @@ function RigaSettore({ settore, categorie, risultato }: RigaSettoreProps) {
         ) : (
           !inModifica && (
             <span style={STILE_AZIONI}>
-              <button
-                type="button"
+              <Bottone
+                variante="ghost"
                 onClick={() => setFormCategoriaAperto(true)}
               >
                 + categoria
-              </button>
-              <button type="button" onClick={() => setInModifica(true)}>
+              </Bottone>
+              <Bottone variante="ghost" onClick={() => setInModifica(true)}>
                 Rinomina
-              </button>
-              <button type="button" onClick={() => setInConferma(true)}>
+              </Bottone>
+              <Bottone variante="ghost" onClick={() => setInConferma(true)}>
                 Elimina
-              </button>
+              </Bottone>
             </span>
           )
         )}
@@ -484,8 +467,8 @@ export function AlberoSettori(risultato: UseAlberoRisultato) {
 
   return (
     <section style={STILE_SEZIONE}>
-      <div style={STILE_INTESTAZIONE_PAGINA}>
-        <h2>Settori e categorie</h2>
+      <div style={STILE_TITOLO_SEZIONE}>
+        <h2 style={{ margin: 0 }}>Settori e categorie</h2>
         <FormNuovoSettore creaSettore={risultato.creaSettore} />
       </div>
       {caricamento ? <p>Caricamento…</p> : null}

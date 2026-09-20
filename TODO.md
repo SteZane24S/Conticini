@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 5.2 chiuso il 20/09/2026 — Restyling di Prospetto e Movimenti completato.
-**Prossimo giro:** giro 5.3 — Stipendio, Conti, Categorie e regole, da `fasi/fase-5-design/PIANO.md`.
+**Stato:** giro 5.3 chiuso il 20/09/2026 — Restyling di Stipendio, Conti, Categorie e regole completato.
+**Prossimo giro:** giro 5.4 — Spese fisse, In attesa, da `fasi/fase-5-design/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -37,7 +37,8 @@
 - [x] Design prodotto dall'utente su claude.ai/design (brief in `fasi/fase-5-design/PIANO.md`)
 - [x] 5.1 Fondamenta: token, design system, componenti condivisi, layout
 - [x] 5.2 Prospetto e Movimenti
-- [ ] Giri 5.3-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
+- [x] 5.3 Stipendio, Conti, Categorie e regole
+- [ ] Giri 5.4-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
 
 ### Fase 6 — Mobile e sincronizzazione
 - [ ] Richiede una nuova sessione di pianificazione su Opus
@@ -88,3 +89,10 @@
 - Osservazione non bloccante non risolta nel giro 5.2: la card di un conto scompare dal Prospetto se la data di riferimento è anteriore alla creazione del conto, invece di mostrare 0,00€ — comportamento di dominio non toccato, da valutare in un giro futuro che tocchi di nuovo quella logica.
 - Nota tecnica sull'ambiente: nel giro 5.2 il server MCP Codex ha mostrato timeout ripetuti (4 tentativi su 4 senza risposta per 30 minuti); un processo Codex orfano di 3 giorni con 534 thread è stato identificato come probabile causa e terminato, ma il server è rimasto disconnesso per il resto del giro. Da monitorare nel prossimo giro.
 - Osservazione fuori scope dal giro 5.2, non risolta: sul sistema sono presenti numerosi processi `node.exe` orfani risalenti a più giorni prima del giro; non toccati, segnalati per un'eventuale pulizia futura decisa dall'utente.
+- Prossimo giro: 5.4 — Spese fisse, In attesa, da `fasi/fase-5-design/PIANO.md`. Continua a chiudersi con `live-testing`.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 5.3.
+- Osservazione non bloccante emersa nel collaudo del giro 5.3, non risolta: in Categorie e regole il pannello "Anteprima per «pattern»" non si nasconde automaticamente dopo l'eliminazione della regola a cui si riferisce — comportamento della logica di stato esistente, non toccato da questo giro; da valutare in un giro futuro che tocchi di nuovo `useRegole.ts`.
+- Non verificato visivamente nel collaudo del giro 5.3 lo stile "saldo rosso se negativo" sulle nuove card di Conti: nessun conto con saldo negativo nei dati di sviluppo attuali; pattern già verificato nel Prospetto nel giro 5.2, rischio considerato basso.
+- Dato di prova rimasto in `.dati-dev` dal collaudo del giro 5.3 (non nei dati reali dell'utente in `app/dati/`): uno stipendio di collaudo da 1,00€ sul conto "TEST-live-testing" con ciclo 2026-09-20→2026-11-20; non rimovibile perché l'app non espone un'azione di eliminazione per un ciclo stipendio già registrato — limite noto, non un difetto del giro.
+- Nel giro 5.3 l'unità Categorie e regole è girata in parte in ricaduta su Sonnet (review di conformità e correzione del suo rilievo) per esaurimento della quota Codex: da tenere presente nel confronto dei pesi fra giri nel registro dei consumi, perché queste sessioni lasciano traccia nei transcript a differenza di quelle Codex.
+- Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.3: tutti e tre i rilievi (2 su Stipendio, 1 su Categorie e regole) sono stati corretti e riverificati.

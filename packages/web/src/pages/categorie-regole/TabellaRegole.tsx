@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type {
   CategoriaDto,
   RegolaCategoriaDto,
@@ -8,48 +8,19 @@ import { formatImporto } from '@conticini/dominio';
 
 import { ErroreApi } from '../../api.js';
 import { ConfermaInline } from '../../components/ConfermaInline.js';
+import { Bottone, Campo, Tabella } from '../../components/index.js';
 import type { AnteprimaRegola, UseRegoleRisultato } from './useRegole.js';
 import {
+  STILE_ELENCO_ANTEPRIMA,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
+  STILE_FORM,
+  STILE_PANNELLO_ANTEPRIMA,
+  STILE_RIGA_ANTEPRIMA,
   STILE_SEZIONE,
+  STILE_TITOLO_SEZIONE,
   messaggioErrore,
 } from './stili.js';
-
-const STILE_TABELLA: CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  marginTop: '1rem',
-};
-const STILE_CELLA: CSSProperties = {
-  border: '1px solid #ddd',
-  padding: '0.4rem 0.6rem',
-  textAlign: 'left',
-};
-const STILE_FORM: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  alignItems: 'flex-start',
-  marginTop: '1rem',
-  flexWrap: 'wrap',
-};
-const STILE_PANNELLO_ANTEPRIMA: CSSProperties = {
-  border: '1px solid #ddd',
-  borderRadius: 4,
-  padding: '0.75rem',
-  marginTop: '1rem',
-};
-const STILE_ELENCO_ANTEPRIMA: CSSProperties = {
-  listStyle: 'none',
-  padding: 0,
-  margin: '0.5rem 0 0',
-};
-const STILE_RIGA_ANTEPRIMA: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  gap: '0.5rem',
-  padding: '0.2rem 0',
-};
 
 interface NomeCategoria {
   nomeCategoria: string;
@@ -192,64 +163,80 @@ function FormNuovaRegola({
       <form onSubmit={(evento) => void gestisciCreazioneRegola(evento)}>
         <div style={STILE_FORM}>
           <div>
-            <input
-              type="text"
-              value={pattern}
-              onChange={(evento) => setPattern(evento.target.value)}
-              placeholder="Testo da riconoscere (es. esselunga)"
-              aria-label="Pattern della regola"
-            />
+            <Campo etichetta="Pattern" idCampo="regola-pattern">
+              <input
+                id="regola-pattern"
+                className="input"
+                type="text"
+                value={pattern}
+                onChange={(evento) => setPattern(evento.target.value)}
+                placeholder="Testo da riconoscere (es. esselunga)"
+                aria-label="Pattern della regola"
+              />
+            </Campo>
             {erroreCampo?.campo === 'pattern' ? (
               <p style={STILE_ERRORE_CAMPO}>{erroreCampo.messaggio}</p>
             ) : null}
           </div>
           <div>
-            <select
-              value={categoriaId}
-              onChange={(evento) => setCategoriaId(evento.target.value)}
-              aria-label="Categoria della regola"
-            >
-              {categorie.map((categoria) => {
-                const settore = settori.find(
-                  (s) => s.id === categoria.settoreId,
-                );
-                return (
-                  <option key={categoria.id} value={categoria.id}>
-                    {settore !== undefined
-                      ? `${settore.nome} — ${categoria.nome}`
-                      : categoria.nome}
-                  </option>
-                );
-              })}
-            </select>
+            <Campo etichetta="Categoria" idCampo="regola-categoria">
+              <select
+                id="regola-categoria"
+                className="input"
+                value={categoriaId}
+                onChange={(evento) => setCategoriaId(evento.target.value)}
+                aria-label="Categoria della regola"
+              >
+                {categorie.map((categoria) => {
+                  const settore = settori.find(
+                    (s) => s.id === categoria.settoreId,
+                  );
+                  return (
+                    <option key={categoria.id} value={categoria.id}>
+                      {settore !== undefined
+                        ? `${settore.nome} — ${categoria.nome}`
+                        : categoria.nome}
+                    </option>
+                  );
+                })}
+              </select>
+            </Campo>
             {erroreCampo?.campo === 'categoriaId' ? (
               <p style={STILE_ERRORE_CAMPO}>{erroreCampo.messaggio}</p>
             ) : null}
           </div>
           <div>
-            <input
-              type="number"
-              value={priority}
-              onChange={(evento) =>
-                setPriority(Number.parseInt(evento.target.value, 10) || 0)
-              }
-              aria-label="Priorità della regola"
-              style={{ width: '5rem' }}
-            />
+            <Campo etichetta="Priorità" idCampo="regola-priorita">
+              <input
+                id="regola-priorita"
+                className="input"
+                type="number"
+                value={priority}
+                onChange={(evento) =>
+                  setPriority(Number.parseInt(evento.target.value, 10) || 0)
+                }
+                aria-label="Priorità della regola"
+                style={{ width: '5rem' }}
+              />
+            </Campo>
             {erroreCampo?.campo === 'priority' ? (
               <p style={STILE_ERRORE_CAMPO}>{erroreCampo.messaggio}</p>
             ) : null}
           </div>
-          <button
-            type="button"
+          <Bottone
+            variante="ghost"
             disabled={pattern.trim() === ''}
             onClick={() => void gestisciAnteprima()}
           >
             Anteprima
-          </button>
-          <button type="submit" disabled={invio || categoriaId === ''}>
+          </Bottone>
+          <Bottone
+            variante="primaria"
+            type="submit"
+            disabled={invio || categoriaId === ''}
+          >
             Salva regola
-          </button>
+          </Bottone>
         </div>
         {erroreGenerale !== null ? (
           <p style={STILE_ERRORE_GENERALE}>{erroreGenerale}</p>
@@ -313,24 +300,27 @@ function RigaRegola({
 
   return (
     <tr>
-      <td style={STILE_CELLA}>{regola.pattern}</td>
-      <td style={STILE_CELLA}>
+      <td>{regola.pattern}</td>
+      <td>
         {nomeSettore !== null
           ? `${nomeSettore} — ${nomeCategoria}`
           : nomeCategoria}
       </td>
-      <td style={STILE_CELLA}>{regola.priority}</td>
-      <td style={STILE_CELLA}>
-        <button type="button" onClick={() => void gestisciAttivaDisattiva()}>
+      <td>{regola.priority}</td>
+      <td>
+        <Bottone
+          variante="ghost"
+          onClick={() => void gestisciAttivaDisattiva()}
+        >
           {regola.active ? 'Attiva' : 'Disattiva'}
-        </button>
+        </Bottone>
       </td>
-      <td style={STILE_CELLA}>
-        <button type="button" onClick={() => onAnteprima(regola.pattern)}>
+      <td>
+        <Bottone variante="ghost" onClick={() => onAnteprima(regola.pattern)}>
           Anteprima
-        </button>
+        </Bottone>
       </td>
-      <td style={STILE_CELLA}>
+      <td>
         {inConferma ? (
           <ConfermaInline
             domanda="Confermi?"
@@ -338,9 +328,9 @@ function RigaRegola({
             onAnnulla={() => setInConferma(false)}
           />
         ) : (
-          <button type="button" onClick={() => setInConferma(true)}>
+          <Bottone variante="ghost" onClick={() => setInConferma(true)}>
             Elimina
-          </button>
+          </Bottone>
         )}
         {erroreAzione !== null ? (
           <p style={STILE_ERRORE_CAMPO}>{erroreAzione}</p>
@@ -394,7 +384,9 @@ export function TabellaRegole(props: TabellaRegoleProps) {
 
   return (
     <section style={STILE_SEZIONE}>
-      <h2>Regole di categorizzazione</h2>
+      <div style={STILE_TITOLO_SEZIONE}>
+        <h2 style={{ margin: 0 }}>Regole di categorizzazione</h2>
+      </div>
       {categorie.length === 0 ? (
         <p>Crea prima almeno una categoria per poter creare regole.</p>
       ) : (
@@ -413,15 +405,15 @@ export function TabellaRegole(props: TabellaRegoleProps) {
         regole.length === 0 ? (
           <p>Nessuna regola ancora creata.</p>
         ) : (
-          <table style={STILE_TABELLA}>
+          <Tabella>
             <thead>
               <tr>
-                <th style={STILE_CELLA}>Pattern</th>
-                <th style={STILE_CELLA}>Categoria</th>
-                <th style={STILE_CELLA}>Priorità</th>
-                <th style={STILE_CELLA}>Stato</th>
-                <th style={STILE_CELLA}></th>
-                <th style={STILE_CELLA}></th>
+                <th>Pattern</th>
+                <th>Categoria</th>
+                <th>Priorità</th>
+                <th>Stato</th>
+                <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -437,7 +429,7 @@ export function TabellaRegole(props: TabellaRegoleProps) {
                 />
               ))}
             </tbody>
-          </table>
+          </Tabella>
         )
       ) : null}
       {anteprimaRigaPattern !== null ? (
