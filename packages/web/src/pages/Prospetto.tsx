@@ -8,17 +8,39 @@ import {
 import { Link } from 'react-router';
 import { useState } from 'react';
 
+import { Campo, Etichetta, Tabella } from '../components/index.js';
 import { useAlbero } from './categorie-regole/useAlbero.js';
 import { useConti } from './conti/dati.js';
 import { useProspetto } from './prospetto/dati.js';
 import {
-  STILE_ARRETRATA,
-  STILE_CELLA,
+  STILE_AVVISO,
+  STILE_AVVISO_TESTO,
+  STILE_AVVISO_TITOLO,
+  STILE_BARRA_CONTENITORE,
+  STILE_CAMPO_DATA,
+  STILE_CELLA_CARD,
+  STILE_CELLA_DESTRA,
+  STILE_COLONNA_SALDO_PRINCIPALE,
+  STILE_COLONNA_SALDO_SECONDARIA,
   STILE_ERRORE_GENERALE,
+  STILE_GRID_SEZIONI,
+  STILE_IMPORTO_FISSA,
+  STILE_INTESTAZIONE,
+  STILE_KICKER,
+  STILE_META_FISSA,
+  STILE_NOME_FISSA,
+  STILE_NOTA_ATTENUATA,
+  STILE_NUMERO_GRANDE,
+  STILE_NUMERO_MEDIO,
   STILE_PAGINA,
-  STILE_SALDO_GRANDE,
-  STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_RIGA_CARD,
+  STILE_RIGA_FISSA,
+  STILE_RIGA_FISSA_ARRETRATA,
+  STILE_RIGA_NUMERO,
+  STILE_RIQUADRO_SALDO,
+  STILE_TITOLO_SEZIONE,
+  STILE_VALORE_CARD,
+  stileBarraRiempimento,
 } from './prospetto/stili.js';
 import { useStipendio } from './stipendio/dati.js';
 
@@ -54,7 +76,7 @@ export function Prospetto() {
           categoriaId);
   }
 
-  const dataProssimoStipendio =
+  const cicloProssimo =
     prospetto !== null && prospetto.saldoPrevistoCents !== null
       ? cicloContenente(
           data,
@@ -63,159 +85,235 @@ export function Prospetto() {
             startDate: ciclo.startDate as DataISO,
             expectedNextDate: ciclo.expectedNextDate as DataISO | null,
           })),
-        )?.expectedNextDate
+        )
       : null;
+  const dataProssimoStipendio = cicloProssimo?.expectedNextDate ?? null;
+  const accreditoPrevistoCents = cicloProssimo?.expectedAmountCents ?? null;
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Prospetto</h1>
-      <section style={STILE_SEZIONE}>
-        <label htmlFor="prospetto-data">Data</label>
-        <input
-          id="prospetto-data"
-          type="date"
-          value={data}
-          onChange={(evento) => setData(evento.target.value as DataISO)}
-          required
-        />
-        {prospetto?.dataFutura && <span>Data futura</span>}
-      </section>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Prospetto</h1>
+        <div style={STILE_CAMPO_DATA}>
+          <Campo etichetta="Data di riferimento" idCampo="prospetto-data">
+            <input
+              id="prospetto-data"
+              className="input"
+              type="date"
+              value={data}
+              onChange={(evento) => setData(evento.target.value as DataISO)}
+              required
+            />
+          </Campo>
+          {prospetto?.dataFutura && (
+            <Etichetta variante="outline">Data futura</Etichetta>
+          )}
+        </div>
+      </div>
       {caricando && <p>Caricamento…</p>}
       {errore && <p style={STILE_ERRORE_GENERALE}>{errore}</p>}
       {!caricando && prospetto !== null && (
         <>
-          <section style={STILE_SEZIONE}>
-            <h2>Saldo totale</h2>
-            <p style={STILE_SALDO_GRANDE}>
-              {formatImporto(prospetto.saldoTotaleCents)}
-            </p>
-            <table style={STILE_TABELLA}>
-              <thead>
-                <tr>
-                  <th style={STILE_CELLA}>Conto</th>
-                  <th style={STILE_CELLA}>Saldo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prospetto.saldiPerConto.map((saldo) => (
-                  <tr key={saldo.contoId}>
-                    <td style={STILE_CELLA}>{nomeConto(saldo.contoId)}</td>
-                    <td style={STILE_CELLA}>
-                      {formatImporto(saldo.saldoCents)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-          <section style={STILE_SEZIONE}>
-            <h2>Fisse ancora da pagare</h2>
-            {fisseArricchite.length > 0 ? (
-              <table style={STILE_TABELLA}>
+          {prospetto.saldoPrevistoCents === null ? (
+            <div style={STILE_AVVISO}>
+              <div style={STILE_AVVISO_TESTO}>
+                <div style={STILE_AVVISO_TITOLO}>
+                  Manca la data del prossimo stipendio
+                </div>
+                <div>
+                  {messaggioSaldoPrevistoAssente(
+                    prospetto.motivoSaldoPrevistoAssente,
+                  )}
+                </div>
+              </div>
+              <Link to="/stipendio" className="btn btn-primary">
+                Imposta ora
+              </Link>
+            </div>
+          ) : (
+            <div style={STILE_RIQUADRO_SALDO}>
+              <div style={STILE_COLONNA_SALDO_PRINCIPALE}>
+                <div style={STILE_KICKER}>
+                  Saldo previsto al prossimo stipendio
+                </div>
+                <div style={STILE_RIGA_NUMERO}>
+                  <span
+                    style={{
+                      ...STILE_NUMERO_GRANDE,
+                      color:
+                        prospetto.saldoPrevistoCents >= 0
+                          ? 'var(--verde)'
+                          : 'var(--rosso)',
+                    }}
+                  >
+                    {formatImporto(prospetto.saldoPrevistoCents)}
+                  </span>
+                  {dataProssimoStipendio !== null && (
+                    <span style={STILE_NOTA_ATTENUATA}>
+                      al {dataProssimoStipendio}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={STILE_COLONNA_SALDO_SECONDARIA}>
+                <div style={STILE_KICKER}>Dopo l'accredito previsto</div>
+                <div style={STILE_NUMERO_MEDIO}>
+                  {prospetto.dopoAccreditoCents !== null
+                    ? formatImporto(prospetto.dopoAccreditoCents)
+                    : '—'}
+                </div>
+                {accreditoPrevistoCents !== null &&
+                  dataProssimoStipendio !== null && (
+                    <div style={STILE_NOTA_ATTENUATA}>
+                      accredito stimato{' '}
+                      <span style={{ color: 'var(--verde)' }}>
+                        {formatImporto(accreditoPrevistoCents)}
+                      </span>{' '}
+                      il {dataProssimoStipendio}
+                    </div>
+                  )}
+              </div>
+            </div>
+          )}
+
+          <div style={STILE_RIGA_CARD}>
+            <div style={STILE_CELLA_CARD}>
+              <div style={STILE_KICKER}>Saldo totale</div>
+              <div
+                style={{
+                  ...STILE_VALORE_CARD,
+                  color:
+                    prospetto.saldoTotaleCents < 0 ? 'var(--rosso)' : undefined,
+                }}
+              >
+                {formatImporto(prospetto.saldoTotaleCents)}
+              </div>
+            </div>
+            {prospetto.saldiPerConto.map((saldo) => (
+              <div style={STILE_CELLA_CARD} key={saldo.contoId}>
+                <div style={STILE_KICKER}>{nomeConto(saldo.contoId)}</div>
+                <div
+                  style={{
+                    ...STILE_VALORE_CARD,
+                    color: saldo.saldoCents < 0 ? 'var(--rosso)' : undefined,
+                  }}
+                >
+                  {formatImporto(saldo.saldoCents)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={STILE_GRID_SEZIONI}>
+            <section>
+              <div style={STILE_TITOLO_SEZIONE}>
+                <h2 style={{ margin: 0, fontSize: '17px' }}>
+                  Spese fisse ancora da pagare
+                </h2>
+                <span style={STILE_NOTA_ATTENUATA}>
+                  {formatImporto(prospetto.totaleFisseAncoraDaPagareCents)}
+                </span>
+              </div>
+              {fisseArricchite.length > 0 ? (
+                fisseArricchite.map((occorrenza) => {
+                  const arretrata =
+                    confrontaDate(occorrenza.scadenza as DataISO, data) <= 0;
+                  return (
+                    <div
+                      key={occorrenza.id}
+                      style={{
+                        ...STILE_RIGA_FISSA,
+                        ...(arretrata ? STILE_RIGA_FISSA_ARRETRATA : {}),
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={STILE_NOME_FISSA}>
+                          <span>{occorrenza.nome}</span>
+                          {arretrata && (
+                            <Etichetta variante="accent">arretrata</Etichetta>
+                          )}
+                        </div>
+                        <div style={STILE_META_FISSA}>
+                          {occorrenza.scadenza} ·{' '}
+                          {nomeCategoria(occorrenza.categoriaId)} ·{' '}
+                          {nomeConto(occorrenza.contoId)}
+                        </div>
+                      </div>
+                      <div style={STILE_IMPORTO_FISSA}>
+                        {formatImporto(occorrenza.amountCentsPrevisto)}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p style={STILE_NOTA_ATTENUATA}>
+                  Nessuna occorrenza aperta entro l'orizzonte del ciclo.
+                </p>
+              )}
+            </section>
+
+            <section>
+              <div style={STILE_TITOLO_SEZIONE}>
+                <h2 style={{ margin: 0, fontSize: '17px' }}>
+                  Previsioni per categoria
+                </h2>
+              </div>
+              <Tabella>
                 <thead>
                   <tr>
-                    <th style={STILE_CELLA}>Nome</th>
-                    <th style={STILE_CELLA}>Scadenza</th>
-                    <th style={STILE_CELLA}>Importo previsto</th>
-                    <th style={STILE_CELLA}>Conto</th>
-                    <th style={STILE_CELLA}>Categoria</th>
-                    <th style={STILE_CELLA}>Stato</th>
+                    <th>Categoria</th>
+                    <th style={STILE_CELLA_DESTRA}>Previsto</th>
+                    <th style={STILE_CELLA_DESTRA}>Speso</th>
+                    <th style={STILE_CELLA_DESTRA}>Residuo</th>
+                    <th style={STILE_CELLA_DESTRA}>Sforamento</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {fisseArricchite.map((occorrenza) => {
-                    const arretrata =
-                      confrontaDate(occorrenza.scadenza as DataISO, data) <= 0;
+                  {prospetto.categorie.map((categoria) => {
+                    const sforato = categoria.sforamentoCents > 0;
+                    const percentuale =
+                      categoria.previstoCents > 0
+                        ? (categoria.speseCents / categoria.previstoCents) * 100
+                        : categoria.speseCents > 0
+                          ? 100
+                          : 0;
                     return (
-                      <tr key={occorrenza.id}>
-                        <td style={STILE_CELLA}>{occorrenza.nome}</td>
+                      <tr key={categoria.categoriaId}>
+                        <td>
+                          <div>{nomeCategoria(categoria.categoriaId)}</div>
+                          <div style={STILE_BARRA_CONTENITORE}>
+                            <div
+                              style={stileBarraRiempimento(
+                                percentuale,
+                                sforato,
+                              )}
+                            />
+                          </div>
+                        </td>
+                        <td style={STILE_CELLA_DESTRA}>
+                          {formatImporto(categoria.previstoCents)}
+                        </td>
+                        <td style={STILE_CELLA_DESTRA}>
+                          {formatImporto(categoria.speseCents)}
+                        </td>
+                        <td style={STILE_CELLA_DESTRA}>
+                          {formatImporto(categoria.residuoCents)}
+                        </td>
                         <td
                           style={{
-                            ...STILE_CELLA,
-                            ...(arretrata ? STILE_ARRETRATA : {}),
+                            ...STILE_CELLA_DESTRA,
+                            color: sforato ? 'var(--rosso)' : undefined,
                           }}
                         >
-                          {occorrenza.scadenza}
+                          {formatImporto(categoria.sforamentoCents)}
                         </td>
-                        <td style={STILE_CELLA}>
-                          {formatImporto(occorrenza.amountCentsPrevisto)}
-                        </td>
-                        <td style={STILE_CELLA}>
-                          {nomeConto(occorrenza.contoId)}
-                        </td>
-                        <td style={STILE_CELLA}>
-                          {nomeCategoria(occorrenza.categoriaId)}
-                        </td>
-                        <td style={STILE_CELLA}>{occorrenza.stato}</td>
                       </tr>
                     );
                   })}
                 </tbody>
-              </table>
-            ) : (
-              <p>Nessuna spesa fissa ancora da pagare.</p>
-            )}
-          </section>
-          <section style={STILE_SEZIONE}>
-            <h2>Previsioni</h2>
-            <table style={STILE_TABELLA}>
-              <thead>
-                <tr>
-                  <th style={STILE_CELLA}>Categoria</th>
-                  <th style={STILE_CELLA}>Previsto</th>
-                  <th style={STILE_CELLA}>Speso</th>
-                  <th style={STILE_CELLA}>Residuo</th>
-                  <th style={STILE_CELLA}>Sforamento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prospetto.categorie.map((categoria) => (
-                  <tr key={categoria.categoriaId}>
-                    <td style={STILE_CELLA}>
-                      {nomeCategoria(categoria.categoriaId)}
-                    </td>
-                    <td style={STILE_CELLA}>
-                      {formatImporto(categoria.previstoCents)}
-                    </td>
-                    <td style={STILE_CELLA}>
-                      {formatImporto(categoria.speseCents)}
-                    </td>
-                    <td style={STILE_CELLA}>
-                      {formatImporto(categoria.residuoCents)}
-                    </td>
-                    <td style={STILE_CELLA}>
-                      {formatImporto(categoria.sforamentoCents)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-          <section style={STILE_SEZIONE}>
-            <h2>Saldo previsto al prossimo stipendio</h2>
-            {prospetto.saldoPrevistoCents === null ? (
-              <p>
-                {messaggioSaldoPrevistoAssente(
-                  prospetto.motivoSaldoPrevistoAssente,
-                )}{' '}
-                <Link to="/stipendio">Aggiorna la previsione.</Link>
-              </p>
-            ) : (
-              <>
-                <p style={STILE_SALDO_GRANDE}>
-                  {formatImporto(prospetto.saldoPrevistoCents)}
-                  {dataProssimoStipendio !== null &&
-                    ` (${dataProssimoStipendio})`}
-                </p>
-                {prospetto.dopoAccreditoCents !== null && (
-                  <p>
-                    Dopo l'accredito previsto:{' '}
-                    {formatImporto(prospetto.dopoAccreditoCents)}
-                  </p>
-                )}
-              </>
-            )}
-          </section>
+              </Tabella>
+            </section>
+          </div>
         </>
       )}
     </div>

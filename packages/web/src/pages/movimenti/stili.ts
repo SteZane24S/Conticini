@@ -1,88 +1,145 @@
 import type { CSSProperties } from 'react';
 
 export const STILE_PAGINA: CSSProperties = {
-  padding: '1.5rem',
   display: 'flex',
   flexDirection: 'column',
-  gap: '2rem',
-  maxWidth: '900px',
+  gap: 'var(--space-6)',
+};
+
+export const STILE_INTESTAZIONE: CSSProperties = {
+  borderBottom: '2px solid var(--color-divider)',
+  paddingBottom: 'var(--space-3)',
 };
 
 export const STILE_SEZIONE: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.75rem',
+  gap: 'var(--space-3)',
 };
 
-export const STILE_TABELLA: CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
+export const STILE_BARRA_INSERIMENTO: CSSProperties = {
+  border: '1px solid var(--color-divider)',
+  background: 'var(--color-surface)',
+  padding: 'var(--space-3)',
 };
 
-export const STILE_CELLA: CSSProperties = {
-  borderBottom: '1px solid #ddd',
-  padding: '0.5rem',
-  textAlign: 'left',
-};
-
-export const STILE_FORM: CSSProperties = {
+export const STILE_RIGA_CAMPI: CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-  border: '1px solid #ccc',
-  padding: '1rem',
-  maxWidth: '400px',
+  gap: 'var(--space-3)',
+  alignItems: 'flex-end',
+  flexWrap: 'wrap',
 };
 
-export const STILE_CAMPO: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.25rem',
+export const STILE_CAMPO_STRETTO: CSSProperties = {
+  width: '130px',
 };
 
-export const STILE_ERRORE_CAMPO: CSSProperties = {
-  color: '#b00020',
-  fontSize: '0.85rem',
-};
-
-export const STILE_ERRORE_GENERALE: CSSProperties = {
-  color: '#b00020',
-};
-
-export const STILE_AZIONI: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  alignItems: 'center',
-};
-
-export const STILE_RIGA_TOTALI: CSSProperties = {
-  display: 'flex',
-  gap: '1.5rem',
-  fontWeight: 600,
-  margin: '0.5rem 0',
+export const STILE_CAMPO_CON_SUGGERIMENTI: CSSProperties = {
+  position: 'relative',
+  flex: '1',
+  minWidth: '220px',
 };
 
 export const STILE_ELENCO_SUGGERIMENTI: CSSProperties = {
   listStyle: 'none',
   margin: 0,
   padding: 0,
-  border: '1px solid #ccc',
-  borderTop: 'none',
-  maxHeight: '160px',
-  overflowY: 'auto',
   position: 'absolute',
   top: '100%',
   left: 0,
   right: 0,
-  background: '#fff',
-  zIndex: 1,
+  zIndex: 20,
+  background: 'var(--color-bg)',
+  border: '2px solid var(--color-divider)',
+  boxShadow: 'var(--shadow-md)',
+  maxHeight: '200px',
+  overflowY: 'auto',
 };
 
-export const STILE_CAMPO_CON_SUGGERIMENTI: CSSProperties = {
-  ...STILE_CAMPO,
-  position: 'relative',
+export const STILE_VOCE_SUGGERIMENTO: CSSProperties = {
+  padding: '8px 10px',
+  cursor: 'pointer',
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 'var(--space-3)',
+  fontSize: '13.5px',
+  borderBottom: '1px solid var(--color-divider)',
+};
+
+export const STILE_AZIONI: CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-2)',
+  alignItems: 'center',
+};
+
+export const STILE_ERRORE_CAMPO: CSSProperties = {
+  color: 'var(--rosso)',
+  fontSize: '0.85rem',
+};
+
+export const STILE_ERRORE_GENERALE: CSSProperties = {
+  color: 'var(--rosso)',
 };
 
 export const STILE_MESSAGGIO_SUCCESSO: CSSProperties = {
-  color: '#1e7e34',
+  color: 'var(--verde)',
+};
+
+export const STILE_FORM_CATEGORIA: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--space-3)',
+  border: '1px solid var(--color-divider)',
+  padding: 'var(--space-4)',
+  maxWidth: '420px',
+};
+
+export const STILE_GRUPPO_RADIO: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--space-2)',
+};
+
+export const STILE_RIGA_FILTRI: CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-3)',
+  alignItems: 'flex-end',
+  flexWrap: 'wrap',
+};
+
+export const STILE_RIGA_TOTALI: CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-6)',
+  alignItems: 'baseline',
+  flexWrap: 'wrap',
+  padding: 'var(--space-3) 0',
+  borderTop: '2px solid var(--color-divider)',
+  borderBottom: '2px solid var(--color-divider)',
+  fontSize: '14px',
+};
+
+export const STILE_VALORE_TOTALE: CSSProperties = {
+  fontFamily: 'var(--font-heading)',
+  fontWeight: 800,
+  fontVariantNumeric: 'tabular-nums',
+};
+
+export const STILE_CELLA_DESTRA: CSSProperties = {
+  textAlign: 'right',
+  fontVariantNumeric: 'tabular-nums',
+};
+
+export const STILE_IMPORTO_RIGA: CSSProperties = {
+  fontFamily: 'var(--font-heading)',
+  fontWeight: 800,
+  fontVariantNumeric: 'tabular-nums',
+};
+
+export const STILE_FORM_MODIFICA: CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 'var(--space-3)',
+  alignItems: 'flex-end',
+  padding: 'var(--space-3)',
+  background: 'var(--color-surface)',
 };

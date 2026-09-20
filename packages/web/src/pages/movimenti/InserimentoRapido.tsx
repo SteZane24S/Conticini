@@ -14,17 +14,22 @@ import {
 import { useEffect, useRef, useState, type FormEvent, type JSX } from 'react';
 
 import { ErroreApi } from '../../api.js';
+import { Bottone, Campo, ControlloSegmentato } from '../../components/index.js';
 import { useSuggerimenti } from './dati.js';
 import {
   STILE_AZIONI,
-  STILE_CAMPO,
+  STILE_BARRA_INSERIMENTO,
   STILE_CAMPO_CON_SUGGERIMENTI,
+  STILE_CAMPO_STRETTO,
   STILE_ELENCO_SUGGERIMENTI,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
-  STILE_FORM,
+  STILE_FORM_CATEGORIA,
+  STILE_GRUPPO_RADIO,
   STILE_MESSAGGIO_SUCCESSO,
+  STILE_RIGA_CAMPI,
   STILE_SEZIONE,
+  STILE_VOCE_SUGGERIMENTO,
 } from './stili.js';
 
 export interface InserimentoRapidoProps {
@@ -146,6 +151,19 @@ export function InserimentoRapido({
     setSuggerimentiAperti(false);
   }
 
+  function cambiaTipo(nuovoTipo: string) {
+    const tipoValido = nuovoTipo as 'entrata' | 'uscita';
+    setTipo(tipoValido);
+    if (
+      !categorie.some(
+        (categoria) =>
+          categoria.id === categoriaId && categoria.kind === tipoValido,
+      )
+    ) {
+      setCategoriaId('');
+    }
+  }
+
   async function gestisciSalva(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setErroriCampo({});
@@ -226,136 +244,140 @@ export function InserimentoRapido({
     <section style={STILE_SEZIONE}>
       <h2>Inserimento rapido</h2>
       <form
-        style={STILE_FORM}
+        style={STILE_BARRA_INSERIMENTO}
         onSubmit={(evento) => void gestisciSalva(evento)}
       >
-        <div style={STILE_CAMPO}>
-          <label htmlFor="movimento-data">Data</label>
-          <input
-            id="movimento-data"
-            type="date"
-            value={data}
-            onChange={(evento) => setData(evento.target.value)}
-            required
+        <div style={STILE_RIGA_CAMPI}>
+          <div style={STILE_CAMPO_STRETTO}>
+            <Campo etichetta="Data" idCampo="movimento-data">
+              <input
+                id="movimento-data"
+                className="input"
+                type="date"
+                value={data}
+                onChange={(evento) => setData(evento.target.value)}
+                required
+              />
+            </Campo>
+            {erroriCampo.data && (
+              <span style={STILE_ERRORE_CAMPO}>{erroriCampo.data}</span>
+            )}
+          </div>
+          <div style={STILE_CAMPO_CON_SUGGERIMENTI}>
+            <Campo etichetta="Descrizione" idCampo="movimento-descrizione">
+              <input
+                ref={descrizioneRef}
+                id="movimento-descrizione"
+                className="input"
+                type="text"
+                value={descrizioneTesto}
+                onChange={(evento) => setDescrizioneTesto(evento.target.value)}
+                onFocus={() => setSuggerimentiAperti(true)}
+                onBlur={() => setSuggerimentiAperti(false)}
+                placeholder="Esselunga, Bar Centrale…"
+                required
+              />
+            </Campo>
+            {suggerimentiAperti && suggerimentiUnivoci.length > 0 && (
+              <ul style={STILE_ELENCO_SUGGERIMENTI}>
+                {suggerimentiUnivoci.map((suggerimento) => (
+                  <li
+                    key={suggerimento.descrizione}
+                    style={STILE_VOCE_SUGGERIMENTO}
+                    onMouseDown={(evento) => {
+                      evento.preventDefault();
+                      selezionaSuggerimento(suggerimento);
+                    }}
+                  >
+                    {suggerimento.descrizione}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {erroriCampo.descrizione && (
+              <span style={STILE_ERRORE_CAMPO}>{erroriCampo.descrizione}</span>
+            )}
+          </div>
+          <div style={STILE_CAMPO_STRETTO}>
+            <Campo etichetta="Importo" idCampo="movimento-importo">
+              <input
+                id="movimento-importo"
+                className="input"
+                type="text"
+                value={importoTesto}
+                onChange={(evento) => setImportoTesto(evento.target.value)}
+                style={{
+                  textAlign: 'right',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              />
+            </Campo>
+            {erroriCampo.amountCents && (
+              <span style={STILE_ERRORE_CAMPO}>{erroriCampo.amountCents}</span>
+            )}
+          </div>
+          <ControlloSegmentato
+            nome="movimento-tipo"
+            valore={tipo}
+            onCambio={cambiaTipo}
+            opzioni={[
+              { valore: 'entrata', etichetta: 'Entrata' },
+              { valore: 'uscita', etichetta: 'Uscita' },
+            ]}
           />
-          {erroriCampo.data && (
-            <span style={STILE_ERRORE_CAMPO}>{erroriCampo.data}</span>
-          )}
-        </div>
-        <div style={STILE_CAMPO_CON_SUGGERIMENTI}>
-          <label htmlFor="movimento-descrizione">Descrizione</label>
-          <input
-            ref={descrizioneRef}
-            id="movimento-descrizione"
-            type="text"
-            value={descrizioneTesto}
-            onChange={(evento) => setDescrizioneTesto(evento.target.value)}
-            onFocus={() => setSuggerimentiAperti(true)}
-            onBlur={() => setSuggerimentiAperti(false)}
-            required
-          />
-          {suggerimentiAperti && suggerimentiUnivoci.length > 0 && (
-            <ul style={STILE_ELENCO_SUGGERIMENTI}>
-              {suggerimentiUnivoci.map((suggerimento) => (
-                <li
-                  key={suggerimento.descrizione}
-                  onMouseDown={(evento) => {
-                    evento.preventDefault();
-                    selezionaSuggerimento(suggerimento);
-                  }}
-                >
-                  {suggerimento.descrizione}
-                </li>
-              ))}
-            </ul>
-          )}
-          {erroriCampo.descrizione && (
-            <span style={STILE_ERRORE_CAMPO}>{erroriCampo.descrizione}</span>
-          )}
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="movimento-importo">Importo</label>
-          <input
-            id="movimento-importo"
-            type="text"
-            value={importoTesto}
-            onChange={(evento) => setImportoTesto(evento.target.value)}
-          />
-          {erroriCampo.amountCents && (
-            <span style={STILE_ERRORE_CAMPO}>{erroriCampo.amountCents}</span>
-          )}
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="movimento-tipo">Entrata/Uscita</label>
-          <select
-            id="movimento-tipo"
-            value={tipo}
-            onChange={(evento) => {
-              const nuovoTipo = evento.target.value as typeof tipo;
-              setTipo(nuovoTipo);
-              if (
-                !categorie.some(
-                  (categoria) =>
-                    categoria.id === categoriaId &&
-                    categoria.kind === nuovoTipo,
-                )
-              ) {
-                setCategoriaId('');
-              }
-            }}
-          >
-            <option value="entrata">Entrata</option>
-            <option value="uscita">Uscita</option>
-          </select>
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="movimento-conto">Conto</label>
-          <select
-            id="movimento-conto"
-            value={contoId}
-            onChange={(evento) => setContoId(evento.target.value)}
-            required
-          >
-            <option value="">Seleziona un conto</option>
-            {contiAttivi.map((conto) => (
-              <option key={conto.id} value={conto.id}>
-                {conto.nome}
-              </option>
-            ))}
-          </select>
-          {erroriCampo.contoId && (
-            <span style={STILE_ERRORE_CAMPO}>{erroriCampo.contoId}</span>
-          )}
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="movimento-categoria">Categoria</label>
-          <select
-            id="movimento-categoria"
-            value={categoriaId}
-            onChange={(evento) => {
-              setCategoriaId(evento.target.value);
-              setCategoriaSceltaManualmente(true);
-            }}
-            required
-          >
-            <option value="">Seleziona una categoria</option>
-            {categorieDelTipo.map((categoria) => (
-              <option key={categoria.id} value={categoria.id}>
-                {categoria.nome}
-              </option>
-            ))}
-          </select>
-          {erroriCampo.categoriaId && (
-            <span style={STILE_ERRORE_CAMPO}>{erroriCampo.categoriaId}</span>
-          )}
-        </div>
-        <div style={STILE_AZIONI}>
-          <button type="button" onClick={apriFormCategoria}>
-            + nuova categoria
-          </button>
-          <button type="submit" disabled={salvando}>
-            {salvando ? 'Salvataggio…' : 'Salva'}
-          </button>
+          <div>
+            <Campo etichetta="Conto" idCampo="movimento-conto">
+              <select
+                id="movimento-conto"
+                className="input"
+                value={contoId}
+                onChange={(evento) => setContoId(evento.target.value)}
+                required
+              >
+                <option value="">Seleziona un conto</option>
+                {contiAttivi.map((conto) => (
+                  <option key={conto.id} value={conto.id}>
+                    {conto.nome}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            {erroriCampo.contoId && (
+              <span style={STILE_ERRORE_CAMPO}>{erroriCampo.contoId}</span>
+            )}
+          </div>
+          <div>
+            <Campo etichetta="Categoria proposta" idCampo="movimento-categoria">
+              <select
+                id="movimento-categoria"
+                className="input"
+                value={categoriaId}
+                onChange={(evento) => {
+                  setCategoriaId(evento.target.value);
+                  setCategoriaSceltaManualmente(true);
+                }}
+                required
+              >
+                <option value="">Seleziona una categoria</option>
+                {categorieDelTipo.map((categoria) => (
+                  <option key={categoria.id} value={categoria.id}>
+                    {categoria.nome}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            {erroriCampo.categoriaId && (
+              <span style={STILE_ERRORE_CAMPO}>{erroriCampo.categoriaId}</span>
+            )}
+          </div>
+          <div style={STILE_AZIONI}>
+            <Bottone variante="ghost" onClick={apriFormCategoria}>
+              + nuova categoria
+            </Bottone>
+            <Bottone variante="primaria" type="submit" disabled={salvando}>
+              {salvando ? 'Salvataggio…' : 'Salva'}
+            </Bottone>
+          </div>
         </div>
         {erroreGenerale && (
           <div style={STILE_ERRORE_GENERALE}>{erroreGenerale}</div>
@@ -367,41 +389,44 @@ export function InserimentoRapido({
 
       {formCategoriaAperto && (
         <form
-          style={STILE_FORM}
+          style={STILE_FORM_CATEGORIA}
           onSubmit={(evento) => void gestisciCreaCategoria(evento)}
         >
-          <div style={STILE_CAMPO}>
-            <label htmlFor="nuova-categoria-nome">Nome categoria</label>
+          <Campo etichetta="Nome categoria" idCampo="nuova-categoria-nome">
             <input
               id="nuova-categoria-nome"
+              className="input"
               value={nomeCategoria}
               onChange={(evento) => setNomeCategoria(evento.target.value)}
               required
             />
-            {erroriCategoria.nome && (
-              <span style={STILE_ERRORE_CAMPO}>{erroriCategoria.nome}</span>
-            )}
-          </div>
-          <div style={STILE_CAMPO}>
+          </Campo>
+          {erroriCategoria.nome && (
+            <span style={STILE_ERRORE_CAMPO}>{erroriCategoria.nome}</span>
+          )}
+          <div style={STILE_GRUPPO_RADIO}>
             <span>Settore</span>
-            <label>
+            <label className="radio">
               <input
                 type="radio"
                 checked={modalitaSettore === 'esistente'}
                 onChange={() => setModalitaSettore('esistente')}
               />
+              <span className="dot" />
               Settore esistente
             </label>
-            <label>
+            <label className="radio">
               <input
                 type="radio"
                 checked={modalitaSettore === 'nuovo'}
                 onChange={() => setModalitaSettore('nuovo')}
               />
+              <span className="dot" />
               Nuovo settore
             </label>
             {modalitaSettore === 'esistente' ? (
               <select
+                className="input"
                 value={settoreId}
                 onChange={(evento) => setSettoreId(evento.target.value)}
                 required
@@ -415,6 +440,7 @@ export function InserimentoRapido({
               </select>
             ) : (
               <input
+                className="input"
                 value={nomeSettoreNuovo}
                 onChange={(evento) => setNomeSettoreNuovo(evento.target.value)}
                 placeholder="Nome nuovo settore"
@@ -428,10 +454,10 @@ export function InserimentoRapido({
               </span>
             )}
           </div>
-          <div style={STILE_CAMPO}>
-            <label htmlFor="nuova-categoria-kind">Tipo</label>
+          <Campo etichetta="Tipo" idCampo="nuova-categoria-kind">
             <select
               id="nuova-categoria-kind"
+              className="input"
               value={kindNuovaCategoria}
               onChange={(evento) =>
                 setKindNuovaCategoria(
@@ -442,17 +468,24 @@ export function InserimentoRapido({
               <option value="entrata">Entrata</option>
               <option value="uscita">Uscita</option>
             </select>
-          </div>
+          </Campo>
           {erroreCategoria && (
             <div style={STILE_ERRORE_GENERALE}>{erroreCategoria}</div>
           )}
           <div style={STILE_AZIONI}>
-            <button type="submit" disabled={salvandoCategoria}>
+            <Bottone
+              variante="primaria"
+              type="submit"
+              disabled={salvandoCategoria}
+            >
               {salvandoCategoria ? 'Salvataggio…' : 'Crea categoria'}
-            </button>
-            <button type="button" onClick={() => setFormCategoriaAperto(false)}>
+            </Bottone>
+            <Bottone
+              variante="secondaria"
+              onClick={() => setFormCategoriaAperto(false)}
+            >
               Annulla
-            </button>
+            </Bottone>
           </div>
         </form>
       )}

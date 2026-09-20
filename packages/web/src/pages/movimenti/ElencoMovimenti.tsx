@@ -9,18 +9,25 @@ import { formatImporto, parseImporto, type DataISO } from '@conticini/dominio';
 import { useState, type FormEvent, type JSX } from 'react';
 
 import { ErroreApi } from '../../api.js';
+import {
+  Bottone,
+  Campo,
+  ControlloSegmentato,
+  Tabella,
+} from '../../components/index.js';
 import { ConfermaInline } from '../../components/ConfermaInline.js';
 import type { FiltriMovimentiUI } from './dati.js';
 import {
   STILE_AZIONI,
-  STILE_CAMPO,
-  STILE_CELLA,
+  STILE_CELLA_DESTRA,
   STILE_ERRORE_CAMPO,
   STILE_ERRORE_GENERALE,
-  STILE_FORM,
+  STILE_FORM_MODIFICA,
+  STILE_IMPORTO_RIGA,
+  STILE_RIGA_FILTRI,
   STILE_RIGA_TOTALI,
   STILE_SEZIONE,
-  STILE_TABELLA,
+  STILE_VALORE_TOTALE,
 } from './stili.js';
 
 export interface ElencoMovimentiProps {
@@ -100,6 +107,7 @@ export function ElencoMovimenti({
       !filtri.settoreId || categoria.settoreId === filtri.settoreId,
   );
   const contiAttivi = conti.filter((conto) => !conto.archiviato);
+  const saldoNettoCents = totaleEntrateCents - totaleUsciteCents;
 
   function nomeConto(contoId: string): string {
     return conti.find((conto) => conto.id === contoId)?.nome ?? contoId;
@@ -202,11 +210,11 @@ export function ElencoMovimenti({
 
   return (
     <section style={STILE_SEZIONE}>
-      <div style={STILE_FORM}>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-data-da">Data da</label>
+      <div style={STILE_RIGA_FILTRI}>
+        <Campo etichetta="Data da" idCampo="filtro-movimenti-data-da">
           <input
             id="filtro-movimenti-data-da"
+            className="input"
             type="date"
             value={filtri.dataDa ?? ''}
             onChange={(evento) =>
@@ -217,11 +225,11 @@ export function ElencoMovimenti({
               })
             }
           />
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-data-a">Data a</label>
+        </Campo>
+        <Campo etichetta="Data a" idCampo="filtro-movimenti-data-a">
           <input
             id="filtro-movimenti-data-a"
+            className="input"
             type="date"
             value={filtri.dataA ?? ''}
             onChange={(evento) =>
@@ -232,11 +240,11 @@ export function ElencoMovimenti({
               })
             }
           />
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-conto">Conto</label>
+        </Campo>
+        <Campo etichetta="Conto" idCampo="filtro-movimenti-conto">
           <select
             id="filtro-movimenti-conto"
+            className="input"
             value={filtri.contoId ?? ''}
             onChange={(evento) =>
               onCambiaFiltri({
@@ -253,11 +261,11 @@ export function ElencoMovimenti({
               </option>
             ))}
           </select>
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-settore">Settore</label>
+        </Campo>
+        <Campo etichetta="Settore" idCampo="filtro-movimenti-settore">
           <select
             id="filtro-movimenti-settore"
+            className="input"
             value={filtri.settoreId ?? ''}
             onChange={(evento) => {
               const nuovoSettoreId =
@@ -286,11 +294,11 @@ export function ElencoMovimenti({
               </option>
             ))}
           </select>
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-categoria">Categoria</label>
+        </Campo>
+        <Campo etichetta="Categoria" idCampo="filtro-movimenti-categoria">
           <select
             id="filtro-movimenti-categoria"
+            className="input"
             value={filtri.categoriaId ?? ''}
             onChange={(evento) =>
               onCambiaFiltri({
@@ -307,11 +315,11 @@ export function ElencoMovimenti({
               </option>
             ))}
           </select>
-        </div>
-        <div style={STILE_CAMPO}>
-          <label htmlFor="filtro-movimenti-testo">Descrizione</label>
+        </Campo>
+        <Campo etichetta="Descrizione" idCampo="filtro-movimenti-testo">
           <input
             id="filtro-movimenti-testo"
+            className="input"
             type="text"
             value={filtri.testo ?? ''}
             placeholder="Cerca nella descrizione"
@@ -323,16 +331,34 @@ export function ElencoMovimenti({
               })
             }
           />
-        </div>
+        </Campo>
       </div>
 
       <div style={STILE_RIGA_TOTALI}>
-        <span>Entrate: {formatImporto(totaleEntrateCents)}</span>
-        <span>Uscite: {formatImporto(totaleUsciteCents)}</span>
+        <span>{movimenti.length} movimenti</span>
         <span>
-          Saldo netto: {formatImporto(totaleEntrateCents - totaleUsciteCents)}
+          Entrate{' '}
+          <span style={{ ...STILE_VALORE_TOTALE, color: 'var(--verde)' }}>
+            {formatImporto(totaleEntrateCents)}
+          </span>
         </span>
-        <span>Movimenti: {movimenti.length}</span>
+        <span>
+          Uscite{' '}
+          <span style={{ ...STILE_VALORE_TOTALE, color: 'var(--rosso)' }}>
+            {formatImporto(totaleUsciteCents)}
+          </span>
+        </span>
+        <span style={{ marginLeft: 'auto' }}>
+          Saldo netto{' '}
+          <span
+            style={{
+              ...STILE_VALORE_TOTALE,
+              color: saldoNettoCents >= 0 ? 'var(--verde)' : 'var(--rosso)',
+            }}
+          >
+            {formatImporto(saldoNettoCents)}
+          </span>
+        </span>
       </div>
 
       {caricando && <p>Caricamento…</p>}
@@ -341,15 +367,15 @@ export function ElencoMovimenti({
         <p>Nessun movimento trovato.</p>
       )}
       {!caricando && errore === null && movimenti.length > 0 && (
-        <table style={STILE_TABELLA}>
+        <Tabella>
           <thead>
             <tr>
-              <th style={STILE_CELLA}>Data</th>
-              <th style={STILE_CELLA}>Descrizione</th>
-              <th style={STILE_CELLA}>Conto</th>
-              <th style={STILE_CELLA}>Categoria</th>
-              <th style={STILE_CELLA}>Importo</th>
-              <th style={STILE_CELLA}>Azioni</th>
+              <th>Data</th>
+              <th>Descrizione</th>
+              <th>Conto</th>
+              <th>Categoria</th>
+              <th style={STILE_CELLA_DESTRA}>Importo</th>
+              <th>Azioni</th>
             </tr>
           </thead>
           <tbody>
@@ -363,19 +389,20 @@ export function ElencoMovimenti({
                 );
                 return (
                   <tr key={movimento.id}>
-                    <td colSpan={6} style={STILE_CELLA}>
+                    <td colSpan={6}>
                       <form
-                        style={STILE_FORM}
+                        style={STILE_FORM_MODIFICA}
                         onSubmit={(evento) =>
                           void gestisciSalvataggio(evento, movimento)
                         }
                       >
-                        <div style={STILE_CAMPO}>
-                          <label htmlFor={`modifica-${movimento.id}-data`}>
-                            Data
-                          </label>
+                        <Campo
+                          etichetta="Data"
+                          idCampo={`modifica-${movimento.id}-data`}
+                        >
                           <input
                             id={`modifica-${movimento.id}-data`}
+                            className="input"
                             type="date"
                             value={formModifica.data}
                             onChange={(evento) =>
@@ -386,20 +413,19 @@ export function ElencoMovimenti({
                             }
                             required
                           />
-                          {erroriCampo.data && (
-                            <span style={STILE_ERRORE_CAMPO}>
-                              {erroriCampo.data}
-                            </span>
-                          )}
-                        </div>
-                        <div style={STILE_CAMPO}>
-                          <label
-                            htmlFor={`modifica-${movimento.id}-descrizione`}
-                          >
-                            Descrizione
-                          </label>
+                        </Campo>
+                        {erroriCampo.data && (
+                          <span style={STILE_ERRORE_CAMPO}>
+                            {erroriCampo.data}
+                          </span>
+                        )}
+                        <Campo
+                          etichetta="Descrizione"
+                          idCampo={`modifica-${movimento.id}-descrizione`}
+                        >
                           <input
                             id={`modifica-${movimento.id}-descrizione`}
+                            className="input"
                             type="text"
                             value={formModifica.descrizione}
                             onChange={(evento) =>
@@ -410,18 +436,19 @@ export function ElencoMovimenti({
                             }
                             required
                           />
-                          {erroriCampo.descrizione && (
-                            <span style={STILE_ERRORE_CAMPO}>
-                              {erroriCampo.descrizione}
-                            </span>
-                          )}
-                        </div>
-                        <div style={STILE_CAMPO}>
-                          <label htmlFor={`modifica-${movimento.id}-importo`}>
-                            Importo
-                          </label>
+                        </Campo>
+                        {erroriCampo.descrizione && (
+                          <span style={STILE_ERRORE_CAMPO}>
+                            {erroriCampo.descrizione}
+                          </span>
+                        )}
+                        <Campo
+                          etichetta="Importo"
+                          idCampo={`modifica-${movimento.id}-importo`}
+                        >
                           <input
                             id={`modifica-${movimento.id}-importo`}
+                            className="input"
                             type="text"
                             value={formModifica.importoTesto}
                             onChange={(evento) =>
@@ -431,45 +458,41 @@ export function ElencoMovimenti({
                               })
                             }
                           />
-                          {erroriCampo.amountCents && (
-                            <span style={STILE_ERRORE_CAMPO}>
-                              {erroriCampo.amountCents}
-                            </span>
-                          )}
-                        </div>
-                        <div style={STILE_CAMPO}>
-                          <label htmlFor={`modifica-${movimento.id}-tipo`}>
-                            Entrata/Uscita
-                          </label>
-                          <select
-                            id={`modifica-${movimento.id}-tipo`}
-                            value={formModifica.tipo}
-                            onChange={(evento) => {
-                              const tipo = evento.target
-                                .value as FormModifica['tipo'];
-                              setFormModifica({
-                                ...formModifica,
-                                tipo,
-                                categoriaId: categorie.some(
-                                  (categoria) =>
-                                    categoria.id === formModifica.categoriaId &&
-                                    categoria.kind === tipo,
-                                )
-                                  ? formModifica.categoriaId
-                                  : '',
-                              });
-                            }}
-                          >
-                            <option value="entrata">Entrata</option>
-                            <option value="uscita">Uscita</option>
-                          </select>
-                        </div>
-                        <div style={STILE_CAMPO}>
-                          <label htmlFor={`modifica-${movimento.id}-conto`}>
-                            Conto
-                          </label>
+                        </Campo>
+                        {erroriCampo.amountCents && (
+                          <span style={STILE_ERRORE_CAMPO}>
+                            {erroriCampo.amountCents}
+                          </span>
+                        )}
+                        <ControlloSegmentato
+                          nome={`modifica-${movimento.id}-tipo`}
+                          valore={formModifica.tipo}
+                          onCambio={(valore) => {
+                            const tipo = valore as FormModifica['tipo'];
+                            setFormModifica({
+                              ...formModifica,
+                              tipo,
+                              categoriaId: categorie.some(
+                                (categoria) =>
+                                  categoria.id === formModifica.categoriaId &&
+                                  categoria.kind === tipo,
+                              )
+                                ? formModifica.categoriaId
+                                : '',
+                            });
+                          }}
+                          opzioni={[
+                            { valore: 'entrata', etichetta: 'Entrata' },
+                            { valore: 'uscita', etichetta: 'Uscita' },
+                          ]}
+                        />
+                        <Campo
+                          etichetta="Conto"
+                          idCampo={`modifica-${movimento.id}-conto`}
+                        >
                           <select
                             id={`modifica-${movimento.id}-conto`}
+                            className="input"
                             value={formModifica.contoId}
                             onChange={(evento) =>
                               setFormModifica({
@@ -485,18 +508,19 @@ export function ElencoMovimenti({
                               </option>
                             ))}
                           </select>
-                          {erroriCampo.contoId && (
-                            <span style={STILE_ERRORE_CAMPO}>
-                              {erroriCampo.contoId}
-                            </span>
-                          )}
-                        </div>
-                        <div style={STILE_CAMPO}>
-                          <label htmlFor={`modifica-${movimento.id}-categoria`}>
-                            Categoria
-                          </label>
+                        </Campo>
+                        {erroriCampo.contoId && (
+                          <span style={STILE_ERRORE_CAMPO}>
+                            {erroriCampo.contoId}
+                          </span>
+                        )}
+                        <Campo
+                          etichetta="Categoria"
+                          idCampo={`modifica-${movimento.id}-categoria`}
+                        >
                           <select
                             id={`modifica-${movimento.id}-categoria`}
+                            className="input"
                             value={formModifica.categoriaId}
                             onChange={(evento) =>
                               setFormModifica({
@@ -512,28 +536,32 @@ export function ElencoMovimenti({
                               </option>
                             ))}
                           </select>
-                          {erroriCampo.categoriaId && (
-                            <span style={STILE_ERRORE_CAMPO}>
-                              {erroriCampo.categoriaId}
-                            </span>
-                          )}
-                        </div>
+                        </Campo>
+                        {erroriCampo.categoriaId && (
+                          <span style={STILE_ERRORE_CAMPO}>
+                            {erroriCampo.categoriaId}
+                          </span>
+                        )}
                         {erroreGenerale && (
                           <span style={STILE_ERRORE_GENERALE}>
                             {erroreGenerale}
                           </span>
                         )}
                         <div style={STILE_AZIONI}>
-                          <button type="submit" disabled={salvandoModifica}>
+                          <Bottone
+                            variante="primaria"
+                            type="submit"
+                            disabled={salvandoModifica}
+                          >
                             Salva
-                          </button>
-                          <button
-                            type="button"
+                          </Bottone>
+                          <Bottone
+                            variante="secondaria"
                             onClick={annullaModifica}
                             disabled={salvandoModifica}
                           >
                             Annulla
-                          </button>
+                          </Bottone>
                         </div>
                       </form>
                     </td>
@@ -543,16 +571,23 @@ export function ElencoMovimenti({
 
               return (
                 <tr key={movimento.id}>
-                  <td style={STILE_CELLA}>{movimento.data}</td>
-                  <td style={STILE_CELLA}>{movimento.descrizione}</td>
-                  <td style={STILE_CELLA}>{nomeConto(movimento.contoId)}</td>
-                  <td style={STILE_CELLA}>
-                    {nomeCategoria(movimento.categoriaId)}
-                  </td>
-                  <td style={STILE_CELLA}>
+                  <td>{movimento.data}</td>
+                  <td>{movimento.descrizione}</td>
+                  <td>{nomeConto(movimento.contoId)}</td>
+                  <td>{nomeCategoria(movimento.categoriaId)}</td>
+                  <td
+                    style={{
+                      ...STILE_CELLA_DESTRA,
+                      ...STILE_IMPORTO_RIGA,
+                      color:
+                        movimento.amountCents >= 0
+                          ? 'var(--verde)'
+                          : 'var(--rosso)',
+                    }}
+                  >
                     {formatImporto(movimento.amountCents)}
                   </td>
-                  <td style={STILE_CELLA}>
+                  <td>
                     {movimento.transferGroupId !== null ? (
                       'Fa parte di un trasferimento'
                     ) : eliminandoId === movimento.id ? (
@@ -577,21 +612,21 @@ export function ElencoMovimenti({
                       </>
                     ) : (
                       <span style={STILE_AZIONI}>
-                        <button
-                          type="button"
+                        <Bottone
+                          variante="ghost"
                           onClick={() => apriModifica(movimento)}
                         >
                           Modifica
-                        </button>
-                        <button
-                          type="button"
+                        </Bottone>
+                        <Bottone
+                          variante="ghost"
                           onClick={() => {
                             setEliminazioneInCorso(movimento.id);
                             setErroreEliminazione(null);
                           }}
                         >
                           Elimina
-                        </button>
+                        </Bottone>
                       </span>
                     )}
                   </td>
@@ -599,7 +634,7 @@ export function ElencoMovimenti({
               );
             })}
           </tbody>
-        </table>
+        </Tabella>
       )}
     </section>
   );

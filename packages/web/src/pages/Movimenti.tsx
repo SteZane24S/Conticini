@@ -5,7 +5,7 @@ import { useConti } from './conti/dati.js';
 import { ElencoMovimenti } from './movimenti/ElencoMovimenti.js';
 import { InserimentoRapido } from './movimenti/InserimentoRapido.js';
 import { useMovimenti, type FiltriMovimentiUI } from './movimenti/dati.js';
-import { STILE_PAGINA } from './movimenti/stili.js';
+import { STILE_INTESTAZIONE, STILE_PAGINA } from './movimenti/stili.js';
 
 export function Movimenti() {
   const { conti } = useConti();
@@ -24,7 +24,9 @@ export function Movimenti() {
 
   return (
     <div style={STILE_PAGINA}>
-      <h1>Movimenti</h1>
+      <div style={STILE_INTESTAZIONE}>
+        <h1 style={{ margin: 0 }}>Movimenti</h1>
+      </div>
       <InserimentoRapido
         conti={conti}
         settori={settori}

@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 5.1 chiuso il 20/09/2026 — Fondamenta del restyling completate (token, componenti condivisi, layout).
-**Prossimo giro:** giro 5.2 — Prospetto e Movimenti, da `fasi/fase-5-design/PIANO.md`.
+**Stato:** giro 5.2 chiuso il 20/09/2026 — Restyling di Prospetto e Movimenti completato.
+**Prossimo giro:** giro 5.3 — Stipendio, Conti, Categorie e regole, da `fasi/fase-5-design/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -36,7 +36,8 @@
 ### Fase 5 — Restyling con Claude Design
 - [x] Design prodotto dall'utente su claude.ai/design (brief in `fasi/fase-5-design/PIANO.md`)
 - [x] 5.1 Fondamenta: token, design system, componenti condivisi, layout
-- [ ] Giri 5.2-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
+- [x] 5.2 Prospetto e Movimenti
+- [ ] Giri 5.3-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
 
 ### Fase 6 — Mobile e sincronizzazione
 - [ ] Richiede una nuova sessione di pianificazione su Opus
@@ -82,3 +83,8 @@
 - Prossimo passo: Fase 5 — Restyling con Claude Design. Richiede che l’utente produca prima il design su claude.ai/design; i giri di quella fase si definiscono solo dopo che il design esiste.
 - Il componente `Dialogo` del giro 5.1 è stato creato ma non è ancora usato dalle pagine: verrà integrato nei giri 5.2–5.5 dove il design lo richiede.
 - Prossimo giro: 5.2 — Prospetto e Movimenti, da `fasi/fase-5-design/PIANO.md`.
+- Prossimo giro: 5.3 — Stipendio, Conti, Categorie e regole, da `fasi/fase-5-design/PIANO.md`. Continua a chiudersi con `live-testing`.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 5.2.
+- Osservazione non bloccante non risolta nel giro 5.2: la card di un conto scompare dal Prospetto se la data di riferimento è anteriore alla creazione del conto, invece di mostrare 0,00€ — comportamento di dominio non toccato, da valutare in un giro futuro che tocchi di nuovo quella logica.
+- Nota tecnica sull'ambiente: nel giro 5.2 il server MCP Codex ha mostrato timeout ripetuti (4 tentativi su 4 senza risposta per 30 minuti); un processo Codex orfano di 3 giorni con 534 thread è stato identificato come probabile causa e terminato, ma il server è rimasto disconnesso per il resto del giro. Da monitorare nel prossimo giro.
+- Osservazione fuori scope dal giro 5.2, non risolta: sul sistema sono presenti numerosi processi `node.exe` orfani risalenti a più giorni prima del giro; non toccati, segnalati per un'eventuale pulizia futura decisa dall'utente.
