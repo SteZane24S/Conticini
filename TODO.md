@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 4.3 chiuso il 20/09/2026 — Rilascio in `app/` completato (Fase 4 chiusa).
-**Prossimo giro:** Fase 5 — Restyling con Claude Design, dopo il design prodotto dall’utente; vedi fasi/fase-5-design/PIANO.md.
+**Stato:** giro 5.1 chiuso il 20/09/2026 — Fondamenta del restyling completate (token, componenti condivisi, layout).
+**Prossimo giro:** giro 5.2 — Prospetto e Movimenti, da `fasi/fase-5-design/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -34,8 +34,9 @@
 - [x] 4.3 Build in `app/`, launcher, icona, aggiornamento
 
 ### Fase 5 — Restyling con Claude Design
-- [ ] Design prodotto dall'utente su claude.ai/design (brief in `fasi/fase-5-design/PIANO.md`)
-- [ ] Giri da definire quando il design esiste
+- [x] Design prodotto dall'utente su claude.ai/design (brief in `fasi/fase-5-design/PIANO.md`)
+- [x] 5.1 Fondamenta: token, design system, componenti condivisi, layout
+- [ ] Giri 5.2-5.5 definiti in `fasi/fase-5-design/PIANO.md`, da eseguire
 
 ### Fase 6 — Mobile e sincronizzazione
 - [ ] Richiede una nuova sessione di pianificazione su Opus
@@ -79,3 +80,5 @@
 - Nessun rilievo fondato è rimasto fuori scope nel giro 4.3: l’unico rilievo sull’ordinamento di `package.json` è stato corretto e riverificato.
 - La Fase 4 — Grafici, backup, rilascio è chiusa con questo giro: tutti i giri 4.1, 4.2, 4.3 completati.
 - Prossimo passo: Fase 5 — Restyling con Claude Design. Richiede che l’utente produca prima il design su claude.ai/design; i giri di quella fase si definiscono solo dopo che il design esiste.
+- Il componente `Dialogo` del giro 5.1 è stato creato ma non è ancora usato dalle pagine: verrà integrato nei giri 5.2–5.5 dove il design lo richiede.
+- Prossimo giro: 5.2 — Prospetto e Movimenti, da `fasi/fase-5-design/PIANO.md`.

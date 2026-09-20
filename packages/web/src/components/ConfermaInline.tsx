@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 
+import { Bottone } from './Bottone.js';
+
 const STILE_AZIONI: CSSProperties = {
   display: 'flex',
   gap: '0.5rem',
@@ -20,12 +22,12 @@ export function ConfermaInline({
   return (
     <span style={STILE_AZIONI}>
       <span>{domanda}</span>
-      <button type="button" onClick={onConferma}>
+      <Bottone variante="primaria" onClick={onConferma}>
         Sì
-      </button>
-      <button type="button" onClick={onAnnulla}>
+      </Bottone>
+      <Bottone variante="secondaria" onClick={onAnnulla}>
         Annulla
-      </button>
+      </Bottone>
     </span>
   );
 }

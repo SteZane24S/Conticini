@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-792b9396-3965-4afe-986c-b3cb4c5aa971/styles.css">
+<script src="_ds/modernist-792b9396-3965-4afe-986c-b3cb4c5aa971/_ds_bundle.js"></script>
+<style>
+:root{
+  --muted: color-mix(in srgb, var(--color-text) 58%, transparent);
+  --verde: oklch(0.45 0.12 152);
+  --verde-bg: oklch(0.955 0.035 152);
+  --rosso: var(--color-accent-700);
+  --rosso-bg: var(--color-accent-100);
+  --neu: var(--color-neutral-700);
+  --neu-bg: var(--color-neutral-100);
+  --ambra: #8a5a00;
+  --ambra-bg: #fdf1d8;
+  --riga: 10px;
+}
+html[data-theme="dark"]{
+  --color-bg: #151312;
+  --color-surface: #201e1d;
+  --color-text: #f3f2f2;
+  --color-divider: color-mix(in srgb, #f3f2f2 34%, transparent);
+  --verde: oklch(0.82 0.15 152);
+  --verde-bg: #14301f;
+  --rosso: var(--color-accent-400);
+  --rosso-bg: #3b150c;
+  --neu: var(--color-neutral-400);
+  --neu-bg: #2d2b2b;
+  --ambra: #f0b545;
+  --ambra-bg: #33260c;
+}
+body{margin:0;background:var(--color-bg);color:var(--color-text)}
+input,select,button{font-family:inherit;border-radius:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+::placeholder{color:var(--muted)}
+a{color:var(--color-accent)}
+a:hover{color:var(--color-accent-600)}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:15px">
+
+  <aside style="width:244px;flex:0 0 244px;border-right:2px solid var(--color-divider);display:flex;flex-direction:column;height:100vh;position:sticky;top:0">
+    <div style="padding:var(--space-4);border-bottom:2px solid var(--color-divider);display:flex;align-items:baseline;gap:var(--space-2)">
+      <span style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.02em">Conticini</span>
+      <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">locale</span>
+    </div>
+    <nav style="display:flex;flex-direction:column;flex:1;overflow:auto">
+      <sc-for list="{{ nav }}" as="v" hint-placeholder-count="10">
+        <button onClick="{{ v.go }}" style="display:flex;align-items:center;gap:var(--space-3);padding:10px var(--space-4);border:none;border-bottom:1px solid var(--color-divider);border-left:3px solid {{ v.marker }};cursor:pointer;font-size:14px;text-align:left;width:100%;background: {{ v.bg }};color: {{ v.col }};font-weight: {{ v.fw }}" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+          <span style="width:10px;font-size:10px;letter-spacing:0.05em;color:var(--muted)">{{ v.k }}</span>
+          <span style="flex:1">{{ v.label }}</span>
+          <sc-if value="{{ v.badge }}">
+            <span style="background:var(--color-accent);color:var(--color-bg);font-family:var(--font-heading);font-weight:800;font-size:11px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 5px">{{ v.badge }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="border-top:2px solid var(--color-divider);padding:var(--space-3) var(--space-4);display:flex;flex-direction:column;gap:var(--space-2)">
+      <button onClick="{{ tema.toggle }}" style="display:flex;align-items:center;justify-content:space-between;background:transparent;border:1px solid var(--color-divider);padding:7px 10px;cursor:pointer;color:var(--color-text);font-size:13px;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+        <span>{{ tema.label }}</span><span style="font-size:10px;letter-spacing:0.1em;color:var(--muted)">T</span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7;letter-spacing:0.02em">1–0 SEZIONI · N NUOVO<br>/ CERCA · INVIO SALVA · ESC CHIUDI</div>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;padding:var(--space-6) var(--space-8) 72px;max-width:1360px">
+
+    <sc-if value="{{ ui.prospetto }}">
+      <div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-6);flex-wrap:wrap;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3);margin-bottom:var(--space-6)">
+          <div>
+            <h1 style="margin:0;font-size:34px">Prospetto</h1>
+            <div style="color:var(--muted);font-size:13px;margin-top:4px">{{ p.sottotitolo }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Data di riferimento</label>
+            <input type="date" value="{{ p.oggi }}" onChange="{{ set.oggi }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+          </div>
+        </div>
+
+        <sc-if value="{{ p.avviso }}">
+          <div style="border:2px solid var(--color-accent);padding:var(--space-4);margin-bottom:var(--space-6);display:flex;gap:var(--space-4);align-items:flex-start">
+            <div style="flex:1">
+              <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;margin-bottom:4px">Manca la data del prossimo stipendio</div>
+              <div style="color:var(--muted);font-size:14px">Senza l'orizzonte del ciclo non si calcola il saldo previsto: restano visibili solo il saldo di oggi e gli arretrati. Registra la data prevista nella sezione Stipendio.</div>
+            </div>
+            <button onClick="{{ act.vaiStipendio }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:8px 14px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;white-space:nowrap">Imposta ora</button>
+          </div>
+        </sc-if>
+
+        <div style="display:grid;grid-template-columns:minmax(360px,1.3fr) minmax(300px,1fr);gap:0;border:1px solid var(--color-divider);margin-bottom:var(--space-6)">
+          <div style="padding:var(--space-6);border-right:2px solid var(--color-divider)">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Saldo previsto al prossimo stipendio</div>
+            <div style="display:flex;align-items:baseline;gap:var(--space-4);margin:var(--space-3) 0 0;flex-wrap:wrap">
+              <span style="font-family:var(--font-heading);font-weight:800;font-size:64px;letter-spacing:-0.035em;font-variant-numeric:tabular-nums;line-height:0.95;color: {{ p.previstoCol }}">{{ p.previsto }}</span>
+              <span style="font-size:14px;color:var(--muted)">al {{ p.dataStipendio }}</span>
+            </div>
+            <div style="color:var(--muted);font-size:13.5px;line-height:1.6;margin-top:var(--space-4);max-width:52ch">{{ p.previstoNota }}</div>
+          </div>
+          <div style="padding:var(--space-6);background:var(--color-surface);display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Dopo l'accredito previsto</div>
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:40px;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;margin:var(--space-2) 0 var(--space-1)">{{ p.dopo }}</div>
+            <div style="color:var(--muted);font-size:13.5px">accredito stimato <span style="color:var(--verde)">{{ p.accredito }}</span> il {{ p.dataStipendio }}</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:1px solid var(--color-divider);margin-bottom:var(--space-8)">
+          <div style="padding:var(--space-4);border-right:2px solid var(--color-divider)">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Saldo totale</div>
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;font-variant-numeric:tabular-nums;margin-top:var(--space-2)">{{ p.saldoTotale }}</div>
+          </div>
+          <sc-for list="{{ p.conti }}" as="c" hint-placeholder-count="3">
+            <div style="padding:var(--space-4);border-right:1px solid var(--color-divider)">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">{{ c.tipo }}</div>
+              <div style="font-family:var(--font-heading);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;margin-top:var(--space-2)">{{ c.saldo }}</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:2px">{{ c.nome }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(300px,1fr) minmax(440px,1.5fr);gap:var(--space-8)">
+          <section>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2);margin-bottom:0">
+              <h2 style="margin:0;font-size:17px">Spese fisse ancora da pagare</h2>
+              <span style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ p.totFisse }}</span>
+            </div>
+            <sc-for list="{{ p.fisse }}" as="f" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:var(--space-3);padding:11px var(--space-2) 11px 0;border-bottom:1px solid var(--color-divider);background: {{ f.bg }}">
+                <div style="flex:1;min-width:0;padding-left: {{ f.pad }}">
+                  <div style="font-size:14px;display:flex;align-items:center;gap:var(--space-2)">
+                    <span>{{ f.nome }}</span>
+                    <sc-if value="{{ f.arretrata }}"><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-bg);background:var(--color-accent);padding:2px 6px">arretrata</span></sc-if>
+                  </div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:3px">{{ f.scadenza }} · {{ f.modo }}</div>
+                </div>
+                <div style="font-family:var(--font-heading);font-weight:800;font-variant-numeric:tabular-nums;font-size:16px;color: {{ f.col }};padding-right:var(--space-2)">{{ f.importo }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ p.nessunaFissa }}"><div style="padding:var(--space-4) 0;color:var(--muted);font-size:13.5px">Nessuna occorrenza aperta entro l'orizzonte del ciclo.</div></sc-if>
+          </section>
+
+          <section>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2)">
+              <h2 style="margin:0;font-size:17px">Previsioni per categoria</h2>
+              <span style="font-size:13px;color:var(--muted)">ciclo {{ p.ciclo }}</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr>
+                <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px 0;border-bottom:1px solid var(--color-divider)">Categoria</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Previsto</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Speso</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Residuo</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 0 8px 10px;border-bottom:1px solid var(--color-divider)">Sforamento</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ p.previsioni }}" as="r" hint-placeholder-count="8">
+                  <tr>
+                    <td style="padding:var(--riga) 10px var(--riga) 0;border-bottom:1px solid var(--color-divider);font-size:14px">
+                      <div>{{ r.nome }}</div>
+                      <div style="height:6px;background:var(--color-surface);margin-top:7px;border:1px solid var(--color-divider)"><div style="height:100%;width: {{ r.pct }}%;background: {{ r.barCol }}"></div></div>
+                    </td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">{{ r.previsto }}</td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums">{{ r.speso }}</td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums">{{ r.residuo }}</td>
+                    <td style="padding:var(--riga) 0 var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color: {{ r.sforCol }}">{{ r.sforamento }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.movimenti }}">
+      <div>
+        <h1 style="margin:0 0 var(--space-3);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Movimenti</h1>
+
+        <div style="border:1px solid var(--color-divider);background:var(--color-surface);padding:var(--space-3);margin-bottom:var(--space-6)">
+          <div style="display:flex;gap:var(--space-2);align-items:flex-end;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Data</label>
+              <input type="date" value="{{ m.qa.data }}" data-f="data" onChange="{{ set.qa }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:210px;position:relative">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Descrizione</label>
+              <input type="text" value="{{ m.qa.desc }}" data-f="desc" onChange="{{ set.qa }}" onFocus="{{ act.apriSugg }}" onBlur="{{ act.chiudiSugg }}" ref="{{ refs.desc }}" placeholder="Esselunga, Bar Centrale…" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+              <sc-if value="{{ m.suggOpen }}">
+                <div style="position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--color-bg);border:2px solid var(--color-divider);box-shadow:var(--shadow-md)">
+                  <sc-for list="{{ m.sugg }}" as="s" hint-placeholder-count="4">
+                    <div onMouseDown="{{ s.pick }}" style="padding:8px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:var(--space-3);font-size:13.5px;border-bottom:1px solid var(--color-divider)" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+                      <span>{{ s.desc }}</span><span style="color:var(--muted);font-size:12px">{{ s.cat }} · {{ s.importo }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Importo</label>
+              <input type="text" inputMode="decimal" value="{{ m.qa.importo }}" data-f="importo" onChange="{{ set.qa }}" placeholder="0,00" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);width:110px;text-align:right;font-variant-numeric:tabular-nums">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Tipo</label>
+              <div style="display:flex;border:1px solid var(--color-divider)">
+                <button onClick="{{ act.tipoEntrata }}" style="border:none;padding:8px 13px;cursor:pointer;font-size:13px;text-align:left;background: {{ m.entrataBg }};color: {{ m.entrataCol }}">Entrata</button>
+                <button onClick="{{ act.tipoUscita }}" style="border:none;border-left:1px solid var(--color-divider);padding:8px 13px;cursor:pointer;font-size:13px;text-align:left;background: {{ m.uscitaBg }};color: {{ m.uscitaCol }}">Uscita</button>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Conto</label>
+              <select value="{{ m.qa.conto }}" data-f="conto" onChange="{{ set.qa }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <sc-for list="{{ opzioni.conti }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Categoria proposta</label>
+              <select value="{{ m.qa.cat }}" data-f="cat" onChange="{{ set.qa }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <sc-for list="{{ m.catOpzioni }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+              </select>
+            </div>
+            <button onClick="{{ act.nuovaCategoria }}" style="background:transparent;color:var(--color-accent);border:1px solid var(--color-accent);padding:8px 12px;font-size:13.5px;cursor:pointer;text-align:left;min-height:34px" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">+ nuova categoria</button>
+            <button onClick="{{ act.salvaMovimento }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:9px 16px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;min-height:34px">Aggiungi ↵</button>
+          </div>
+          <sc-if value="{{ m.regolaNota }}">
+            <div style="margin-top:var(--space-3);font-size:12.5px;color:var(--muted);border-top:1px solid var(--color-divider);padding-top:var(--space-2)">{{ m.regolaNota }}</div>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;margin-bottom:var(--space-3)">
+          <input type="search" value="{{ m.filtri.testo }}" data-f="testo" onChange="{{ set.filtri }}" ref="{{ refs.cerca }}" placeholder="Cerca nella descrizione…" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider);flex:1;min-width:220px">
+          <select value="{{ m.filtri.periodo }}" data-f="periodo" onChange="{{ set.filtri }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <option value="ciclo">Ciclo corrente</option><option value="mese">Mese corrente</option><option value="3m">Ultimi 3 mesi</option><option value="tutto">Tutto</option>
+          </select>
+          <select value="{{ m.filtri.conto }}" data-f="conto" onChange="{{ set.filtri }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <option value="">Tutti i conti</option>
+            <sc-for list="{{ opzioni.conti }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+          </select>
+          <select value="{{ m.filtri.settore }}" data-f="settore" onChange="{{ set.filtri }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <option value="">Tutti i settori</option>
+            <sc-for list="{{ opzioni.settori }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+          </select>
+          <select value="{{ m.filtri.cat }}" data-f="cat" onChange="{{ set.filtri }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <option value="">Tutte le categorie</option>
+            <sc-for list="{{ m.catFiltro }}" as="o" hint-placeholder-count="8"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+          </select>
+          <button onClick="{{ act.azzeraFiltri }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:8px 13px;font-size:13.5px;cursor:pointer;text-align:left;min-height:34px" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Azzera</button>
+        </div>
+
+        <div style="display:flex;gap:var(--space-6);padding:var(--space-3) 0;border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);margin-bottom:var(--space-2);font-size:14px;flex-wrap:wrap;align-items:baseline">
+          <span style="color:var(--muted)">{{ m.conteggio }}</span>
+          <span>Entrate <b style="color:var(--verde);font-variant-numeric:tabular-nums;font-family:var(--font-heading)">{{ m.totEntrate }}</b></span>
+          <span>Uscite <b style="color:var(--rosso);font-variant-numeric:tabular-nums;font-family:var(--font-heading)">{{ m.totUscite }}</b></span>
+          <span style="margin-left:auto">Saldo del periodo <b style="font-variant-numeric:tabular-nums;font-family:var(--font-heading);color: {{ m.saldoCol }}">{{ m.totSaldo }}</b></span>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px 0;border-bottom:1px solid var(--color-divider);width:100px">Data</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Descrizione</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Categoria</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Conto</th>
+            <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Importo</th>
+            <th style="padding:10px 0 8px 10px;border-bottom:1px solid var(--color-divider);width:36px"></th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ m.righe }}" as="r" hint-placeholder-count="12">
+              <tr style-hover="background:var(--color-surface)">
+                <td style="padding:var(--riga) 10px var(--riga) 0;border-bottom:1px solid var(--color-divider);font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums">{{ r.data }}</td>
+                <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px">{{ r.desc }}</td>
+                <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--muted)">{{ r.cat }}</td>
+                <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--muted)">{{ r.conto }}</td>
+                <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:15px;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--font-heading);font-weight:800;color: {{ r.col }}">{{ r.importo }}</td>
+                <td style="padding:var(--riga) 0 var(--riga) 10px;border-bottom:1px solid var(--color-divider);text-align:right"><button onClick="{{ r.elimina }}" title="Elimina" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" style-hover="color:var(--color-accent)">×</button></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{ m.vuoto }}"><div style="padding:var(--space-6) 0;color:var(--muted);font-size:14px">Nessun movimento con questi filtri.</div></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.stipendio }}">
+      <div>
+        <h1 style="margin:0 0 var(--space-6);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Stipendio</h1>
+        <div style="display:grid;grid-template-columns:minmax(300px,400px) minmax(340px,1fr);gap:var(--space-8);align-items:start">
+          <div style="border:1px solid var(--color-divider);background:var(--color-surface);padding:var(--space-4)">
+            <h2 style="margin:0 0 var(--space-4);font-size:17px">Registra accredito</h2>
+            <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Data accredito</label>
+                <input type="date" value="{{ s.f.data }}" data-f="data" onChange="{{ set.stip }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Importo</label>
+                <input type="text" inputMode="decimal" value="{{ s.f.importo }}" data-f="importo" onChange="{{ set.stip }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);font-variant-numeric:tabular-nums">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Conto di accredito</label>
+                <select value="{{ s.f.conto }}" data-f="conto" onChange="{{ set.stip }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                  <sc-for list="{{ opzioni.conti }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+                </select>
+              </div>
+              <hr style="height:2px;border:0;background:var(--color-divider);margin:var(--space-1) 0">
+              <div style="display:flex;gap:var(--space-2)">
+                <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+                  <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Data prevista prossimo</label>
+                  <input type="date" value="{{ s.f.pdata }}" data-f="pdata" onChange="{{ set.stip }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px;width:130px">
+                  <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Importo previsto</label>
+                  <input type="text" inputMode="decimal" value="{{ s.f.pimporto }}" data-f="pimporto" onChange="{{ set.stip }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);text-align:right;font-variant-numeric:tabular-nums">
+                </div>
+              </div>
+              <button onClick="{{ act.salvaStipendio }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:10px 14px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%">Registra e apri il nuovo ciclo</button>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0 0 0;font-size:17px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2)">Storico dei cicli</h2>
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr>
+                <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px 0;border-bottom:1px solid var(--color-divider)">Ciclo</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Accredito</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Importo</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Speso</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 0 8px 10px;border-bottom:1px solid var(--color-divider)">Residuo</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ s.cicli }}" as="c" hint-placeholder-count="4">
+                  <tr>
+                    <td style="padding:var(--riga) 10px var(--riga) 0;border-bottom:1px solid var(--color-divider);font-size:14px">{{ c.etichetta }}</td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--muted)">{{ c.data }} · {{ c.conto }}</td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--verde)">{{ c.importo }}</td>
+                    <td style="padding:var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--rosso)">{{ c.speso }}</td>
+                    <td style="padding:var(--riga) 0 var(--riga) 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--font-heading);font-weight:800">{{ c.residuo }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.conti }}">
+      <div>
+        <h1 style="margin:0 0 var(--space-6);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Conti</h1>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border:1px solid var(--color-divider);margin-bottom:var(--space-8)">
+          <sc-for list="{{ c.conti }}" as="k" hint-placeholder-count="3">
+            <div style="padding:var(--space-4);border-right:1px solid var(--color-divider)">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">{{ k.tipo }}</div>
+              <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;font-variant-numeric:tabular-nums;margin-top:var(--space-2)">{{ k.saldo }}</div>
+              <div style="font-size:13.5px;margin-top:var(--space-1)">{{ k.nome }}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">{{ k.movimenti }} movimenti nel ciclo</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(280px,360px) minmax(340px,1fr);gap:var(--space-8);align-items:start">
+          <div style="display:flex;flex-direction:column;gap:var(--space-6)">
+            <div style="border:1px solid var(--color-divider);background:var(--color-surface);padding:var(--space-4)">
+              <h2 style="margin:0 0 var(--space-3);font-size:17px">Nuovo conto</h2>
+              <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                <input type="text" value="{{ c.fConto.nome }}" data-f="nome" onChange="{{ set.conto }}" placeholder="Nome del conto" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <select value="{{ c.fConto.tipo }}" data-f="tipo" onChange="{{ set.conto }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                  <option value="corrente">Conto corrente</option><option value="prepagata">Carta prepagata</option><option value="risparmio">Libretto risparmio</option><option value="contanti">Contanti</option>
+                </select>
+                <input type="text" inputMode="decimal" value="{{ c.fConto.apertura }}" data-f="apertura" onChange="{{ set.conto }}" placeholder="Saldo di apertura" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);font-variant-numeric:tabular-nums">
+                <button onClick="{{ act.salvaConto }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:9px 14px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%">Crea conto</button>
+              </div>
+            </div>
+            <div style="border:1px solid var(--color-divider);background:var(--color-surface);padding:var(--space-4)">
+              <h2 style="margin:0 0 var(--space-3);font-size:17px">Nuovo trasferimento</h2>
+              <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                <input type="date" value="{{ c.fTrasf.data }}" data-f="data" onChange="{{ set.trasf }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <div style="display:flex;gap:var(--space-2);align-items:center">
+                  <select value="{{ c.fTrasf.da }}" data-f="da" onChange="{{ set.trasf }}" style="flex:1;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                    <sc-for list="{{ opzioni.conti }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+                  </select>
+                  <span style="color:var(--neu)">→</span>
+                  <select value="{{ c.fTrasf.a }}" data-f="a" onChange="{{ set.trasf }}" style="flex:1;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                    <sc-for list="{{ opzioni.conti }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+                  </select>
+                </div>
+                <input type="text" inputMode="decimal" value="{{ c.fTrasf.importo }}" data-f="importo" onChange="{{ set.trasf }}" placeholder="Importo" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);font-variant-numeric:tabular-nums">
+                <input type="text" value="{{ c.fTrasf.nota }}" data-f="nota" onChange="{{ set.trasf }}" placeholder="Nota (facoltativa)" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <button onClick="{{ act.salvaTrasf }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:9px 14px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;width:100%">Trasferisci</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0;font-size:17px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2)">Trasferimenti fra conti</h2>
+            <sc-for list="{{ c.trasf }}" as="t" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:var(--space-4);padding:12px 0;border-bottom:1px solid var(--color-divider)">
+                <span style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;width:92px">{{ t.data }}</span>
+                <span style="flex:1;font-size:14px">{{ t.da }} <span style="color:var(--neu)">→</span> {{ t.a }}<sc-if value="{{ t.nota }}"><span style="color:var(--muted);font-size:12.5px"> · {{ t.nota }}</span></sc-if></span>
+                <span style="font-family:var(--font-heading);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;color:var(--neu)">{{ t.importo }}</span>
+                <button onClick="{{ t.elimina }}" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1" style-hover="color:var(--color-accent)">×</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.categorie }}">
+      <div>
+        <h1 style="margin:0 0 var(--space-6);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Categorie e regole</h1>
+        <div style="display:grid;grid-template-columns:minmax(300px,1fr) minmax(380px,1.25fr);gap:var(--space-8);align-items:start">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2)">
+              <h2 style="margin:0;font-size:17px">Settori e categorie</h2>
+              <button onClick="{{ act.nuovaCategoria }}" style="background:transparent;color:var(--color-accent);border:1px solid var(--color-accent);padding:6px 10px;font-size:13px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">+ nuova categoria</button>
+            </div>
+            <sc-for list="{{ k.settori }}" as="s" hint-placeholder-count="6">
+              <div style="padding:var(--space-3) 0;border-bottom:1px solid var(--color-divider)">
+                <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2)">
+                  <span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ s.nome }}</span>
+                  <span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;background: {{ s.bg }};color: {{ s.col }}">{{ s.tipo }}</span>
+                  <span style="margin-left:auto;font-size:12px;color:var(--muted)">{{ s.totale }}</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:var(--space-1)">
+                  <sc-for list="{{ s.categorie }}" as="c" hint-placeholder-count="3">
+                    <span style="font-size:13px;border:1px solid var(--color-divider);padding:3px 9px">{{ c.nome }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-2)">
+              <h2 style="margin:0;font-size:17px">Regole di categorizzazione</h2>
+              <span style="font-size:13px;color:var(--muted)">{{ k.regoleAttive }}</span>
+            </div>
+            <div style="display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;padding:var(--space-3) 0;border-bottom:1px solid var(--color-divider)">
+              <span style="font-size:13px;color:var(--muted)">Se contiene</span>
+              <input type="text" value="{{ k.fRegola.testo }}" data-f="testo" onChange="{{ set.regola }}" placeholder="es. esselunga" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider);flex:1;min-width:140px">
+              <span style="font-size:13px;color:var(--muted)">→</span>
+              <select value="{{ k.fRegola.cat }}" data-f="cat" onChange="{{ set.regola }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+                <sc-for list="{{ opzioni.categorie }}" as="o" hint-placeholder-count="8"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+              </select>
+              <button onClick="{{ act.salvaRegola }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:8px 13px;font-family:var(--font-heading);font-weight:800;font-size:13.5px;cursor:pointer;text-align:left">Aggiungi</button>
+            </div>
+            <sc-for list="{{ k.regole }}" as="r" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;gap:var(--space-3);padding:10px 0;border-bottom:1px solid var(--color-divider)">
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <button onClick="{{ r.su }}" style="background:transparent;border:none;color:var(--muted);cursor:pointer;line-height:1;font-size:9px;padding:0" style-hover="color:var(--color-accent)">▲</button>
+                  <button onClick="{{ r.giu }}" style="background:transparent;border:none;color:var(--muted);cursor:pointer;line-height:1;font-size:9px;padding:0" style-hover="color:var(--color-accent)">▼</button>
+                </div>
+                <span style="font-size:11px;color:var(--muted);width:20px;letter-spacing:0.05em">{{ r.priorita }}</span>
+                <span style="flex:1;font-size:14px;opacity: {{ r.op }}">«{{ r.testo }}» <span style="color:var(--muted)">→</span> {{ r.cat }}</span>
+                <span style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{ r.usi }}</span>
+                <button onClick="{{ r.toggle }}" style="border:1px solid var(--color-divider);width:42px;height:22px;padding:2px;cursor:pointer;display:flex;justify-content: {{ r.just }};background: {{ r.swBg }}">
+                  <span style="width:16px;height:16px;background: {{ r.knob }};display:block"></span>
+                </button>
+                <button onClick="{{ r.elimina }}" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1" style-hover="color:var(--color-accent)">×</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.fisse }}">
+      <div>
+        <h1 style="margin:0 0 var(--space-6);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Spese fisse</h1>
+        <div style="display:grid;grid-template-columns:minmax(340px,1.5fr) minmax(280px,350px);gap:var(--space-8);align-items:start">
+          <div>
+            <sc-for list="{{ f.lista }}" as="x" hint-placeholder-count="8">
+              <div style="display:flex;align-items:center;gap:var(--space-3);padding:12px var(--space-2);border-bottom:1px solid var(--color-divider);background: {{ x.bg }}">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14.5px;display:flex;align-items:center;gap:var(--space-2)">
+                    <span>{{ x.nome }}</span>
+                    <span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;background: {{ x.modoBg }};color: {{ x.modoCol }}">{{ x.modo }}</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:3px">{{ x.ricorrenza }} · prossima {{ x.prossima }} · {{ x.cat }}</div>
+                </div>
+                <div style="font-family:var(--font-heading);font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;color:var(--rosso)">{{ x.importo }}</div>
+                <button onClick="{{ x.modifica }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:5px 10px;font-size:12.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Modifica</button>
+                <button onClick="{{ x.elimina }}" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1" style-hover="color:var(--color-accent)">×</button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--color-divider);background:var(--color-surface);padding:var(--space-4)">
+            <h2 style="margin:0 0 var(--space-3);font-size:17px">{{ f.titoloForm }}</h2>
+            <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+              <input type="text" value="{{ f.form.nome }}" data-f="nome" onChange="{{ set.fissa }}" placeholder="Nome (es. Affitto)" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+              <input type="text" inputMode="decimal" value="{{ f.form.importo }}" data-f="importo" onChange="{{ set.fissa }}" placeholder="Importo" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider);font-variant-numeric:tabular-nums">
+              <div style="display:flex;gap:var(--space-2)">
+                <select value="{{ f.form.ric }}" data-f="ric" onChange="{{ set.fissa }}" style="flex:1;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                  <option value="mensile">Mensile</option><option value="ogniN">Ogni N mesi</option><option value="annuale">Annuale</option>
+                </select>
+                <sc-if value="{{ f.mostraN }}">
+                  <input type="number" min="2" max="12" value="{{ f.form.n }}" data-f="n" onChange="{{ set.fissa }}" style="width:76px;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                </sc-if>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Prossima scadenza</label>
+                <input type="date" value="{{ f.form.prossima }}" data-f="prossima" onChange="{{ set.fissa }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+              </div>
+              <select value="{{ f.form.cat }}" data-f="cat" onChange="{{ set.fissa }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-bg);border:1px solid var(--color-divider)">
+                <sc-for list="{{ opzioni.categorie }}" as="o" hint-placeholder-count="8"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+              </select>
+              <div style="display:flex;gap:var(--space-2);align-items:center;font-size:13px;color:var(--muted)">
+                <span>Addebito</span>
+                <div style="display:flex;border:1px solid var(--color-divider)">
+                  <button onClick="{{ act.modoAuto }}" style="border:none;padding:7px 11px;cursor:pointer;font-size:12.5px;text-align:left;background: {{ f.autoBg }};color: {{ f.autoCol }}">automatica</button>
+                  <button onClick="{{ act.modoManuale }}" style="border:none;border-left:1px solid var(--color-divider);padding:7px 11px;cursor:pointer;font-size:12.5px;text-align:left;background: {{ f.manBg }};color: {{ f.manCol }}">manuale</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-1)">
+                <button onClick="{{ act.salvaFissa }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:9px 14px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;flex:1">{{ f.ctaForm }}</button>
+                <sc-if value="{{ f.inModifica }}">
+                  <button onClick="{{ act.annullaFissa }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:9px 13px;font-size:13.5px;cursor:pointer;text-align:left">Annulla</button>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.attesa }}">
+      <div>
+        <div style="border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3);margin-bottom:var(--space-4)">
+          <div style="display:flex;align-items:baseline;gap:var(--space-3)">
+            <h1 style="margin:0;font-size:34px">In attesa</h1>
+            <span style="font-size:14px;color:var(--muted)">{{ a.conteggio }}</span>
+          </div>
+        </div>
+        <p style="margin:0 0 var(--space-6);color:var(--muted);font-size:14px;max-width:64ch">Occorrenze di spese fisse manuali arrivate a scadenza: conferma con l'importo reale, salta il ciclo, oppure collegale a un movimento già registrato.</p>
+        <div style="display:flex;flex-direction:column;gap:var(--space-4);max-width:860px">
+          <sc-for list="{{ a.lista }}" as="x" hint-placeholder-count="2">
+            <div style="border:1px solid var(--color-divider);border-left:4px solid {{ x.bordo }};padding:var(--space-4)">
+              <div style="display:flex;align-items:baseline;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-3)">
+                <span style="font-family:var(--font-heading);font-weight:800;font-size:17px">{{ x.nome }}</span>
+                <span style="font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color: {{ x.statoCol }}">{{ x.stato }}</span>
+                <span style="margin-left:auto;font-size:12.5px;color:var(--muted)">previsti {{ x.previsto }}</span>
+              </div>
+              <div style="display:flex;gap:var(--space-2);align-items:flex-end;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Importo reale</label>
+                  <input type="text" inputMode="decimal" value="{{ x.importo }}" data-id="{{ x.id }}" data-f="importo" onChange="{{ set.attesa }}" style="width:120px;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider);text-align:right;font-variant-numeric:tabular-nums">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Data</label>
+                  <input type="date" value="{{ x.data }}" data-id="{{ x.id }}" data-f="data" onChange="{{ set.attesa }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:200px">
+                  <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Collega a un movimento</label>
+                  <select value="{{ x.link }}" data-id="{{ x.id }}" data-f="link" onChange="{{ set.attesa }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+                    <option value="">— nessuno —</option>
+                    <sc-for list="{{ a.movimenti }}" as="o" hint-placeholder-count="5"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+                  </select>
+                </div>
+                <button onClick="{{ x.conferma }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:9px 15px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;min-height:34px">{{ x.ctaConferma }}</button>
+                <button onClick="{{ x.salta }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:9px 13px;font-size:13.5px;cursor:pointer;text-align:left;min-height:34px" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Salta</button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ a.vuoto }}">
+            <div style="border:1px solid var(--color-divider);padding:var(--space-8) var(--space-4);color:var(--muted);font-size:14px">Niente in attesa: tutte le occorrenze manuali sono confermate o saltate.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.previsioni }}">
+      <div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3);margin-bottom:var(--space-6)">
+          <h1 style="margin:0;font-size:34px">Previsioni</h1>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Ciclo</label>
+            <select value="{{ pv.ciclo }}" onChange="{{ set.ciclo }}" style="min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+              <sc-for list="{{ pv.cicli }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border:1px solid var(--color-divider);margin-bottom:var(--space-6);max-width:620px">
+          <div style="padding:var(--space-4);border-right:1px solid var(--color-divider)">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Totale previsto</div>
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums;margin-top:var(--space-2)">{{ pv.totPrevisto }}</div>
+          </div>
+          <div style="padding:var(--space-4)">
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Margine sull'accredito</div>
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums;margin-top:var(--space-2);color: {{ pv.margineCol }}">{{ pv.margine }}</div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;max-width:940px">
+          <thead><tr>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px 0;border-bottom:1px solid var(--color-divider)">Categoria</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Settore</th>
+            <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 10px 8px;border-bottom:1px solid var(--color-divider)">Previsione predefinita</th>
+            <th style="text-align:right;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;padding:10px 0 8px 10px;border-bottom:1px solid var(--color-divider);width:150px">Valore del ciclo</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ pv.righe }}" as="r" hint-placeholder-count="12">
+              <tr>
+                <td style="padding:6px 10px 6px 0;border-bottom:1px solid var(--color-divider);font-size:14px">{{ r.nome }}</td>
+                <td style="padding:6px 10px;border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--muted)">{{ r.settore }}</td>
+                <td style="padding:6px 10px;border-bottom:1px solid var(--color-divider);font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">{{ r.predefinita }}</td>
+                <td style="padding:6px 0 6px 10px;border-bottom:1px solid var(--color-divider);text-align:right">
+                  <input type="text" inputMode="decimal" value="{{ r.valore }}" data-id="{{ r.id }}" onChange="{{ set.previsione }}" style="width:110px;min-height:32px;padding:5px 9px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider);text-align:right;font-variant-numeric:tabular-nums">
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.grafici }}">
+      <div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3);margin-bottom:var(--space-6)">
+          <h1 style="margin:0;font-size:34px">Grafici</h1>
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ g.periodi }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.pick }}" style="border:none;border-left:1px solid var(--color-divider);padding:8px 14px;cursor:pointer;font-size:13px;text-align:left;background: {{ o.bg }};color: {{ o.col }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(320px,1fr) minmax(380px,1.3fr);border:1px solid var(--color-divider);margin-bottom:var(--space-6)">
+          <div style="padding:var(--space-4);border-right:2px solid var(--color-divider)">
+            <h2 style="margin:0 0 var(--space-4);font-size:17px">Uscite per settore</h2>
+            <div style="display:flex;gap:var(--space-6);align-items:center;flex-wrap:wrap">
+              <div style="width:160px;height:160px;flex:0 0 auto;background: {{ g.torta }}"></div>
+              <div style="display:flex;flex-direction:column;flex:1;min-width:170px">
+                <sc-for list="{{ g.fette }}" as="s" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:var(--space-2);font-size:13px;padding:5px 0;border-bottom:1px solid var(--color-divider)">
+                    <span style="width:10px;height:10px;flex:0 0 auto;background: {{ s.col }}"></span>
+                    <span style="flex:1">{{ s.nome }}</span>
+                    <span style="color:var(--muted);font-variant-numeric:tabular-nums">{{ s.importo }}</span>
+                    <span style="color:var(--muted);font-variant-numeric:tabular-nums;width:40px;text-align:right">{{ s.perc }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="padding:var(--space-4)">
+            <h2 style="margin:0 0 var(--space-4);font-size:17px">Andamento del saldo</h2>
+            <svg viewBox="0 0 520 200" style="width:100%;height:200px">
+              <polyline points="{{ g.grigliaY }}" fill="none" stroke="var(--color-divider)" stroke-width="1"></polyline>
+              <polyline points="{{ g.linea }}" fill="none" stroke="var(--color-accent)" stroke-width="2"></polyline>
+              <sc-for list="{{ g.punti }}" as="p" hint-placeholder-count="7">
+                <rect x="{{ p.x }}" y="{{ p.y }}" width="6" height="6" fill="var(--color-accent)"></rect>
+              </sc-for>
+              <sc-for list="{{ g.etichette }}" as="e" hint-placeholder-count="7">
+                <text x="{{ e.x }}" y="194" text-anchor="middle" fill="currentColor" opacity="0.55" style="font-size:10px;font-family:var(--font-body);letter-spacing:0.08em;text-transform:uppercase">{{ e.label }}</text>
+              </sc-for>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);border-top:1px solid var(--color-divider);padding-top:var(--space-2)"><span>min {{ g.min }}</span><span>max {{ g.max }}</span></div>
+          </div>
+        </div>
+        <div style="border:1px solid var(--color-divider);padding:var(--space-4)">
+          <h2 style="margin:0 0 var(--space-4);font-size:17px">Previsto e speso per settore</h2>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ g.barre }}" as="b" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:var(--space-4);padding:9px 0;border-bottom:1px solid var(--color-divider)">
+                <span style="width:140px;font-size:13.5px;flex:0 0 auto">{{ b.nome }}</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                  <div style="height:10px;background:var(--color-surface)"><div style="height:100%;background:var(--color-neutral-500);width: {{ b.pctPrev }}%"></div></div>
+                  <div style="height:10px;background:var(--color-surface)"><div style="height:100%;width: {{ b.pctSpeso }}%;background: {{ b.col }}"></div></div>
+                </div>
+                <span style="width:190px;text-align:right;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto">{{ b.speso }} speso / {{ b.previsto }} previsto</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ui.backup }}">
+      <div style="max-width:760px">
+        <h1 style="margin:0 0 var(--space-6);font-size:34px;border-bottom:2px solid var(--color-divider);padding-bottom:var(--space-3)">Backup</h1>
+        <div style="border:1px solid var(--color-divider);padding:var(--space-4);margin-bottom:var(--space-4);display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap">
+          <span style="width:10px;height:10px;background: {{ b.statoCol }}"></span>
+          <div style="flex:1;min-width:220px">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ b.stato }}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">Ultimo backup: {{ b.ultimo }} · {{ b.dimensione }}</div>
+          </div>
+          <button onClick="{{ act.backupOra }}" style="background:var(--color-accent);color:var(--color-bg);border:1px solid var(--color-accent);padding:10px 16px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left">Backup ora</button>
+        </div>
+        <div style="border:1px solid var(--color-divider);padding:var(--space-4);margin-bottom:var(--space-4)">
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:var(--space-2)">Cartella di destinazione</div>
+          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+            <input type="text" value="{{ b.cartella }}" onChange="{{ set.cartella }}" style="flex:1;min-width:260px;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <button onClick="{{ act.sfoglia }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:8px 14px;font-size:13.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Sfoglia…</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border:1px solid var(--color-divider)">
+          <div style="padding:var(--space-4);border-right:1px solid var(--color-divider)">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;margin-bottom:var(--space-1)">Ripristino</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:var(--space-3)">Sostituisce tutti i dati attuali con quelli dell'ultimo backup.</div>
+            <button onClick="{{ act.ripristina }}" style="background:transparent;color:var(--color-accent);border:1px solid var(--color-accent);padding:9px 14px;font-family:var(--font-heading);font-weight:800;font-size:13.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">Ripristina backup</button>
+          </div>
+          <div style="padding:var(--space-4)">
+            <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;margin-bottom:var(--space-1)">Esportazione</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:var(--space-3)">{{ b.righeExport }} pronte all'esportazione.</div>
+            <div style="display:flex;gap:var(--space-2)">
+              <button onClick="{{ act.exportCsv }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:9px 14px;font-size:13.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Export CSV</button>
+              <button onClick="{{ act.exportJson }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:9px 14px;font-size:13.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Export JSON</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <sc-if value="{{ dlg.aperto }}">
+    <div style="position:fixed;inset:0;background:color-mix(in srgb, #201e1d 55%, transparent);display:flex;align-items:center;justify-content:center;z-index:60;padding:var(--space-6)">
+      <div style="background:var(--color-bg);border:2px solid var(--color-text);padding:var(--space-6);width:100%;max-width:460px;box-shadow:var(--shadow-lg);animation:entra 0.14s ease-out">
+        <h2 style="margin:0 0 var(--space-2);font-size:20px">{{ dlg.titolo }}</h2>
+        <p style="margin:0 0 var(--space-4);color:var(--muted);font-size:14px;line-height:1.55">{{ dlg.testo }}</p>
+        <sc-if value="{{ dlg.form }}">
+          <div style="display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-4)">
+            <input type="text" value="{{ dlg.campo1 }}" data-f="campo1" onChange="{{ set.dialog }}" placeholder="Nome categoria" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+            <select value="{{ dlg.campo2 }}" data-f="campo2" onChange="{{ set.dialog }}" style="width:100%;min-height:34px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-divider)">
+              <sc-for list="{{ opzioni.settori }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.nome }}</option></sc-for>
+            </select>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:var(--space-2);justify-content:flex-end">
+          <button onClick="{{ act.chiudiDialog }}" style="background:transparent;color:var(--color-text);border:1px solid var(--color-divider);padding:9px 14px;font-size:13.5px;cursor:pointer;text-align:left" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">Annulla · Esc</button>
+          <button onClick="{{ act.confermaDialog }}" style="border:1px solid var(--color-accent);padding:9px 16px;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer;text-align:left;color:var(--color-bg);background:var(--color-accent)">{{ dlg.cta }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast.on }}">
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--color-text);color:var(--color-bg);padding:11px 20px;font-size:13.5px;z-index:70;box-shadow:var(--shadow-lg);animation:entra 0.16s ease-out">{{ toast.testo }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;temaIniziale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;chiaro&quot;,&quot;scuro&quot;],&quot;default&quot;:&quot;scuro&quot;,&quot;tsType&quot;:&quot;'chiaro'|'scuro'&quot;,&quot;section&quot;:&quot;Aspetto&quot;},&quot;densita&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;compatta&quot;,&quot;media&quot;,&quot;arieggiata&quot;],&quot;default&quot;:&quot;media&quot;,&quot;tsType&quot;:&quot;'compatta'|'media'|'arieggiata'&quot;,&quot;section&quot;:&quot;Aspetto&quot;},&quot;avvisoStipendio&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Stati&quot;}}">
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const db = this.seed();
+    this.refDesc = React.createRef();
+    this.refCerca = React.createRef();
+    this.state = {
+      page: 'prospetto',
+      tema: (p.temaIniziale === 'chiaro') ? 'chiaro' : 'scuro',
+      oggi: '2026-09-17',
+      db: db,
+      qa: { data: '2026-09-17', desc: '', importo: '', tipo: 'u', conto: 'c1', cat: 'super' },
+      suggOpen: false,
+      filtri: { periodo: 'ciclo', conto: '', settore: '', cat: '', testo: '' },
+      fConto: { nome: '', tipo: 'corrente', apertura: '' },
+      fTrasf: { data: '2026-09-17', da: 'c1', a: 'c2', importo: '', nota: '' },
+      fStip: { data: '2026-09-27', importo: '1780,00', conto: 'c1', pdata: '2026-10-27', pimporto: '1780,00' },
+      fFissa: { id: null, nome: '', importo: '', ric: 'mensile', n: 2, prossima: '2026-10-01', modo: 'auto', cat: 'bollette' },
+      fRegola: { testo: '', cat: 'super' },
+      attesaEdit: {},
+      ciclo: '2026-08-27',
+      periodoGraf: '6m',
+      dialog: null,
+      toast: '',
+      backup: { ultimo: '16 set 2026, 22:10', cartella: 'C:\\Conticini\\dati\\backup' }
+    };
+  }
+
+  seed() {
+    const settori = [
+      { id: 's_casa', nome: 'Casa', tipo: 'uscita' },
+      { id: 's_spesa', nome: 'Spesa', tipo: 'uscita' },
+      { id: 's_trasp', nome: 'Trasporti', tipo: 'uscita' },
+      { id: 's_salute', nome: 'Salute', tipo: 'uscita' },
+      { id: 's_tempo', nome: 'Tempo libero', tipo: 'uscita' },
+      { id: 's_fin', nome: 'Finanza', tipo: 'uscita' },
+      { id: 's_lavoro', nome: 'Lavoro', tipo: 'entrata' },
+      { id: 's_extra', nome: 'Extra', tipo: 'entrata' }
+    ];
+    const cats = [
+      ['affitto', 'Affitto', 's_casa', 780], ['bollette', 'Bollette', 's_casa', 130], ['manut', 'Manutenzione casa', 's_casa', 50],
+      ['super', 'Supermercato', 's_spesa', 420], ['bar', 'Bar e pranzi', 's_spesa', 90],
+      ['carb', 'Carburante', 's_trasp', 110], ['mezzi', 'Mezzi pubblici', 's_trasp', 39], ['auto', 'Auto e moto', 's_trasp', 60],
+      ['farmacia', 'Farmacia', 's_salute', 40], ['visite', 'Visite mediche', 's_salute', 60],
+      ['risto', 'Ristoranti', 's_tempo', 120], ['abb', 'Abbonamenti', 's_tempo', 45], ['svago', 'Svago', 's_tempo', 60], ['viaggi', 'Viaggi', 's_tempo', 80],
+      ['comm', 'Commissioni', 's_fin', 8], ['risparmio', 'Risparmio', 's_fin', 0],
+      ['stip', 'Stipendio', 's_lavoro', 0], ['rimb', 'Rimborsi', 's_lavoro', 0],
+      ['vendite', 'Vendite', 's_extra', 0], ['regali', 'Regali', 's_extra', 0]
+    ].map(function (c) {
+      const s = settori.find(function (x) { return x.id === c[2]; });
+      return { id: c[0], nome: c[1], settore: c[2], previsto: c[3], tipo: s.tipo };
+    });
+    const conti = [
+      { id: 'c1', nome: 'Conto principale', tipo: 'corrente', apertura: 2200 },
+      { id: 'c2', nome: 'Carta prepagata', tipo: 'prepagata', apertura: 400 },
+      { id: 'c3', nome: 'Libretto risparmio', tipo: 'risparmio', apertura: 6000 }
+    ];
+    const mv = [
+      ['2026-09-17', 'Bar Centrale', 4.2, 'u', 'c2', 'bar'],
+      ['2026-09-16', 'Esselunga', 62.4, 'u', 'c1', 'super'],
+      ['2026-09-16', 'Netflix', 12.99, 'u', 'c2', 'abb'],
+      ['2026-09-15', 'Farmacia Comunale', 18.5, 'u', 'c2', 'farmacia'],
+      ['2026-09-15', 'Panificio Rosa', 6.8, 'u', 'c2', 'super'],
+      ['2026-09-14', 'Trattoria da Lino', 46.0, 'u', 'c1', 'risto'],
+      ['2026-09-14', 'Bar Centrale', 4.2, 'u', 'c2', 'bar'],
+      ['2026-09-13', 'Eni Station', 58.3, 'u', 'c1', 'carb'],
+      ['2026-09-12', 'Conad', 34.85, 'u', 'c2', 'super'],
+      ['2026-09-11', 'Abbonamento ATM', 39.0, 'u', 'c1', 'mezzi'],
+      ['2026-09-10', 'Rimborso trasferta', 120.0, 'e', 'c1', 'rimb'],
+      ['2026-09-10', 'Cartoleria Bianchi', 11.4, 'u', 'c2', 'manut'],
+      ['2026-09-09', 'Bar Centrale', 3.8, 'u', 'c2', 'bar'],
+      ['2026-09-08', 'Esselunga', 71.2, 'u', 'c1', 'super'],
+      ['2026-09-07', 'Internet casa', 27.9, 'u', 'c1', 'bollette'],
+      ['2026-09-06', 'Cinema Odeon', 18.0, 'u', 'c2', 'svago'],
+      ['2026-09-05', 'Telefono', 9.99, 'u', 'c1', 'bollette'],
+      ['2026-09-05', 'Bar Centrale', 4.6, 'u', 'c2', 'bar'],
+      ['2026-09-04', 'Pizzeria Sole', 28.5, 'u', 'c2', 'risto'],
+      ['2026-09-03', 'Meccanico tagliando', 145.0, 'u', 'c1', 'auto'],
+      ['2026-09-02', 'Esselunga', 55.1, 'u', 'c1', 'super'],
+      ['2026-09-02', 'Edicola', 2.5, 'u', 'c2', 'svago'],
+      ['2026-09-01', 'Affitto settembre', 780.0, 'u', 'c1', 'affitto'],
+      ['2026-08-31', 'Commissioni conto', 3.5, 'u', 'c1', 'comm'],
+      ['2026-08-30', 'Conad', 41.7, 'u', 'c2', 'super'],
+      ['2026-08-29', 'Bar Centrale', 4.6, 'u', 'c2', 'bar'],
+      ['2026-08-28', 'Ferramenta', 23.4, 'u', 'c1', 'manut'],
+      ['2026-08-27', 'Stipendio agosto', 1780.0, 'e', 'c1', 'stip'],
+      ['2026-08-26', 'Esselunga', 48.9, 'u', 'c1', 'super'],
+      ['2026-08-25', 'Parrucchiere', 22.0, 'u', 'c2', 'svago'],
+      ['2026-08-24', 'Bolletta luce e gas', 102.3, 'u', 'c1', 'bollette'],
+      ['2026-08-22', 'Trattoria da Lino', 38.5, 'u', 'c1', 'risto'],
+      ['2026-08-20', 'Vendita bici usata', 150.0, 'e', 'c2', 'vendite'],
+      ['2026-08-19', 'Conad', 36.2, 'u', 'c2', 'super'],
+      ['2026-08-18', 'Eni Station', 52.0, 'u', 'c1', 'carb'],
+      ['2026-08-16', 'Bar Centrale', 3.8, 'u', 'c2', 'bar'],
+      ['2026-08-15', 'Ristorante Ferragosto', 64.0, 'u', 'c1', 'risto'],
+      ['2026-08-13', 'Farmacia Comunale', 9.9, 'u', 'c2', 'farmacia'],
+      ['2026-08-12', 'Esselunga', 59.4, 'u', 'c1', 'super'],
+      ['2026-08-10', 'Abbonamento ATM', 39.0, 'u', 'c1', 'mezzi'],
+      ['2026-08-08', 'Pizzeria Sole', 31.0, 'u', 'c2', 'risto'],
+      ['2026-08-06', 'Telefono', 9.99, 'u', 'c1', 'bollette'],
+      ['2026-08-05', 'Affitto agosto', 780.0, 'u', 'c1', 'affitto'],
+      ['2026-08-03', 'Assicurazione moto', 96.0, 'u', 'c1', 'auto'],
+      ['2026-08-01', 'Esselunga', 64.3, 'u', 'c1', 'super'],
+      ['2026-07-30', 'Visita dentista', 80.0, 'u', 'c1', 'visite'],
+      ['2026-07-28', 'Conad', 44.15, 'u', 'c2', 'super'],
+      ['2026-07-27', 'Stipendio luglio', 1780.0, 'e', 'c1', 'stip'],
+      ['2026-07-24', 'Eni Station', 55.4, 'u', 'c1', 'carb'],
+      ['2026-07-20', 'Weekend in montagna', 210.0, 'u', 'c1', 'viaggi'],
+      ['2026-07-15', 'Esselunga', 57.8, 'u', 'c1', 'super'],
+      ['2026-07-10', 'Regalo compleanno', 45.0, 'u', 'c2', 'svago'],
+      ['2026-07-05', 'Affitto luglio', 780.0, 'u', 'c1', 'affitto'],
+      ['2026-06-29', 'Bolletta luce e gas', 88.7, 'u', 'c1', 'bollette'],
+      ['2026-06-27', 'Stipendio giugno', 1812.5, 'e', 'c1', 'stip'],
+      ['2026-06-20', 'Esselunga', 61.2, 'u', 'c1', 'super']
+    ].map(function (m, i) {
+      return { id: 'm' + i, data: m[0], desc: m[1], importo: m[2], tipo: m[3], conto: m[4], cat: m[5] };
+    });
+    return {
+      settori: settori, cats: cats, conti: conti, movimenti: mv,
+      trasf: [
+        { id: 't1', data: '2026-09-01', da: 'c1', a: 'c3', importo: 300, nota: 'Risparmio mensile' },
+        { id: 't2', data: '2026-08-28', da: 'c1', a: 'c2', importo: 200, nota: 'Ricarica prepagata' },
+        { id: 't3', data: '2026-08-01', da: 'c1', a: 'c3', importo: 300, nota: 'Risparmio mensile' }
+      ],
+      fisse: [
+        { id: 'f1', nome: 'Affitto', importo: 780, ric: 'mensile', n: 1, prossima: '2026-10-01', modo: 'auto', cat: 'affitto' },
+        { id: 'f2', nome: 'Bolletta luce e gas', importo: 98.5, ric: 'ogniN', n: 2, prossima: '2026-09-12', modo: 'manuale', cat: 'bollette' },
+        { id: 'f3', nome: 'Abbonamento palestra', importo: 45, ric: 'mensile', n: 1, prossima: '2026-09-15', modo: 'manuale', cat: 'abb' },
+        { id: 'f4', nome: 'Telefono', importo: 9.99, ric: 'mensile', n: 1, prossima: '2026-09-19', modo: 'auto', cat: 'bollette' },
+        { id: 'f5', nome: 'Internet casa', importo: 27.9, ric: 'mensile', n: 1, prossima: '2026-09-22', modo: 'auto', cat: 'bollette' },
+        { id: 'f6', nome: 'Netflix', importo: 12.99, ric: 'mensile', n: 1, prossima: '2026-09-24', modo: 'auto', cat: 'abb' },
+        { id: 'f7', nome: 'Tassa rifiuti', importo: 63, ric: 'ogniN', n: 4, prossima: '2026-11-05', modo: 'manuale', cat: 'manut' },
+        { id: 'f8', nome: 'Assicurazione auto', importo: 412, ric: 'annuale', n: 12, prossima: '2027-02-10', modo: 'auto', cat: 'auto' }
+      ],
+      stipendi: [
+        { id: 'st1', data: '2026-08-27', importo: 1780, conto: 'c1', pdata: '2026-09-27', pimporto: 1780 },
+        { id: 'st2', data: '2026-07-27', importo: 1780, conto: 'c1', pdata: '2026-08-27', pimporto: 1780 },
+        { id: 'st3', data: '2026-06-27', importo: 1812.5, conto: 'c1', pdata: '2026-07-27', pimporto: 1780 }
+      ],
+      regole: [
+        { id: 'r1', testo: 'esselunga', cat: 'super', attiva: true },
+        { id: 'r2', testo: 'conad', cat: 'super', attiva: true },
+        { id: 'r3', testo: 'eni', cat: 'carb', attiva: true },
+        { id: 'r4', testo: 'bar', cat: 'bar', attiva: true },
+        { id: 'r5', testo: 'farmacia', cat: 'farmacia', attiva: true },
+        { id: 'r6', testo: 'netflix', cat: 'abb', attiva: true },
+        { id: 'r7', testo: 'atm', cat: 'mezzi', attiva: false }
+      ],
+      prevCiclo: { '2026-08-27': { super: 450, risto: 140 } },
+      saltate: []
+    };
+  }
+
+  componentDidMount() {
+    this.applicaTema();
+    this.onKey = (e) => {
+      const t = e.target || {};
+      const dentroCampo = /INPUT|TEXTAREA|SELECT/.test(t.tagName || '');
+      if (e.key === 'Escape') {
+        if (this.state.dialog) this.setState({ dialog: null });
+        else if (t.blur) t.blur();
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (dentroCampo) {
+        if (e.key === 'Enter' && this.state.page === 'movimenti' && !this.state.dialog) { e.preventDefault(); this.salvaMovimento(); }
+        return;
+      }
+      const mappa = { '1': 'prospetto', '2': 'movimenti', '3': 'stipendio', '4': 'conti', '5': 'categorie', '6': 'fisse', '7': 'attesa', '8': 'previsioni', '9': 'grafici', '0': 'backup' };
+      if (mappa[e.key]) { this.setState({ page: mappa[e.key] }); return; }
+      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); this.setState({ page: 'movimenti' }, () => { if (this.refDesc.current) this.refDesc.current.focus(); }); }
+      if (e.key === '/') { e.preventDefault(); this.setState({ page: 'movimenti' }, () => { if (this.refCerca.current) this.refCerca.current.focus(); }); }
+      if (e.key === 't' || e.key === 'T') this.toggleTema();
+    };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { document.removeEventListener('keydown', this.onKey); }
+  componentDidUpdate() { this.applicaTema(); }
+
+  applicaTema() {
+    const d = document.documentElement;
+    d.dataset.theme = this.state.tema === 'scuro' ? 'dark' : 'light';
+    const dens = this.props.densita || 'media';
+    d.style.setProperty('--riga', dens === 'compatta' ? '6px' : dens === 'arieggiata' ? '15px' : '10px');
+  }
+  toggleTema() {
+    this.setState(function (s) { return { tema: s.tema === 'scuro' ? 'chiaro' : 'scuro' }; }, () => this.applicaTema());
+  }
+
+  eur(n) {
+    const v = Math.abs(Number(n) || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (n < -0.004 ? '−' : '') + v + ' €';
+  }
+  eurS(n, tipo) { return (tipo === 'e' ? '+' : '−') + Math.abs(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+  num(s) { return parseFloat(String(s).replace(/\./g, '').replace(',', '.')) || 0; }
+  data(iso) {
+    if (!iso) return '—';
+    const mesi = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+    const p = iso.split('-');
+    return Number(p[2]) + ' ' + mesi[Number(p[1]) - 1] + ' ' + p[0];
+  }
+  dataCorta(iso) { const mesi = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']; const p = iso.split('-'); return Number(p[2]) + ' ' + mesi[Number(p[1]) - 1]; }
+  dataBreve(iso) { const p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0].slice(2); }
+  cat(id) { const c = this.state.db.cats.find(function (x) { return x.id === id; }); return c ? c : { nome: '—', settore: '', previsto: 0, tipo: 'uscita' }; }
+  conto(id) { const c = this.state.db.conti.find(function (x) { return x.id === id; }); return c ? c : { nome: '—', tipo: '' }; }
+  settore(id) { const s = this.state.db.settori.find(function (x) { return x.id === id; }); return s ? s : { nome: '—' }; }
+  nomeTipo(t) { return t === 'corrente' ? 'Conto corrente' : t === 'prepagata' ? 'Carta prepagata' : t === 'risparmio' ? 'Libretto risparmio' : 'Contanti'; }
+
+  saldi() {
+    const db = this.state.db, out = {};
+    db.conti.forEach(function (c) { out[c.id] = c.apertura; });
+    db.movimenti.forEach(function (m) { if (out[m.conto] !== undefined) out[m.conto] += (m.tipo === 'e' ? m.importo : -m.importo); });
+    db.trasf.forEach(function (t) { if (out[t.da] !== undefined) out[t.da] -= t.importo; if (out[t.a] !== undefined) out[t.a] += t.importo; });
+    return out;
+  }
+  ultimoStipendio() { const s = this.state.db.stipendi.slice().sort(function (a, b) { return a.data < b.data ? 1 : -1; }); return s[0] || null; }
+  mesiTra(iso, n) { const d = new Date(iso + 'T12:00:00'); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); }
+
+  msg(t) { this.setState({ toast: t }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  patch(chiave, e) { const o = Object.assign({}, this.state[chiave]); o[e.target.dataset.f] = e.target.value; const s = {}; s[chiave] = o; this.setState(s); }
+
+  categoriaDaRegole(desc) {
+    const d = (desc || '').toLowerCase().trim();
+    if (!d) return null;
+    const r = this.state.db.regole.filter(function (x) { return x.attiva && d.indexOf(x.testo) >= 0; })
+      .sort(function (a, b) { return b.testo.length - a.testo.length; })[0];
+    return r || null;
+  }
+  salvaMovimento() {
+    const q = this.state.qa, imp = this.num(q.importo);
+    if (!q.desc.trim() || !imp) { this.msg('Servono descrizione e importo.'); return; }
+    const db = Object.assign({}, this.state.db);
+    db.movimenti = [{ id: 'm' + Date.now(), data: q.data, desc: q.desc.trim(), importo: imp, tipo: q.tipo, conto: q.conto, cat: q.cat }].concat(db.movimenti);
+    this.setState({ db: db, qa: Object.assign({}, q, { desc: '', importo: '' }), suggOpen: false });
+    this.msg('Registrato: ' + q.desc.trim() + ' ' + this.eurS(imp, q.tipo));
+    if (this.refDesc.current) this.refDesc.current.focus();
+  }
+  confermaDialog() {
+    const d = this.state.dialog; if (!d) return;
+    const db = Object.assign({}, this.state.db);
+    if (d.tipo === 'eliminaMov') { db.movimenti = db.movimenti.filter(function (x) { return x.id !== d.id; }); this.setState({ db: db, dialog: null }); this.msg('Movimento eliminato.'); return; }
+    if (d.tipo === 'eliminaTrasf') { db.trasf = db.trasf.filter(function (x) { return x.id !== d.id; }); this.setState({ db: db, dialog: null }); this.msg('Trasferimento eliminato (entrambi i movimenti).'); return; }
+    if (d.tipo === 'eliminaFissa') { db.fisse = db.fisse.filter(function (x) { return x.id !== d.id; }); this.setState({ db: db, dialog: null }); this.msg('Spesa fissa eliminata.'); return; }
+    if (d.tipo === 'eliminaRegola') { db.regole = db.regole.filter(function (x) { return x.id !== d.id; }); this.setState({ db: db, dialog: null }); this.msg('Regola eliminata.'); return; }
+    if (d.tipo === 'salta') { db.saltate = db.saltate.concat([d.id]); this.setState({ db: db, dialog: null }); this.msg('Occorrenza saltata.'); return; }
+    if (d.tipo === 'ripristino') { this.setState({ dialog: null }); this.msg('Dati ripristinati dall\'ultimo backup.'); return; }
+    if (d.tipo === 'nuovaCat') {
+      const nome = (d.campo1 || '').trim(); if (!nome) { this.msg('Serve un nome.'); return; }
+      const id = 'k' + Date.now();
+      const set = this.settore(d.campo2);
+      db.cats = db.cats.concat([{ id: id, nome: nome, settore: d.campo2, previsto: 0, tipo: set.tipo || 'uscita' }]);
+      this.setState({ db: db, dialog: null, qa: Object.assign({}, this.state.qa, { cat: id }) });
+      this.msg('Categoria «' + nome + '» creata in ' + set.nome + '.');
+      return;
+    }
+    this.setState({ dialog: null });
+  }
+  confermaAttesa(f) {
+    const ed = this.state.attesaEdit[f.id] || {};
+    const imp = ed.importo !== undefined ? this.num(ed.importo) : f.importo;
+    const data = ed.data || f.prossima;
+    const db = Object.assign({}, this.state.db);
+    if (!ed.link) {
+      db.movimenti = [{ id: 'm' + Date.now(), data: data, desc: f.nome, importo: imp, tipo: 'u', conto: 'c1', cat: f.cat }].concat(db.movimenti);
+    }
+    const passo = f.ric === 'annuale' ? 12 : f.ric === 'ogniN' ? Number(f.n) : 1;
+    db.fisse = db.fisse.map((x) => x.id === f.id ? Object.assign({}, x, { prossima: this.mesiTra(x.prossima, passo) }) : x);
+    this.setState({ db: db });
+    this.msg(ed.link ? 'Occorrenza collegata al movimento esistente.' : 'Confermata: ' + this.eur(imp));
+  }
+
+  renderVals() {
+    const self = this, db = this.state.db, oggi = this.state.oggi;
+    const avviso = this.props.avvisoStipendio === true;
+    const ult = this.ultimoStipendio();
+    const inizioCiclo = ult ? ult.data : '2026-09-01';
+    const orizzonte = (avviso || !ult) ? '' : ult.pdata;
+    const saldi = this.saldi();
+    const saldoTot = db.conti.reduce(function (a, c) { return a + saldi[c.id]; }, 0);
+
+    const arretrate = db.fisse.filter(function (f) { return db.saltate.indexOf(f.id) < 0 && f.prossima <= oggi; });
+    const inOrizzonte = orizzonte ? db.fisse.filter(function (f) { return db.saltate.indexOf(f.id) < 0 && f.prossima > oggi && f.prossima < orizzonte; }) : [];
+    const fisseAperte = arretrate.concat(inOrizzonte).sort(function (a, b) { return a.prossima < b.prossima ? -1 : 1; });
+    const totFisse = fisseAperte.reduce(function (a, f) { return a + f.importo; }, 0);
+
+    const speseCiclo = db.movimenti.filter(function (m) { return m.tipo === 'u' && m.data >= inizioCiclo && m.data <= oggi; });
+    const perCat = {};
+    speseCiclo.forEach(function (m) { perCat[m.cat] = (perCat[m.cat] || 0) + m.importo; });
+    const override = db.prevCiclo[inizioCiclo] || {};
+    const prevRighe = db.cats.filter(function (c) { return c.tipo === 'uscita' && (c.previsto > 0 || override[c.id] || perCat[c.id]); })
+      .map(function (c) {
+        const prev = override[c.id] !== undefined ? override[c.id] : c.previsto;
+        const speso = perCat[c.id] || 0;
+        const residuo = Math.max(0, prev - speso);
+        const sforamento = Math.max(0, speso - prev);
+        const pct = prev > 0 ? Math.min(100, (speso / prev) * 100) : 100;
+        return {
+          id: c.id, nome: c.nome, ord: speso, previsto: self.eur(prev), speso: self.eur(speso),
+          residuo: self.eur(residuo), sforamento: sforamento > 0 ? self.eur(sforamento) : '—',
+          sforCol: sforamento > 0 ? 'var(--rosso)' : 'var(--muted)',
+          pct: pct.toFixed(1), barCol: sforamento > 0 ? 'var(--rosso)' : pct > 85 ? 'var(--ambra)' : 'var(--verde)',
+          residuoCents: residuo
+        };
+      }).sort(function (a, b) { return b.ord - a.ord; });
+    const totResidui = prevRighe.reduce(function (a, r) { return a + r.residuoCents; }, 0);
+    const previsto = saldoTot - totFisse - totResidui;
+    const accredito = ult ? ult.pimporto : 0;
+
+    const nav = [
+      ['prospetto', 'Prospetto', '1'], ['movimenti', 'Movimenti', '2'], ['stipendio', 'Stipendio', '3'], ['conti', 'Conti', '4'],
+      ['categorie', 'Categorie e regole', '5'], ['fisse', 'Spese fisse', '6'], ['attesa', 'In attesa', '7'],
+      ['previsioni', 'Previsioni', '8'], ['grafici', 'Grafici', '9'], ['backup', 'Backup', '0']
+    ];
+    const attesaLista = db.fisse.filter(function (f) { return f.modo === 'manuale' && f.prossima <= oggi && db.saltate.indexOf(f.id) < 0; });
+
+    const f = this.state.filtri;
+    let lista = db.movimenti.slice();
+    if (f.periodo === 'ciclo') lista = lista.filter(function (m) { return m.data >= inizioCiclo; });
+    if (f.periodo === 'mese') lista = lista.filter(function (m) { return m.data.slice(0, 7) === oggi.slice(0, 7); });
+    if (f.periodo === '3m') lista = lista.filter(function (m) { return m.data >= self.mesiTra(oggi, -3); });
+    if (f.conto) lista = lista.filter(function (m) { return m.conto === f.conto; });
+    if (f.settore) lista = lista.filter(function (m) { return self.cat(m.cat).settore === f.settore; });
+    if (f.cat) lista = lista.filter(function (m) { return m.cat === f.cat; });
+    if (f.testo) lista = lista.filter(function (m) { return m.desc.toLowerCase().indexOf(f.testo.toLowerCase()) >= 0; });
+    lista = lista.sort(function (a, b) { return a.data < b.data ? 1 : a.data > b.data ? -1 : 0; });
+    const tE = lista.filter(function (m) { return m.tipo === 'e'; }).reduce(function (a, m) { return a + m.importo; }, 0);
+    const tU = lista.filter(function (m) { return m.tipo === 'u'; }).reduce(function (a, m) { return a + m.importo; }, 0);
+
+    const q = this.state.qa;
+    const regola = this.categoriaDaRegole(q.desc);
+    const gruppi = [];
+    db.movimenti.forEach(function (m) { if (gruppi.indexOf(m.desc) < 0) gruppi.push(m.desc); });
+    const sugg = gruppi.filter(function (d) { return !q.desc || d.toLowerCase().indexOf(q.desc.toLowerCase()) === 0; }).slice(0, 6)
+      .map(function (d) {
+        const ultimo = db.movimenti.find(function (m) { return m.desc === d; });
+        return {
+          desc: d, cat: self.cat(ultimo.cat).nome, importo: self.eur(ultimo.importo),
+          pick: function () { self.setState({ qa: Object.assign({}, self.state.qa, { desc: d, cat: ultimo.cat, tipo: ultimo.tipo, conto: ultimo.conto, importo: self.state.qa.importo || String(ultimo.importo.toFixed(2)).replace('.', ',') }), suggOpen: false }); }
+        };
+      });
+
+    const cicli = db.stipendi.map(function (s, i) {
+      const prox = db.stipendi[i - 1];
+      const fine = prox ? prox.data : (s.pdata || oggi);
+      const speso = db.movimenti.filter(function (m) { return m.tipo === 'u' && m.data >= s.data && m.data < fine; }).reduce(function (a, m) { return a + m.importo; }, 0);
+      return {
+        etichetta: self.dataCorta(s.data) + ' → ' + self.dataCorta(fine), data: self.dataBreve(s.data),
+        conto: self.conto(s.conto).nome, importo: self.eur(s.importo), speso: self.eur(speso), residuo: self.eur(s.importo - speso)
+      };
+    });
+
+    const mesiIndietro = this.state.periodoGraf === '3m' ? 3 : this.state.periodoGraf === '12m' ? 12 : 6;
+    const daData = this.mesiTra(oggi, -mesiIndietro);
+    const perSet = {};
+    db.movimenti.filter(function (m) { return m.tipo === 'u' && m.data >= daData; })
+      .forEach(function (m) { const s = self.cat(m.cat).settore; perSet[s] = (perSet[s] || 0) + m.importo; });
+    const palette = ['var(--color-accent)', 'var(--color-neutral-800)', 'var(--color-accent-400)', 'var(--color-neutral-500)', 'var(--color-accent-700)', 'var(--color-neutral-300)'];
+    const totUsc = Object.keys(perSet).reduce(function (a, k) { return a + perSet[k]; }, 0) || 1;
+    let acc = 0; const stops = [];
+    const fette = Object.keys(perSet).sort(function (a, b) { return perSet[b] - perSet[a]; }).map(function (k, i) {
+      const col = palette[i % palette.length], pc = (perSet[k] / totUsc) * 100;
+      stops.push(col + ' ' + acc.toFixed(2) + '% ' + (acc + pc).toFixed(2) + '%'); acc += pc;
+      return { nome: self.settore(k).nome, importo: self.eur(perSet[k]), perc: pc.toFixed(0) + '%', col: col };
+    });
+
+    const punti = [], etichette = [], serie = [];
+    const mesiLabel = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+    const base = db.conti.reduce(function (a, c) { return a + c.apertura; }, 0);
+    for (let i = mesiIndietro; i >= 0; i--) {
+      const fineM = this.mesiTra(oggi, -i);
+      const val = base + db.movimenti.filter(function (m) { return m.data <= fineM; }).reduce(function (a, m) { return a + (m.tipo === 'e' ? m.importo : -m.importo); }, 0);
+      serie.push({ v: val, m: mesiLabel[Number(fineM.slice(5, 7)) - 1] });
+    }
+    const vals = serie.map(function (s) { return s.v; });
+    const mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), span = (mx - mn) || 1;
+    const linea = serie.map(function (s, i) {
+      const x = 16 + (i * (488 / Math.max(1, serie.length - 1)));
+      const y = 20 + (1 - (s.v - mn) / span) * 140;
+      punti.push({ x: (x - 3).toFixed(1), y: (y - 3).toFixed(1) });
+      etichette.push({ x: x.toFixed(1), label: s.m });
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+
+    const barre = db.settori.filter(function (s) { return s.tipo === 'uscita'; }).map(function (s) {
+      const prevS = db.cats.filter(function (c) { return c.settore === s.id; }).reduce(function (a, c) { return a + (override[c.id] !== undefined ? override[c.id] : c.previsto); }, 0);
+      const spesoS = speseCiclo.filter(function (m) { return self.cat(m.cat).settore === s.id; }).reduce(function (a, m) { return a + m.importo; }, 0);
+      const b = Math.max(prevS, spesoS) || 1;
+      return { nome: s.nome, previsto: self.eur(prevS), speso: self.eur(spesoS), pctPrev: ((prevS / b) * 100).toFixed(1), pctSpeso: ((spesoS / b) * 100).toFixed(1), col: spesoS > prevS ? 'var(--rosso)' : 'var(--verde)' };
+    });
+
+    const ff = this.state.fFissa;
+
+    return {
+      nav: nav.map(function (n) {
+        const att = self.state.page === n[0];
+        return {
+          k: n[2], label: n[1], badge: n[0] === 'attesa' && attesaLista.length ? String(attesaLista.length) : '',
+          bg: att ? 'var(--color-surface)' : 'transparent', col: 'var(--color-text)',
+          fw: att ? '800' : '400', marker: att ? 'var(--color-accent)' : 'transparent',
+          go: function () { self.setState({ page: n[0] }); }
+        };
+      }),
+      ui: { prospetto: this.state.page === 'prospetto', movimenti: this.state.page === 'movimenti', stipendio: this.state.page === 'stipendio', conti: this.state.page === 'conti', categorie: this.state.page === 'categorie', fisse: this.state.page === 'fisse', attesa: this.state.page === 'attesa', previsioni: this.state.page === 'previsioni', grafici: this.state.page === 'grafici', backup: this.state.page === 'backup' },
+      tema: { label: this.state.tema === 'scuro' ? 'Tema scuro' : 'Tema chiaro', toggle: function () { self.toggleTema(); } },
+      refs: { desc: this.refDesc, cerca: this.refCerca },
+      opzioni: {
+        conti: db.conti.map(function (c) { return { id: c.id, nome: c.nome }; }),
+        settori: db.settori.map(function (s) { return { id: s.id, nome: s.nome }; }),
+        categorie: db.cats.map(function (c) { return { id: c.id, nome: self.settore(c.settore).nome + ' › ' + c.nome }; })
+      },
+      p: {
+        oggi: oggi, avviso: avviso,
+        sottotitolo: 'Ciclo aperto il ' + this.data(inizioCiclo) + (orizzonte ? ' · orizzonte ' + this.data(orizzonte) : ' · orizzonte mancante'),
+        previsto: avviso ? '—' : this.eur(previsto),
+        previstoCol: avviso ? 'var(--muted)' : previsto < 0 ? 'var(--rosso)' : 'var(--color-text)',
+        dataStipendio: avviso ? '—' : this.data(orizzonte),
+        previstoNota: avviso
+          ? 'Il calcolo richiede la data prevista del prossimo accredito. Sotto restano il saldo reale e le occorrenze arretrate.'
+          : 'Saldo di oggi ' + this.eur(saldoTot) + ' − ' + fisseAperte.length + ' spese fisse aperte ' + this.eur(totFisse) + ' − residui di categoria ' + this.eur(totResidui) + '.',
+        dopo: avviso ? '—' : this.eur(previsto + accredito),
+        accredito: this.eur(accredito),
+        saldoTotale: this.eur(saldoTot),
+        conti: db.conti.map(function (c) { return { nome: c.nome, tipo: self.nomeTipo(c.tipo), saldo: self.eur(saldi[c.id]) }; }),
+        totFisse: this.eur(totFisse),
+        nessunaFissa: fisseAperte.length === 0,
+        fisse: fisseAperte.map(function (x) {
+          const arr = x.prossima <= oggi;
+          return { nome: x.nome, arretrata: arr, scadenza: (arr ? 'scaduta il ' : 'scade il ') + self.data(x.prossima), modo: x.modo === 'auto' ? 'automatica' : 'manuale', importo: self.eur(x.importo), col: arr ? 'var(--rosso)' : 'var(--color-text)', bg: arr ? 'var(--rosso-bg)' : 'transparent', pad: arr ? '10px' : '0px' };
+        }),
+        ciclo: this.dataCorta(inizioCiclo) + (orizzonte ? ' → ' + this.dataCorta(orizzonte) : ''),
+        previsioni: prevRighe
+      },
+      m: {
+        qa: q, suggOpen: this.state.suggOpen && sugg.length > 0, sugg: sugg,
+        catOpzioni: db.cats.filter(function (c) { return c.tipo === (q.tipo === 'e' ? 'entrata' : 'uscita'); }).map(function (c) { return { id: c.id, nome: self.settore(c.settore).nome + ' › ' + c.nome }; }),
+        catFiltro: db.cats.filter(function (c) { return !f.settore || c.settore === f.settore; }).map(function (c) { return { id: c.id, nome: c.nome }; }),
+        regolaNota: regola ? 'Regola «' + regola.testo + '» → ' + this.cat(regola.cat).nome + ': categoria proposta automaticamente.' : '',
+        entrataBg: q.tipo === 'e' ? 'var(--verde-bg)' : 'transparent', entrataCol: q.tipo === 'e' ? 'var(--verde)' : 'var(--muted)',
+        uscitaBg: q.tipo === 'u' ? 'var(--rosso-bg)' : 'transparent', uscitaCol: q.tipo === 'u' ? 'var(--rosso)' : 'var(--muted)',
+        filtri: f,
+        conteggio: lista.length + (lista.length === 1 ? ' movimento' : ' movimenti'),
+        totEntrate: this.eur(tE), totUscite: this.eur(tU), totSaldo: this.eur(tE - tU), saldoCol: (tE - tU) < 0 ? 'var(--rosso)' : 'var(--verde)',
+        vuoto: lista.length === 0,
+        righe: lista.map(function (m) {
+          return {
+            data: self.dataBreve(m.data), desc: m.desc, cat: self.cat(m.cat).nome, conto: self.conto(m.conto).nome,
+            importo: self.eurS(m.importo, m.tipo), col: m.tipo === 'e' ? 'var(--verde)' : 'var(--rosso)',
+            elimina: function () { self.setState({ dialog: { tipo: 'eliminaMov', id: m.id, titolo: 'Eliminare il movimento?', testo: '«' + m.desc + '» del ' + self.data(m.data) + ', ' + self.eur(m.importo) + '. Il saldo e le previsioni si ricalcolano subito.', cta: 'Elimina' } }); }
+          };
+        })
+      },
+      s: { f: this.state.fStip, cicli: cicli },
+      c: {
+        conti: db.conti.map(function (c) {
+          return { nome: c.nome, tipo: self.nomeTipo(c.tipo), saldo: self.eur(saldi[c.id]), movimenti: db.movimenti.filter(function (m) { return m.conto === c.id && m.data >= inizioCiclo; }).length };
+        }),
+        fConto: this.state.fConto, fTrasf: this.state.fTrasf,
+        trasf: db.trasf.slice().sort(function (a, b) { return a.data < b.data ? 1 : -1; }).map(function (t) {
+          return {
+            data: self.dataBreve(t.data), da: self.conto(t.da).nome, a: self.conto(t.a).nome, nota: t.nota, importo: self.eur(t.importo),
+            elimina: function () { self.setState({ dialog: { tipo: 'eliminaTrasf', id: t.id, titolo: 'Eliminare il trasferimento?', testo: self.eur(t.importo) + ' da ' + self.conto(t.da).nome + ' a ' + self.conto(t.a).nome + '. Il gruppo viene eliminato per intero.', cta: 'Elimina' } }); }
+          };
+        })
+      },
+      k: {
+        settori: db.settori.map(function (s) {
+          const cs = db.cats.filter(function (c) { return c.settore === s.id; });
+          return {
+            nome: s.nome, tipo: s.tipo, bg: s.tipo === 'entrata' ? 'var(--verde-bg)' : 'var(--rosso-bg)', col: s.tipo === 'entrata' ? 'var(--verde)' : 'var(--rosso)',
+            totale: cs.length + (cs.length === 1 ? ' categoria' : ' categorie'),
+            categorie: cs.map(function (c) { return { nome: c.nome }; })
+          };
+        }),
+        fRegola: this.state.fRegola,
+        regoleAttive: db.regole.filter(function (r) { return r.attiva; }).length + ' attive su ' + db.regole.length,
+        regole: db.regole.map(function (r, i) {
+          return {
+            priorita: String(i + 1), testo: r.testo, cat: self.cat(r.cat).nome, op: r.attiva ? '1' : '0.45',
+            usi: db.movimenti.filter(function (m) { return m.desc.toLowerCase().indexOf(r.testo) >= 0; }).length + ' usi',
+            just: r.attiva ? 'flex-end' : 'flex-start', swBg: r.attiva ? 'var(--color-accent)' : 'transparent',
+            knob: r.attiva ? 'var(--color-bg)' : 'var(--muted)',
+            toggle: function () { self.setState({ db: Object.assign({}, db, { regole: db.regole.map(function (x) { return x.id === r.id ? Object.assign({}, x, { attiva: !x.attiva }) : x; }) }) }); },
+            su: function () { if (i === 0) return; const a = db.regole.slice(); const t = a[i - 1]; a[i - 1] = a[i]; a[i] = t; self.setState({ db: Object.assign({}, db, { regole: a }) }); },
+            giu: function () { if (i === db.regole.length - 1) return; const a = db.regole.slice(); const t = a[i + 1]; a[i + 1] = a[i]; a[i] = t; self.setState({ db: Object.assign({}, db, { regole: a }) }); },
+            elimina: function () { self.setState({ dialog: { tipo: 'eliminaRegola', id: r.id, titolo: 'Eliminare la regola?', testo: '«' + r.testo + '» → ' + self.cat(r.cat).nome + '. I movimenti già categorizzati restano invariati.', cta: 'Elimina' } }); }
+          };
+        })
+      },
+      f: {
+        lista: db.fisse.slice().sort(function (a, b) { return a.prossima < b.prossima ? -1 : 1; }).map(function (x) {
+          const arr = x.prossima <= oggi;
+          return {
+            nome: x.nome, importo: self.eur(x.importo), bg: arr ? 'var(--rosso-bg)' : 'transparent',
+            modo: x.modo === 'auto' ? 'automatica' : 'manuale',
+            modoBg: x.modo === 'auto' ? 'var(--neu-bg)' : 'var(--ambra-bg)', modoCol: x.modo === 'auto' ? 'var(--neu)' : 'var(--ambra)',
+            ricorrenza: x.ric === 'mensile' ? 'Mensile' : x.ric === 'annuale' ? 'Annuale' : 'Ogni ' + x.n + ' mesi',
+            prossima: self.data(x.prossima), cat: self.cat(x.cat).nome,
+            modifica: function () { self.setState({ fFissa: { id: x.id, nome: x.nome, importo: x.importo.toFixed(2).replace('.', ','), ric: x.ric, n: x.n, prossima: x.prossima, modo: x.modo, cat: x.cat } }); },
+            elimina: function () { self.setState({ dialog: { tipo: 'eliminaFissa', id: x.id, titolo: 'Eliminare la spesa fissa?', testo: '«' + x.nome + '», ' + self.eur(x.importo) + '. Sparisce dal prospetto e dalle occorrenze future.', cta: 'Elimina' } }); }
+          };
+        }),
+        form: ff, mostraN: ff.ric === 'ogniN', inModifica: !!ff.id,
+        titoloForm: ff.id ? 'Modifica spesa fissa' : 'Nuova spesa fissa',
+        ctaForm: ff.id ? 'Salva modifiche' : 'Crea spesa fissa',
+        autoBg: ff.modo === 'auto' ? 'var(--neu-bg)' : 'transparent', autoCol: ff.modo === 'auto' ? 'var(--neu)' : 'var(--muted)',
+        manBg: ff.modo === 'manuale' ? 'var(--ambra-bg)' : 'transparent', manCol: ff.modo === 'manuale' ? 'var(--ambra)' : 'var(--muted)'
+      },
+      a: {
+        conteggio: attesaLista.length + (attesaLista.length === 1 ? ' occorrenza da confermare' : ' occorrenze da confermare'),
+        vuoto: attesaLista.length === 0,
+        movimenti: db.movimenti.slice(0, 12).map(function (m) { return { id: m.id, label: self.dataBreve(m.data) + ' · ' + m.desc + ' · ' + self.eur(m.importo) }; }),
+        lista: attesaLista.map(function (x) {
+          const ed = self.state.attesaEdit[x.id] || {};
+          const giorni = Math.round((new Date(oggi) - new Date(x.prossima)) / 86400000);
+          return {
+            id: x.id, nome: x.nome, previsto: self.eur(x.importo),
+            stato: giorni > 0 ? 'arretrata di ' + giorni + (giorni === 1 ? ' giorno' : ' giorni') : 'in scadenza oggi',
+            statoCol: giorni > 0 ? 'var(--rosso)' : 'var(--ambra)',
+            bordo: giorni > 0 ? 'var(--color-accent)' : 'var(--ambra)',
+            importo: ed.importo !== undefined ? ed.importo : x.importo.toFixed(2).replace('.', ','),
+            data: ed.data || x.prossima, link: ed.link || '',
+            ctaConferma: ed.link ? 'Collega' : 'Conferma',
+            conferma: function () { self.confermaAttesa(x); },
+            salta: function () { self.setState({ dialog: { tipo: 'salta', id: x.id, titolo: 'Saltare questa occorrenza?', testo: '«' + x.nome + '» non verrà registrata per la scadenza del ' + self.data(x.prossima) + ' e uscirà dal prospetto.', cta: 'Salta' } }); }
+          };
+        })
+      },
+      pv: (function () {
+        const cicliOpt = db.stipendi.map(function (s) { return { id: s.data, label: self.data(s.data) + (s.pdata ? ' → ' + self.data(s.pdata) : '') }; });
+        const righe = db.cats.filter(function (c) { return c.tipo === 'uscita'; }).map(function (c) {
+          const ov = (db.prevCiclo[self.state.ciclo] || {})[c.id];
+          return { id: c.id, nome: c.nome, settore: self.settore(c.settore).nome, predefinita: self.eur(c.previsto), valore: (ov !== undefined ? ov : c.previsto).toFixed(2).replace('.', ',') };
+        });
+        const tot = righe.reduce(function (a, r) { return a + self.num(r.valore); }, 0);
+        const marg = (ult ? ult.pimporto : 0) - tot;
+        return { ciclo: self.state.ciclo, cicli: cicliOpt, righe: righe, totPrevisto: self.eur(tot), margine: self.eur(marg), margineCol: marg < 0 ? 'var(--rosso)' : 'var(--verde)' };
+      })(),
+      g: {
+        periodi: [['3m', '3 mesi'], ['6m', '6 mesi'], ['12m', '12 mesi']].map(function (o) {
+          const att = self.state.periodoGraf === o[0];
+          return { label: o[1], bg: att ? 'var(--color-accent)' : 'transparent', col: att ? 'var(--color-bg)' : 'var(--color-text)', pick: function () { self.setState({ periodoGraf: o[0] }); } };
+        }),
+        torta: 'conic-gradient(' + stops.join(',') + ')', fette: fette,
+        linea: linea, punti: punti, etichette: etichette, grigliaY: '16,160 504,160',
+        min: this.eur(mn), max: this.eur(mx), barre: barre
+      },
+      b: {
+        stato: 'Backup aggiornato', statoCol: 'var(--verde)', ultimo: this.state.backup.ultimo,
+        dimensione: '412 KB', cartella: this.state.backup.cartella,
+        righeExport: db.movimenti.length + ' movimenti e ' + db.trasf.length + ' trasferimenti'
+      },
+      dlg: {
+        aperto: !!this.state.dialog,
+        titolo: this.state.dialog ? this.state.dialog.titolo : '',
+        testo: this.state.dialog ? this.state.dialog.testo : '',
+        cta: this.state.dialog ? this.state.dialog.cta : '',
+        form: !!(this.state.dialog && this.state.dialog.tipo === 'nuovaCat'),
+        campo1: this.state.dialog ? (this.state.dialog.campo1 || '') : '',
+        campo2: this.state.dialog ? (this.state.dialog.campo2 || 's_casa') : 's_casa'
+      },
+      toast: { on: !!this.state.toast, testo: this.state.toast },
+      set: {
+        oggi: function (e) { self.setState({ oggi: e.target.value }); },
+        qa: function (e) {
+          const o = Object.assign({}, self.state.qa); o[e.target.dataset.f] = e.target.value;
+          if (e.target.dataset.f === 'desc') {
+            const r = self.categoriaDaRegole(e.target.value);
+            if (r) o.cat = r.cat;
+            self.setState({ qa: o, suggOpen: true });
+            return;
+          }
+          self.setState({ qa: o });
+        },
+        filtri: function (e) { self.patch('filtri', e); },
+        conto: function (e) { self.patch('fConto', e); },
+        trasf: function (e) { self.patch('fTrasf', e); },
+        stip: function (e) { self.patch('fStip', e); },
+        fissa: function (e) { self.patch('fFissa', e); },
+        regola: function (e) { self.patch('fRegola', e); },
+        dialog: function (e) { const d = Object.assign({}, self.state.dialog); d[e.target.dataset.f] = e.target.value; self.setState({ dialog: d }); },
+        attesa: function (e) {
+          const id = e.target.dataset.id, campo = e.target.dataset.f;
+          const ed = Object.assign({}, self.state.attesaEdit);
+          ed[id] = Object.assign({}, ed[id] || {}); ed[id][campo] = e.target.value;
+          self.setState({ attesaEdit: ed });
+        },
+        ciclo: function (e) { self.setState({ ciclo: e.target.value }); },
+        previsione: function (e) {
+          const id = e.target.dataset.id, v = self.num(e.target.value);
+          const pc = Object.assign({}, db.prevCiclo);
+          pc[self.state.ciclo] = Object.assign({}, pc[self.state.ciclo] || {}); pc[self.state.ciclo][id] = v;
+          self.setState({ db: Object.assign({}, db, { prevCiclo: pc }) });
+        },
+        cartella: function (e) { self.setState({ backup: Object.assign({}, self.state.backup, { cartella: e.target.value }) }); }
+      },
+      act: {
+        vaiStipendio: function () { self.setState({ page: 'stipendio' }); },
+        apriSugg: function () { self.setState({ suggOpen: true }); },
+        chiudiSugg: function () { setTimeout(function () { self.setState({ suggOpen: false }); }, 120); },
+        tipoEntrata: function () { const c = db.cats.find(function (x) { return x.tipo === 'entrata'; }); self.setState({ qa: Object.assign({}, self.state.qa, { tipo: 'e', cat: c ? c.id : '' }) }); },
+        tipoUscita: function () { const c = db.cats.find(function (x) { return x.tipo === 'uscita'; }); self.setState({ qa: Object.assign({}, self.state.qa, { tipo: 'u', cat: c ? c.id : '' }) }); },
+        salvaMovimento: function () { self.salvaMovimento(); },
+        nuovaCategoria: function () { self.setState({ dialog: { tipo: 'nuovaCat', titolo: 'Nuova categoria', testo: 'Nome e settore di appartenenza. Una categoria con previsione non può avere spese fisse attive.', cta: 'Crea categoria', campo1: '', campo2: 's_casa' } }); },
+        azzeraFiltri: function () { self.setState({ filtri: { periodo: 'ciclo', conto: '', settore: '', cat: '', testo: '' } }); },
+        salvaStipendio: function () {
+          const fs = self.state.fStip, imp = self.num(fs.importo);
+          if (!imp) { self.msg('Inserisci l\'importo dell\'accredito.'); return; }
+          const d = Object.assign({}, db);
+          d.stipendi = [{ id: 'st' + Date.now(), data: fs.data, importo: imp, conto: fs.conto, pdata: fs.pdata, pimporto: self.num(fs.pimporto) }].concat(db.stipendi);
+          d.movimenti = [{ id: 'm' + Date.now(), data: fs.data, desc: 'Stipendio', importo: imp, tipo: 'e', conto: fs.conto, cat: 'stip' }].concat(db.movimenti);
+          self.setState({ db: d, ciclo: fs.data });
+          self.msg('Stipendio registrato: nuovo ciclo dal ' + self.data(fs.data) + '.');
+        },
+        salvaConto: function () {
+          const fc = self.state.fConto;
+          if (!fc.nome.trim()) { self.msg('Serve il nome del conto.'); return; }
+          const d = Object.assign({}, db);
+          d.conti = db.conti.concat([{ id: 'c' + Date.now(), nome: fc.nome.trim(), tipo: fc.tipo, apertura: self.num(fc.apertura) }]);
+          self.setState({ db: d, fConto: { nome: '', tipo: 'corrente', apertura: '' } });
+          self.msg('Conto creato.');
+        },
+        salvaTrasf: function () {
+          const t = self.state.fTrasf, imp = self.num(t.importo);
+          if (!imp) { self.msg('Inserisci l\'importo.'); return; }
+          if (t.da === t.a) { self.msg('Scegli due conti diversi.'); return; }
+          const d = Object.assign({}, db);
+          d.trasf = [{ id: 't' + Date.now(), data: t.data, da: t.da, a: t.a, importo: imp, nota: t.nota }].concat(db.trasf);
+          self.setState({ db: d, fTrasf: Object.assign({}, t, { importo: '', nota: '' }) });
+          self.msg('Trasferimento registrato.');
+        },
+        salvaRegola: function () {
+          const r = self.state.fRegola;
+          if (!r.testo.trim()) { self.msg('Scrivi il testo da cercare.'); return; }
+          const d = Object.assign({}, db);
+          d.regole = db.regole.concat([{ id: 'r' + Date.now(), testo: r.testo.trim().toLowerCase(), cat: r.cat, attiva: true }]);
+          self.setState({ db: d, fRegola: { testo: '', cat: r.cat } });
+          self.msg('Regola aggiunta con priorità più bassa.');
+        },
+        modoAuto: function () { self.setState({ fFissa: Object.assign({}, self.state.fFissa, { modo: 'auto' }) }); },
+        modoManuale: function () { self.setState({ fFissa: Object.assign({}, self.state.fFissa, { modo: 'manuale' }) }); },
+        annullaFissa: function () { self.setState({ fFissa: { id: null, nome: '', importo: '', ric: 'mensile', n: 2, prossima: '2026-10-01', modo: 'auto', cat: 'bollette' } }); },
+        salvaFissa: function () {
+          const x = self.state.fFissa, imp = self.num(x.importo);
+          if (!x.nome.trim() || !imp) { self.msg('Servono nome e importo.'); return; }
+          const d = Object.assign({}, db);
+          if (x.id) {
+            d.fisse = db.fisse.map(function (o) { return o.id === x.id ? { id: x.id, nome: x.nome.trim(), importo: imp, ric: x.ric, n: Number(x.n), prossima: x.prossima, modo: x.modo, cat: x.cat } : o; });
+            self.msg('Spesa fissa aggiornata.');
+          } else {
+            d.fisse = db.fisse.concat([{ id: 'f' + Date.now(), nome: x.nome.trim(), importo: imp, ric: x.ric, n: Number(x.n), prossima: x.prossima, modo: x.modo, cat: x.cat }]);
+            self.msg('Spesa fissa creata.');
+          }
+          self.setState({ db: d, fFissa: { id: null, nome: '', importo: '', ric: 'mensile', n: 2, prossima: '2026-10-01', modo: 'auto', cat: 'bollette' } });
+        },
+        backupOra: function () {
+          const ora = new Date();
+          self.setState({ backup: Object.assign({}, self.state.backup, { ultimo: self.data(ora.toISOString().slice(0, 10)) + ', ' + String(ora.getHours()).padStart(2, '0') + ':' + String(ora.getMinutes()).padStart(2, '0') }) });
+          self.msg('Backup completato.');
+        },
+        sfoglia: function () { self.msg('Si apre il selettore cartelle di Windows.'); },
+        ripristina: function () { self.setState({ dialog: { tipo: 'ripristino', titolo: 'Ripristinare il backup?', testo: 'Tutti i dati attuali vengono sostituiti con quelli del ' + self.state.backup.ultimo + '. Quanto registrato dopo quella data va perso.', cta: 'Ripristina' } }); },
+        exportCsv: function () { self.msg('Esportato movimenti.csv nella cartella dati.'); },
+        exportJson: function () { self.msg('Esportato conticini.json nella cartella dati.'); },
+        chiudiDialog: function () { self.setState({ dialog: null }); },
+        confermaDialog: function () { self.confermaDialog(); }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
