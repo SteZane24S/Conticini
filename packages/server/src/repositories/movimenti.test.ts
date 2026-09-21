@@ -68,6 +68,7 @@ describe('creaRepositorioMovimenti', () => {
       descrizione: 'Spesa iniziale',
       descrizioneNorm: '',
       transferGroupId: null,
+      posizioneId: null,
       ...dati,
     };
   }
@@ -90,6 +91,7 @@ describe('creaRepositorioMovimenti', () => {
       descrizione: 'Città Perché',
       descrizioneNorm: 'citta perche',
       transferGroupId: null,
+      posizioneId: null,
     });
     expect(await repo.ottieni(creato.id)).toEqual(creato);
   });

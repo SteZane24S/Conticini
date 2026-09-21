@@ -42,6 +42,12 @@ export function registraRottePrevisioni(
     return { ok: true, budgetDefault };
   });
 
+  app.delete('/api/previsioni/default/:categoriaId', async (request) => {
+    const { categoriaId } = request.params as { categoriaId: string };
+    await repoDefault.elimina(categoriaId);
+    return { ok: true };
+  });
+
   app.put('/api/previsioni/override/:cicloId/:categoriaId', async (request) => {
     const { cicloId, categoriaId } = request.params as {
       cicloId: string;

@@ -5,6 +5,8 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ID_SETTORE_TECNICO_DEBITI_CREDITI } from '@conticini/dominio';
+
 import { runMigrations } from '../migrations-runner.js';
 import { creaRepositorioSettori } from './settori.js';
 
@@ -41,7 +43,12 @@ describe('creaRepositorioSettori', () => {
     const primo = await repo.crea({ nome: 'Casa' });
     const secondo = await repo.crea({ nome: 'Svago' });
 
-    expect(await repo.elenca()).toEqual([primo, secondo]);
+    const elenco = await repo.elenca();
+    expect(
+      elenco.filter(
+        (settore) => settore.id !== ID_SETTORE_TECNICO_DEBITI_CREDITI,
+      ),
+    ).toEqual([primo, secondo]);
   });
 
   it('rifiuta un nome gia usato da un settore attivo', async () => {
@@ -86,7 +93,12 @@ describe('creaRepositorioSettori', () => {
 
     await repo.elimina(creato.id);
 
-    expect(await repo.elenca()).toEqual([]);
+    const elenco = await repo.elenca();
+    expect(
+      elenco.filter(
+        (settore) => settore.id !== ID_SETTORE_TECNICO_DEBITI_CREDITI,
+      ),
+    ).toEqual([]);
     expect(await repo.ottieni(creato.id)).toBeNull();
     const riga = db
       ?.prepare('SELECT deleted_at FROM sectors WHERE id = ?')

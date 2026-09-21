@@ -71,6 +71,7 @@ describe('occorrenze', () => {
       period: string;
       dueDate: string;
       amountCents: number;
+      mode: 'auto' | 'manual';
       status: 'pending' | 'paid' | 'skipped';
       transactionId: string | null;
     }> = {},
@@ -82,7 +83,7 @@ describe('occorrenze', () => {
       amount_cents: dati.amountCents ?? 8500,
       account_id: 'conto-1',
       category_id: 'categoria-1',
-      mode: 'manual',
+      mode: dati.mode ?? 'manual',
       status: dati.status ?? 'pending',
       transaction_id: dati.transactionId ?? null,
     });
@@ -105,6 +106,10 @@ describe('occorrenze', () => {
     preparaDati(ctx);
     inserisciOccorrenza(ctx, 'pending-tarda', { dueDate: '2026-03-05' });
     inserisciOccorrenza(ctx, 'pending-presto', { dueDate: '2026-02-05' });
+    inserisciOccorrenza(ctx, 'pending-auto', {
+      dueDate: '2026-01-05',
+      mode: 'auto',
+    });
     inserisciOccorrenza(ctx, 'paid', { status: 'paid' });
     inserisciOccorrenza(ctx, 'skipped', { status: 'skipped' });
 

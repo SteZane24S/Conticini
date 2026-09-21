@@ -1,8 +1,9 @@
 import { formatImporto, parseImporto } from '@conticini/dominio';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { ErroreApi } from '../api.js';
 import { Bottone, Campo, Tabella } from '../components/index.js';
+import { ConfermaInline } from '../components/ConfermaInline.js';
 import { useAlbero } from './categorie-regole/useAlbero.js';
 import { dataRiferimentoCiclo, usePrevisioni } from './previsioni/dati.js';
 import {
@@ -135,6 +136,11 @@ export function Previsioni() {
   const [pannelloAperto, setPannelloAperto] = useState<PannelloAperto | null>(
     null,
   );
+  const [categoriaIdDaResettare, setCategoriaIdDaResettare] = useState<
+    string | null
+  >(null);
+  const [erroreReset, setErroreReset] = useState<string | null>(null);
+  const resettandoRef = useRef(false);
 
   useEffect(() => {
     if (cicloSelezionatoId === '' && cicli[0]) {
@@ -152,6 +158,7 @@ export function Previsioni() {
     errore: errorePrevisioni,
     impostaDefault,
     impostaOverride,
+    rimuoviDefault,
   } = usePrevisioni(dataRiferimento);
   const categorieUscita = categorie.filter(
     (categoria) => categoria.kind === 'uscita',
@@ -174,6 +181,32 @@ export function Previsioni() {
 
   function apriPannello(categoriaId: string, modo: PannelloAperto['modo']) {
     setPannelloAperto({ categoriaId, modo });
+  }
+
+  function apriReset(categoriaId: string) {
+    setErroreReset(null);
+    setCategoriaIdDaResettare(categoriaId);
+  }
+
+  function annullaReset() {
+    setErroreReset(null);
+    setCategoriaIdDaResettare(null);
+  }
+
+  async function gestisciReset(categoriaId: string) {
+    if (resettandoRef.current) return;
+    resettandoRef.current = true;
+    setErroreReset(null);
+    try {
+      await rimuoviDefault(categoriaId);
+      setCategoriaIdDaResettare(null);
+    } catch (err) {
+      setErroreReset(
+        err instanceof ErroreApi ? err.message : 'Errore imprevisto.',
+      );
+    } finally {
+      resettandoRef.current = false;
+    }
   }
 
   return (
@@ -321,28 +354,54 @@ export function Previsioni() {
                       : '—'}
                   </td>
                   <td>
-                    {!modificaDefault && !modificaOverride && (
+                    {categoriaIdDaResettare === categoria.id ? (
                       <span style={STILE_AZIONI}>
-                        <Bottone
-                          variante="ghost"
-                          type="button"
-                          onClick={() => apriPannello(categoria.id, 'default')}
-                        >
-                          Modifica
-                        </Bottone>
-                        {budgetDefault && (
+                        <ConfermaInline
+                          domanda="Azzerare la previsione?"
+                          onConferma={() => void gestisciReset(categoria.id)}
+                          onAnnulla={annullaReset}
+                        />
+                      </span>
+                    ) : (
+                      !modificaDefault &&
+                      !modificaOverride && (
+                        <span style={STILE_AZIONI}>
                           <Bottone
                             variante="ghost"
                             type="button"
                             onClick={() =>
-                              apriPannello(categoria.id, 'override')
+                              apriPannello(categoria.id, 'default')
                             }
                           >
-                            Override
+                            Modifica
                           </Bottone>
-                        )}
-                      </span>
+                          {budgetDefault && (
+                            <>
+                              <Bottone
+                                variante="ghost"
+                                type="button"
+                                onClick={() =>
+                                  apriPannello(categoria.id, 'override')
+                                }
+                              >
+                                Override
+                              </Bottone>
+                              <Bottone
+                                variante="ghost"
+                                type="button"
+                                onClick={() => apriReset(categoria.id)}
+                              >
+                                Reset
+                              </Bottone>
+                            </>
+                          )}
+                        </span>
+                      )
                     )}
+                    {erroreReset !== null &&
+                      categoriaIdDaResettare === categoria.id && (
+                        <div style={STILE_ERRORE_CAMPO}>{erroreReset}</div>
+                      )}
                   </td>
                 </tr>
               );

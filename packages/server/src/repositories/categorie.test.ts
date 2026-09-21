@@ -5,12 +5,18 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+} from '@conticini/dominio';
+
 import { runMigrations } from '../migrations-runner.js';
 import { creaRepositorioSettori } from './settori.js';
 import {
   creaCategoriaConSettoreEventuale,
   creaRepositorioCategorie,
 } from './categorie.js';
+import { creaRepositorioBudgetDefault } from './previsioni.js';
 
 describe('creaRepositorioCategorie', () => {
   let dir: string | undefined;
@@ -135,7 +141,15 @@ describe('creaRepositorioCategorie', () => {
       settoreId: settore.id,
     });
 
-    expect(await categorie.elenca()).toEqual([prima, seconda]);
+    const elenco = await categorie.elenca();
+    const idTecnici = new Set([
+      ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+      ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+    ]);
+    expect(elenco.filter((c) => !idTecnici.has(c.id))).toEqual([
+      prima,
+      seconda,
+    ]);
   });
 
   it('aggiorna nome, tipo e settore', async () => {
@@ -195,9 +209,35 @@ describe('creaRepositorioCategorie', () => {
 
     await categorie.elimina(creata.id);
 
-    expect(await categorie.elenca()).toEqual([]);
+    const elenco = await categorie.elenca();
+    const idTecnici = new Set([
+      ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+      ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+    ]);
+    expect(elenco.filter((c) => !idTecnici.has(c.id))).toEqual([]);
     const riga = db
       ?.prepare('SELECT deleted_at FROM categories WHERE id = ?')
+      .get(creata.id) as { deleted_at: string | null };
+    expect(riga.deleted_at).not.toBeNull();
+  });
+
+  it('elimina anche il budget di default della categoria', async () => {
+    const { categorie, settori, ctx } = creaRepository();
+    const settore = await settori.crea({ nome: 'Casa' });
+    const creata = await categorie.crea({
+      nome: 'Affitto',
+      kind: 'uscita',
+      settoreId: settore.id,
+    });
+    await creaRepositorioBudgetDefault(ctx).imposta({
+      categoriaId: creata.id,
+      amountCents: 85000,
+    });
+
+    await categorie.elimina(creata.id);
+
+    const riga = db
+      ?.prepare('SELECT deleted_at FROM budget_defaults WHERE category_id = ?')
       .get(creata.id) as { deleted_at: string | null };
     expect(riga.deleted_at).not.toBeNull();
   });

@@ -66,6 +66,7 @@ describe('prospetto', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'trasferimento-b',
@@ -74,6 +75,7 @@ describe('prospetto', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -107,6 +109,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: null,
           transferGroupId: null,
+          posizioneId: null,
         },
       ],
       [
@@ -203,6 +206,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: 'c1',
           transferGroupId: null,
+          posizioneId: null,
         },
       ],
     );
@@ -240,6 +244,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: 'c1',
           transferGroupId: null,
+          posizioneId: null,
         },
       ],
     );
@@ -367,6 +372,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: null,
           transferGroupId: null,
+          posizioneId: null,
         },
         {
           id: 'trasferimento-a',
@@ -375,6 +381,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: null,
           transferGroupId: 't1',
+          posizioneId: null,
         },
         {
           id: 'trasferimento-b',
@@ -383,6 +390,7 @@ describe('prospetto', () => {
           contoId: 'b',
           categoriaId: null,
           transferGroupId: 't1',
+          posizioneId: null,
         },
         {
           id: 'spesa-casa-1',
@@ -391,6 +399,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: 'spesa-casa',
           transferGroupId: null,
+          posizioneId: null,
         },
         {
           id: 'spesa-casa-2',
@@ -399,6 +408,7 @@ describe('prospetto', () => {
           contoId: 'a',
           categoriaId: 'spesa-casa',
           transferGroupId: null,
+          posizioneId: null,
         },
       ],
       cicli: [

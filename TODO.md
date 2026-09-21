@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** giro 5.5 chiuso il 20/09/2026 — Previsioni, Grafici, Backup completati: la Fase 5 è chiusa.
-**Prossimo giro:** Fase 6 — Mobile e sincronizzazione, richiede una nuova sessione di pianificazione su Opus.
+**Stato:** Giro 6.1 chiuso il 21/09/2026. La Fase 6 resta aperta.
+**Prossimo giro:** 6.2 — Pagina Debiti e crediti, da `fasi/fase-6-debiti-crediti/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -41,8 +41,16 @@
 - [x] 5.4 Spese fisse, In attesa
 - [x] 5.5 Previsioni, Grafici, Backup — chiude la Fase 5
 
-### Fase 6 — Mobile e sincronizzazione
-- [ ] Richiede una nuova sessione di pianificazione su Opus
+### Fase 6 — Debiti e crediti
+- [x] 6.1 Modello, dominio e API: migrazione 002, residuo derivato dai movimenti collegati, categorie tecniche riservate, saldamento atomico
+- [ ] 6.2 Pagina Debiti e crediti: elenco, creazione, salda tutto o in parte, annullamento, totale netto
+
+### Fase 7 — Mobile e sincronizzazione
+- [ ] 7.1 Protocollo, snapshot e applicazione dei pacchetti (solo PC, senza rete)
+- [ ] 7.2 Trasporto Google Drive sul PC (OAuth desktop su loopback, `appDataFolder`)
+- [ ] 7.3 App mobile in lettura (router in-process, stato in memoria, Prospetto e saldi)
+- [ ] 7.4 App mobile in scrittura (inserimento movimenti, pubblicazione dei pacchetti)
+- [ ] 7.5 In attesa, risoluzione dei conflitti, manifest e chiusura della fase
 
 ## Pendenze aperte
 - Il file `AGENTS.md` non tracciato alla radice resta una pendenza preesistente invariata: è comparso durante sessioni Codex di un giro precedente, non è richiesto dai brief e non è incluso in alcun commit; la decisione se tenerlo, cancellarlo o ignorarlo è dell’utente.
@@ -110,3 +118,21 @@
 - Nessun rilievo fondato è rimasto fuori scope non risolto nel giro 5.5: i cinque rilievi fondati (2 costanti di stile morte, 3 di concorrenza/UX sul dialogo di ripristino di Backup) sono stati corretti e riverificati con build/lint/format/test, tutti verdi.
 - La Fase 5 — Restyling con Claude Design è chiusa con questo giro: tutti i giri 5.1-5.5 completati.
 - Prossimo passo: Fase 6 — Mobile e sincronizzazione. Richiede una nuova sessione di pianificazione su Opus: nessun piano di dettaglio esiste ancora per questa fase.
+
+## Pianificazione del 20/09/2026 (Opus 5)
+
+- La pendenza qui sopra è chiusa: le due fasi che restano hanno ora un piano di dettaglio. L'ordine è cambiato su richiesta dell'utente — prima **Debiti e crediti** (fase 6), poi **Mobile e sincronizzazione** (fase 7), perché portare sul telefono un modello dati che sta per cambiare significherebbe rifare il lavoro due volte. La cartella `fasi/fase-6-mobile-sync/` è stata rinominata `fasi/fase-7-mobile-sync/` con `git mv`, e il suo segnaposto sostituito dal piano vero.
+- Decisioni dell'utente sulla fase 6, congelate: saldare crea davvero il movimento sul conto scelto; il totale netto vive **solo** nella pagina Debiti e crediti e il Prospetto non si tocca; unica data è quella di apertura, automatica.
+- Decisioni dell'utente sulla fase 7, congelate: sul telefono si inserisce e si consulta (movimenti, prospetto, saldi, in attesa); **nessun uso offline**; trasporto su **Google Drive**; programma distribuito da **Cloudflare Pages** con repository privato.
+- Dissenso del consulente messo agli atti: `tech-advisor` raccomandava OneDrive invece di Google Drive, perché il suo client desktop avrebbe evitato di scrivere codice di rete sul PC. L'utente ha scelto Google Drive sapendolo. Costo accettato: il giro 7.2 deve implementare OAuth desktop, perché `appDataFolder` non è sincronizzata su disco e lo scope `drive.file` su una cartella normale non funzionerebbe (il telefono non vedrebbe i file creati dal client desktop).
+- Configurazione che spetta all'utente e non è ancora stata fatta, da guidare **in chat** un passo per volta: progetto Google Cloud con due client OAuth (Web e Desktop) e passaggio «In produzione» — serve al giro 7.2 per il PC e al 7.3 per il telefono; account Cloudflare e collegamento al repository privato, serve al giro 7.3.
+- Limite noto da non dimenticare nella fase 7: il consenso Google sul telefono non è perpetuo (token di circa un'ora, nessun refresh token nel browser), quindi va previsto un gesto «Collega Google Drive» a ogni nuova sessione della pagina. Non va promesso un accesso silenzioso.
+- Limite noto da scrivere nella documentazione della fase 7: **iOS resta progettato ma non collaudato**, perché l'utente non ha un dispositivo su cui provarlo.
+- Domanda ancora aperta, da decidere quando si aprirà la fase 7: se la pagina Debiti e crediti debba comparire anche sul telefono. Oggi non è nell'ambito concordato.
+- Il rilascio in `app/programma` è stato rifatto il 20/09/2026 dopo la chiusura della Fase 5 (`npm run release`, `app/dati/` non toccata): va rifatto alla chiusura della fase 6.
+- L'icona `Conticini.ico` è ancora il segnaposto a colore pieno generato da `scripts/release.mjs`: la Fase 5 non l'ha sostituita e ogni rilascio la rigenera identica. Resta da fare se e quando l'utente vorrà un'icona vera.
+- La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, decisione dell'utente se tenerlo, cancellarlo o ignorarlo) resta invariata: non è stata generata né modificata in questa sessione di pianificazione.
+- La pendenza preesistente su `AGENTS.md` (file non tracciato alla radice, decisione dell’utente se tenerlo, cancellarlo o ignorarlo) resta invariata: non è stata generata né modificata nel giro 6.1.
+- Il commit del giro 6.1 include anche una funzionalità preesistente non committata e non rivista da questo giro (eliminazione di una previsione con cascata sulle spese fisse collegate): inclusa nel commit su decisione esplicita dell’utente, dopo essere stata segnalata dall’orchestratore. Non è stata sottoposta a review né a checker in questo giro; se emergessero problemi, va trattata come un giro a sé.
+- Rilievo accettato come debito, non corretto: nessuna validazione runtime del segno rispetto al kind della categoria tecnica nel percorso non-saldamento; il percorso di saldamento l’ha già, aggiunta in questo giro. Il rischio è basso perché le due mappature sono funzioni pure e deterministiche dello stesso `verso`, verificate dai test di dominio.
+- Prossimo giro: 6.2 — Pagina Debiti e crediti, da `fasi/fase-6-debiti-crediti/PIANO.md`. Tocca `packages/web`: chiudersi con `live-testing`.

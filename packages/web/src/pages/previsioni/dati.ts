@@ -10,7 +10,7 @@ import {
 import { aggiungiGiorni, oggiLocale, type DataISO } from '@conticini/dominio';
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiGet, apiInvia, ErroreApi } from '../../api.js';
+import { apiGet, apiInvia, ErroreApi, rispostaOkSchema } from '../../api.js';
 
 export interface UsePrevisioni {
   budgetDefaults: BudgetDefaultDto[];
@@ -23,6 +23,7 @@ export interface UsePrevisioni {
     categoriaId: string,
     amountCents: number,
   ) => Promise<void>;
+  rimuoviDefault: (categoriaId: string) => Promise<void>;
   ricarica: () => void;
 }
 
@@ -115,6 +116,19 @@ export function usePrevisioni(dataRiferimento: DataISO | null): UsePrevisioni {
     [ricarica],
   );
 
+  const rimuoviDefault = useCallback(
+    async (categoriaId: string) => {
+      await apiInvia(
+        'DELETE',
+        `/api/previsioni/default/${categoriaId}`,
+        undefined,
+        rispostaOkSchema,
+      );
+      ricarica();
+    },
+    [ricarica],
+  );
+
   return {
     budgetDefaults,
     categorieCiclo,
@@ -122,6 +136,7 @@ export function usePrevisioni(dataRiferimento: DataISO | null): UsePrevisioni {
     errore,
     impostaDefault,
     impostaOverride,
+    rimuoviDefault,
     ricarica,
   };
 }

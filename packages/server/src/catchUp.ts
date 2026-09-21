@@ -12,7 +12,12 @@ import {
   yearly,
 } from '@conticini/dominio';
 
-import { inserisci, SOLO_ATTIVI, type ContestoScrittura } from './scrittura.js';
+import {
+  aggiorna,
+  inserisci,
+  SOLO_ATTIVI,
+  type ContestoScrittura,
+} from './scrittura.js';
 
 interface RigaSpesaFissa {
   id: string;
@@ -73,9 +78,41 @@ export function eseguiCatchUp(
           NAMESPACE_CONTICINI,
         );
         const esistente = ctx.db
-          .prepare('SELECT 1 FROM recurring_occurrences WHERE id = ?')
-          .get(occorrenzaId);
+          .prepare(
+            'SELECT status, revision FROM recurring_occurrences WHERE id = ?',
+          )
+          .get(occorrenzaId) as
+          | { status: 'pending' | 'paid' | 'skipped'; revision: string }
+          | undefined;
         if (esistente) {
+          if (
+            esistente.status === 'pending' &&
+            spesaFissa.mode === 'auto' &&
+            confrontaDate(scadenza, oggi) <= 0
+          ) {
+            const movimentoId = uuidv5(occorrenzaId, NAMESPACE_CONTICINI);
+            inserisci(ctx, 'transactions', 'transactions', movimentoId, {
+              date: scadenza,
+              amount_cents: -spesaFissa.amount_cents,
+              account_id: spesaFissa.account_id,
+              category_id: spesaFissa.category_id,
+              description: spesaFissa.name,
+              description_norm: normalizzaTesto(spesaFissa.name),
+              transfer_group_id: null,
+            });
+            aggiorna(
+              ctx,
+              'recurring_occurrences',
+              'recurring_occurrences',
+              occorrenzaId,
+              {
+                status: 'paid',
+                transaction_id: movimentoId,
+                due_date: scadenza,
+              },
+              esistente.revision,
+            );
+          }
           continue;
         }
 

@@ -173,7 +173,7 @@ describe('scrittura centrale', () => {
     const categoryCount = database
       .prepare('SELECT COUNT(*) as count FROM categories')
       .get() as { count: number };
-    expect(categoryCount.count).toBe(0);
+    expect(categoryCount.count).toBe(2);
 
     const logCount = database
       .prepare(

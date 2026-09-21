@@ -7,7 +7,7 @@ import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { runMigrations } from './migrations-runner.js';
-import { inserisci, type ContestoScrittura } from './scrittura.js';
+import { aggiorna, inserisci, type ContestoScrittura } from './scrittura.js';
 import { eseguiCatchUp } from './catchUp.js';
 
 interface DatiSpesaFissa {
@@ -219,5 +219,71 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db.prepare('SELECT COUNT(*) AS totale FROM transactions').get(),
     ).toEqual({ totale: 0 });
+  });
+
+  it('promuove a pagata un’occorrenza auto pending quando la scadenza arriva in un catch-up successivo', () => {
+    const ctx = creaContesto();
+    preparaDati(ctx);
+    inserisciSpesaFissa(ctx, {
+      id: 'spesa-fissa-auto',
+      startDate: '2026-03-01' as DataISO,
+      mode: 'auto',
+    });
+
+    eseguiCatchUp(ctx, '2026-02-01' as DataISO, 40);
+    eseguiCatchUp(ctx, '2026-03-10' as DataISO, 40);
+
+    expect(
+      ctx.db
+        .prepare(
+          'SELECT recurring_occurrences.status, recurring_occurrences.transaction_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.due_date = ?',
+        )
+        .get('2026-03-05'),
+    ).toEqual({
+      status: 'paid',
+      transaction_id: expect.any(String),
+      transaction_date: '2026-03-05',
+      transaction_amount_cents: -75000,
+    });
+  });
+
+  it('aggiorna la scadenza di un’occorrenza auto pending quando cambia nello stesso periodo', () => {
+    const ctx = creaContesto();
+    preparaDati(ctx);
+    inserisciSpesaFissa(ctx, {
+      id: 'spesa-fissa-auto',
+      startDate: '2026-03-01' as DataISO,
+      anchorDay: 5,
+      mode: 'auto',
+    });
+
+    eseguiCatchUp(ctx, '2026-02-01' as DataISO, 40);
+    const spesaFissa = ctx.db
+      .prepare('SELECT revision FROM recurring_expenses WHERE id = ?')
+      .get('spesa-fissa-auto') as { revision: string };
+    aggiorna(
+      ctx,
+      'recurring_expenses',
+      'recurring_expenses',
+      'spesa-fissa-auto',
+      { anchor_day: 10 },
+      spesaFissa.revision,
+    );
+
+    eseguiCatchUp(ctx, '2026-03-11' as DataISO, 40);
+
+    expect(
+      ctx.db
+        .prepare(
+          'SELECT recurring_occurrences.status, recurring_occurrences.due_date, recurring_occurrences.transaction_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.recurring_id = ? AND recurring_occurrences.period = ?',
+        )
+        .get('spesa-fissa-auto', '2026-03'),
+    ).toEqual({
+      status: 'paid',
+      due_date: '2026-03-10',
+      transaction_id: expect.any(String),
+      transaction_date: '2026-03-10',
+      transaction_amount_cents: -75000,
+    });
   });
 });

@@ -14,6 +14,7 @@ export interface Movimento {
   contoId: string;
   categoriaId: string | null;
   transferGroupId: string | null;
+  posizioneId: string | null;
 }
 
 export interface SaldoConto {

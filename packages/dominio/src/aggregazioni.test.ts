@@ -22,6 +22,7 @@ function movimento(
   amountCents: number,
   categoriaId: string | null,
   transferGroupId: string | null = null,
+  posizioneId: string | null = null,
 ): Movimento {
   return {
     id,
@@ -30,6 +31,7 @@ function movimento(
     contoId: 'conto',
     categoriaId,
     transferGroupId,
+    posizioneId,
   };
 }
 
@@ -98,6 +100,25 @@ describe('aggregazioni', () => {
           { categoriaId: 'c1', speseCents: 100 },
           { categoriaId: 'c2', speseCents: 200 },
         ],
+      },
+    ]);
+  });
+
+  it('esclude i saldamenti di una posizione dalle spese per settore e categoria', () => {
+    expect(
+      speseSettoreCategoria(
+        [
+          movimento('spesa', '2024-01-15', -100, 'c1'),
+          movimento('saldamento', '2024-01-15', -500, 'c1', null, 'p1'),
+        ],
+        categorie,
+        { dataInizio: data('2024-01-01'), dataFineEsclusiva: null },
+      ),
+    ).toEqual([
+      {
+        settoreId: 's1',
+        speseCents: 100,
+        categorie: [{ categoriaId: 'c1', speseCents: 100 }],
       },
     ]);
   });

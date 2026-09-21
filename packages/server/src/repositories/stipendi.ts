@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   normalizzaTesto,
   validaDataApertura,
   validaSegnoCategoria,
@@ -10,6 +12,7 @@ import {
 } from '@conticini/dominio';
 
 import {
+  erroreCategoriaTecnica,
   erroreDominio,
   erroreNonTrovato,
   erroreValidazione,
@@ -46,9 +49,16 @@ function leggiCategoria(
   ctx: ContestoScrittura,
   id: string,
 ): RigaCategoria | undefined {
-  return ctx.db
+  const categoria = ctx.db
     .prepare(`SELECT id, kind FROM categories WHERE id = ? AND ${SOLO_ATTIVI}`)
     .get(id) as RigaCategoria | undefined;
+  if (
+    id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+    id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+  ) {
+    throw erroreCategoriaTecnica('categoriaId');
+  }
+  return categoria;
 }
 
 function leggiRigaMovimento(
@@ -57,7 +67,7 @@ function leggiRigaMovimento(
 ): RigaMovimento | undefined {
   return ctx.db
     .prepare(
-      `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, revision FROM transactions WHERE id = ? AND ${SOLO_ATTIVI}`,
+      `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, linked_position_id, revision FROM transactions WHERE id = ? AND ${SOLO_ATTIVI}`,
     )
     .get(id) as RigaMovimento | undefined;
 }
@@ -70,6 +80,7 @@ function creaMovimentoPerValidazione(dati: DatiStipendio) {
     contoId: dati.contoId,
     categoriaId: dati.categoriaId,
     transferGroupId: null,
+    posizioneId: null,
   };
 }
 

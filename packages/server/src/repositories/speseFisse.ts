@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   everyNMonths,
   monthly,
   validaVincoloPrevisioneFissa,
@@ -12,6 +14,7 @@ import {
 } from '@conticini/dominio';
 
 import {
+  erroreCategoriaTecnica,
   erroreDominio,
   erroreNonTrovato,
   erroreValidazione,
@@ -114,6 +117,12 @@ function leggiCategoriaSpesaFissa(
       'La categoria di una spesa fissa deve essere di tipo uscita.',
       'categoriaId',
     );
+  }
+  if (
+    id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+    id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+  ) {
+    throw erroreCategoriaTecnica('categoriaId');
   }
 
   return categoria;

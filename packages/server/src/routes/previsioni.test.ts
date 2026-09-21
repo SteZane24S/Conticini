@@ -101,6 +101,32 @@ describe('rotte previsioni', () => {
     });
   });
 
+  it('rimuove un budget di default', async () => {
+    const applicazione = creaApp();
+    await applicazione.inject({
+      method: 'PUT',
+      url: '/api/previsioni/default/categoria-uscita',
+      payload: { amountCents: 12500 },
+    });
+
+    const response = await applicazione.inject({
+      method: 'DELETE',
+      url: '/api/previsioni/default/categoria-uscita',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ ok: true });
+  });
+
+  it('restituisce 404 per la rimozione di un budget di default inesistente', async () => {
+    const response = await creaApp().inject({
+      method: 'DELETE',
+      url: '/api/previsioni/default/categoria-uscita',
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
+
   it('rifiuta un budget di default per una categoria con spesa fissa attiva', async () => {
     const response = await creaApp(true).inject({
       method: 'PUT',

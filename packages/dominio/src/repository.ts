@@ -1,5 +1,6 @@
 import { type Conto, type Movimento } from './saldi.js';
 import { type Ciclo } from './cicli.js';
+import { type Posizione } from './posizioni.js';
 import {
   type OccorrenzaFissa,
   type BudgetDefault,
@@ -126,6 +127,7 @@ export interface RepositorioOccorrenzeFisse {
 export interface RepositorioBudgetDefault {
   elenca(): Promise<BudgetDefault[]>;
   imposta(dati: BudgetDefault): Promise<BudgetDefault>;
+  elimina(categoriaId: string): Promise<void>;
 }
 
 export interface RepositorioBudgetOverride {
@@ -143,6 +145,23 @@ export interface RepositorioRegoleCategoria {
     id: string,
     dati: Partial<Omit<RegolaCategoria, 'id' | 'deletedAt' | 'createdAt'>>,
   ): Promise<RegolaCategoria>;
+  elimina(id: string): Promise<void>;
+}
+
+export interface PosizioneConResiduo extends Posizione {
+  residuoCents: number;
+}
+
+export interface RepositorioPosizioni {
+  elenca(): Promise<PosizioneConResiduo[]>;
+  ottieni(id: string): Promise<PosizioneConResiduo | null>;
+  crea(
+    dati: Omit<Posizione, 'id' | 'dataApertura'>,
+  ): Promise<PosizioneConResiduo>;
+  aggiorna(
+    id: string,
+    dati: Partial<Pick<Posizione, 'descrizione'>>,
+  ): Promise<PosizioneConResiduo>;
   elimina(id: string): Promise<void>;
 }
 

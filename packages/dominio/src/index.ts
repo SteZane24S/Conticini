@@ -10,3 +10,4 @@ export * from './testo.js';
 export * from './regole.js';
 export * from './validazioni.js';
 export * from './repository.js';
+export * from './posizioni.js';

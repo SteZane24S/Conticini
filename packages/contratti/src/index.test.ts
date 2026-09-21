@@ -5,10 +5,13 @@ import {
   creaCategoriaSchema,
   creaContoSchema,
   creaMovimentoSchema,
+  creaPosizioneSchema,
+  creaSaldamentoSchema,
   creaSettoreSchema,
   creaTrasferimentoSchema,
   erroreApiSchema,
   filtriMovimentiSchema,
+  posizioneSchema,
   settoreSchema,
 } from './index.js';
 
@@ -106,5 +109,47 @@ describe('schemi dei contratti API', () => {
         contoDestinazioneId: 'conto-1',
       }).success,
     ).toBe(false);
+  });
+
+  it('valida le posizioni e i saldamenti', () => {
+    expect(
+      creaPosizioneSchema.safeParse({
+        descrizione: 'Prestito',
+        verso: 'debito',
+        importoCents: 1000,
+      }).success,
+    ).toBe(true);
+    expect(
+      creaPosizioneSchema.safeParse({
+        descrizione: 'Prestito',
+        verso: 'debito',
+        importoCents: 0,
+      }).success,
+    ).toBe(false);
+    expect(
+      creaPosizioneSchema.safeParse({
+        descrizione: 'Prestito',
+        verso: 'debito',
+        importoCents: -1000,
+      }).success,
+    ).toBe(false);
+    expect(
+      creaSaldamentoSchema.safeParse({
+        contoId: 'conto-1',
+        importoCents: 1000,
+        data: '2026-01-15',
+        operazioneId: '',
+      }).success,
+    ).toBe(false);
+    expect(
+      posizioneSchema.safeParse({
+        id: 'posizione-1',
+        descrizione: 'Prestito',
+        verso: 'debito',
+        importoInizialeCents: -1000,
+        dataApertura: '2026-01-15',
+        residuoCents: -1000,
+      }).success,
+    ).toBe(true);
   });
 });

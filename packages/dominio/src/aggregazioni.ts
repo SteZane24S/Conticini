@@ -52,6 +52,7 @@ export function speseSettoreCategoria(
           .filter(
             (movimento) =>
               movimento.transferGroupId === null &&
+              movimento.posizioneId === null &&
               movimento.categoriaId === categoria.id &&
               movimento.amountCents < 0 &&
               confrontaDate(movimento.data, intervallo.dataInizio) >= 0 &&

@@ -9,6 +9,7 @@ export const movimentoSchema = z.object({
   contoId: z.string(),
   categoriaId: z.string().nullable(),
   transferGroupId: z.string().nullable(),
+  posizioneId: z.string().nullable(),
   descrizione: z.string(),
   descrizioneNorm: z.string(),
 });
@@ -47,6 +48,7 @@ export const filtriMovimentiSchema = z.object({
   contoId: z.string().min(1).optional(),
   settoreId: z.string().min(1).optional(),
   categoriaId: z.string().min(1).optional(),
+  posizioneId: z.string().min(1).optional(),
   testo: z.string().min(1).optional(),
   pagina: z.coerce.number().int().min(1).default(1),
   perPagina: z.coerce.number().int().min(1).max(200).default(50),

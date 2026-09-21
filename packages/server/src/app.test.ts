@@ -6,6 +6,12 @@ import Database from 'better-sqlite3';
 import type { FastifyInstance } from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+  ID_SETTORE_TECNICO_DEBITI_CREDITI,
+} from '@conticini/dominio';
+
 import { buildApp } from './app.js';
 import { ensureMeta } from './meta.js';
 import { runMigrations } from './migrations-runner.js';
@@ -216,9 +222,33 @@ describe('buildApp — rotte dati', () => {
     expect(contiRes.statusCode).toBe(200);
     expect(contiRes.json()).toEqual({ ok: true, conti: [] });
     expect(settoriRes.statusCode).toBe(200);
-    expect(settoriRes.json()).toEqual({ ok: true, settori: [] });
+    expect(settoriRes.json()).toEqual({
+      ok: true,
+      settori: [
+        {
+          id: ID_SETTORE_TECNICO_DEBITI_CREDITI,
+          nome: 'Debiti e crediti (tecnico)',
+        },
+      ],
+    });
     expect(categorieRes.statusCode).toBe(200);
-    expect(categorieRes.json()).toEqual({ ok: true, categorie: [] });
+    expect(categorieRes.json()).toEqual({
+      ok: true,
+      categorie: [
+        {
+          id: ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+          nome: 'Incasso crediti',
+          kind: 'entrata',
+          settoreId: ID_SETTORE_TECNICO_DEBITI_CREDITI,
+        },
+        {
+          id: ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+          nome: 'Pagamento debiti',
+          kind: 'uscita',
+          settoreId: ID_SETTORE_TECNICO_DEBITI_CREDITI,
+        },
+      ],
+    });
     expect(movimentiRes.statusCode).toBe(200);
     expect(movimentiRes.json()).toEqual({
       ok: true,

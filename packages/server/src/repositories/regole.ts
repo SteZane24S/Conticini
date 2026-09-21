@@ -1,12 +1,18 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   normalizzaTesto,
   type RegolaCategoria,
   type RepositorioRegoleCategoria,
 } from '@conticini/dominio';
 
-import { erroreNonTrovato, erroreValidazione } from '../errori.js';
+import {
+  erroreCategoriaTecnica,
+  erroreNonTrovato,
+  erroreValidazione,
+} from '../errori.js';
 import {
   aggiorna as aggiornaRiga,
   cancella,
@@ -95,6 +101,12 @@ export function creaRepositorioRegoleCategoria(
       if (!categoriaEsiste(dati.categoriaId)) {
         throw erroreNonTrovato('categoria', dati.categoriaId);
       }
+      if (
+        dati.categoriaId === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+        dati.categoriaId === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+      ) {
+        throw erroreCategoriaTecnica('categoriaId');
+      }
 
       const pattern = normalizzaTesto(dati.pattern);
       if (pattern === '') {
@@ -127,6 +139,13 @@ export function creaRepositorioRegoleCategoria(
         !categoriaEsiste(dati.categoriaId)
       ) {
         throw erroreNonTrovato('categoria', dati.categoriaId);
+      }
+      if (
+        dati.categoriaId !== undefined &&
+        (dati.categoriaId === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+          dati.categoriaId === ID_CATEGORIA_TECNICA_INCASSO_CREDITI)
+      ) {
+        throw erroreCategoriaTecnica('categoriaId');
       }
 
       const colonne: Record<string, string | number> = {};

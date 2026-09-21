@@ -34,7 +34,7 @@ function leggiRigheGruppo(
 ): RigaMovimento[] {
   return ctx.db
     .prepare(
-      `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, revision FROM transactions WHERE transfer_group_id = ? AND ${SOLO_ATTIVI}`,
+      `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, linked_position_id, revision FROM transactions WHERE transfer_group_id = ? AND ${SOLO_ATTIVI}`,
     )
     .all(transferGroupId) as RigaMovimento[];
 }
@@ -52,6 +52,7 @@ function creaMovimentoPerValidazione(dati: {
     contoId: dati.contoId,
     categoriaId: null,
     transferGroupId: dati.transferGroupId,
+    posizioneId: null,
   };
 }
 

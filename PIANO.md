@@ -85,7 +85,8 @@ Conticini/
       fase-3-ui-provvisoria/PIANO.md
       fase-4-grafici-backup-rilascio/PIANO.md
       fase-5-design/PIANO.md          (contiene il brief per Claude Design)
-      fase-6-mobile-sync/PIANO.md     (solo segnaposto: serve una nuova pianificazione)
+      fase-6-debiti-crediti/PIANO.md
+      fase-7-mobile-sync/PIANO.md
     storico/                (vuoto; regola globale sui documenti superati)
 ```
 Ogni giro crea `fasi/fase-N-…/giro-N.M/` con `TODO.md` e `guida-sviluppo.md`, scritti da
@@ -135,12 +136,25 @@ Il `PIANO.md` della fase contiene il brief delle schermate (quelle della fase 3 
 da usare su claude.ai/design. L'utente disegna ed esporta; i giri si definiscono quando il design
 esiste, adattando solo `packages/web`.
 
-**Fase 6 — Mobile e sincronizzazione (futura)**
-Richiede una nuova sessione di pianificazione su Opus. Vincoli già noti dal consulente:
-- serve un'origine HTTPS statica, senza backend;
-- persistenza nel browser, con backup obbligatori;
-- OAuth Google lato client, scope `drive.appdata`;
-- sincronizzazione a pacchetti di modifiche immutabili (mai il file SQLite, mai un JSON sovrascritto), conflitti espliciti.
+**Fase 6 — Debiti e crediti** (pianificata il 20/09/2026, dettaglio in `fasi/fase-6-debiti-crediti/PIANO.md`)
+Pagina per i soldi prestati e presi in prestito, volutamente minima. Il residuo si deriva dai
+movimenti collegati e non è un campo; saldare crea il movimento sul conto scelto nella stessa
+transazione; due categorie tecniche riservate tengono i saldamenti dentro i saldi e fuori dai
+consumi. Il Prospetto e la formula di previsione **non si toccano**: il totale netto vive solo
+nella pagina nuova.
+- 6.1 Modello, dominio e API.
+- 6.2 Pagina Debiti e crediti.
+
+**Fase 7 — Mobile e sincronizzazione** (pianificata il 20/09/2026, dettaglio in `fasi/fase-7-mobile-sync/PIANO.md`)
+Web app distribuita da un'origine statica (Cloudflare Pages, repository privato), senza backend;
+sul telefono si inserisce e si consulta, senza uso offline e senza database nel browser; stato
+ricostruito in memoria da uno snapshot e da pacchetti immutabili su Google Drive
+(`appDataFolder`, scope `drive.appdata`); PC archivio autorevole; conflitti espliciti.
+- 7.1 Protocollo, snapshot, applicazione dei pacchetti (senza rete).
+- 7.2 Trasporto Google Drive sul PC.
+- 7.3 App mobile in lettura.
+- 7.4 App mobile in scrittura.
+- 7.5 In attesa, conflitti, chiusura.
 
 ## CLAUDE.md di progetto (contenuti)
 - layer e confini (tabella sopra);

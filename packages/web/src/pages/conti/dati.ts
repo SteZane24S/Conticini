@@ -90,6 +90,7 @@ export function useConti(): UseConti {
               contoId: movimento.contoId,
               categoriaId: movimento.categoriaId,
               transferGroupId: movimento.transferGroupId,
+              posizioneId: movimento.posizioneId,
             })),
           ),
         );

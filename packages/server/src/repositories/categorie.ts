@@ -1,12 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
-import type {
-  CategoriaConDettagli,
-  RepositorioCategorie,
+import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
+  type CategoriaConDettagli,
+  type RepositorioCategorie,
 } from '@conticini/dominio';
 import Database from 'better-sqlite3';
 
 import {
+  erroreCategoriaTecnicaProtetta,
   erroreNomeDuplicato,
   erroreNonTrovato,
   erroreValidazione,
@@ -18,6 +21,7 @@ import {
   SOLO_ATTIVI,
   type ContestoScrittura,
 } from '../scrittura.js';
+import { rimuoviBudgetPerCategoria } from './previsioni.js';
 
 interface RigaCategoria {
   id: string;
@@ -124,6 +128,12 @@ export function creaRepositorioCategorie(
     },
 
     async aggiorna(id, dati) {
+      if (
+        id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+        id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+      ) {
+        throw erroreCategoriaTecnicaProtetta();
+      }
       const rigaCorrente = leggiRigaRevisione(id);
       const baseRevision = rigaCorrente.revision;
       if (dati.settoreId !== undefined && !settoreEsiste(ctx, dati.settoreId)) {
@@ -168,8 +178,18 @@ export function creaRepositorioCategorie(
     },
 
     async elimina(id) {
+      if (
+        id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+        id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+      ) {
+        throw erroreCategoriaTecnicaProtetta();
+      }
       const baseRevision = leggiRevisione(id);
-      cancella(ctx, 'categories', 'categories', id, baseRevision);
+      const eliminaConCascata = ctx.db.transaction(() => {
+        rimuoviBudgetPerCategoria(ctx, id);
+        cancella(ctx, 'categories', 'categories', id, baseRevision);
+      });
+      eliminaConCascata();
     },
   };
 }

@@ -24,6 +24,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'trasferimento-b',
@@ -32,6 +33,7 @@ describe('validaTrasferimento', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -47,6 +49,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -65,6 +68,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-b',
@@ -73,6 +77,7 @@ describe('validaTrasferimento', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-c',
@@ -81,6 +86,7 @@ describe('validaTrasferimento', () => {
         contoId: 'c',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -99,6 +105,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-b',
@@ -107,6 +114,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -125,6 +133,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-b',
@@ -133,6 +142,7 @@ describe('validaTrasferimento', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -151,6 +161,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-b',
@@ -159,6 +170,7 @@ describe('validaTrasferimento', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -177,6 +189,7 @@ describe('validaTrasferimento', () => {
         contoId: 'a',
         categoriaId: 'categoria',
         transferGroupId: 't1',
+        posizioneId: null,
       },
       {
         id: 'movimento-b',
@@ -185,6 +198,7 @@ describe('validaTrasferimento', () => {
         contoId: 'b',
         categoriaId: null,
         transferGroupId: 't1',
+        posizioneId: null,
       },
     ];
 
@@ -203,6 +217,7 @@ describe('validaSegnoCategoria', () => {
     contoId: 'conto',
     categoriaId: 'categoria',
     transferGroupId: null,
+    posizioneId: null,
   };
   const movimentoUscita: Movimento = {
     ...movimentoEntrata,
@@ -253,6 +268,7 @@ describe('validaDataApertura', () => {
       contoId: 'conto',
       categoriaId: null,
       transferGroupId: null,
+      posizioneId: null,
     };
 
     expect(validaDataApertura(movimento, conto)).toEqual({ valido: true });
@@ -266,6 +282,7 @@ describe('validaDataApertura', () => {
       contoId: 'conto',
       categoriaId: null,
       transferGroupId: null,
+      posizioneId: null,
     };
 
     expect(validaDataApertura(movimento, conto)).toEqual({
@@ -282,6 +299,7 @@ describe('validaDataApertura', () => {
       contoId: 'conto',
       categoriaId: null,
       transferGroupId: null,
+      posizioneId: null,
     };
 
     expect(validaDataApertura(movimento, conto)).toEqual({ valido: true });

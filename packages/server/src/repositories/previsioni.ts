@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   validaVincoloPrevisioneFissa,
   type BudgetDefault,
   type BudgetOverride,
@@ -9,6 +11,7 @@ import {
 } from '@conticini/dominio';
 
 import {
+  erroreCategoriaTecnica,
   erroreDominio,
   erroreNonTrovato,
   erroreValidazione,
@@ -16,6 +19,7 @@ import {
 import { leggiRigaCiclo } from './cicli.js';
 import {
   aggiorna as aggiornaRiga,
+  cancella,
   inserisci,
   SOLO_ATTIVI,
   type ContestoScrittura,
@@ -95,6 +99,12 @@ function leggiCategoriaPrevisione(
       'categoriaId',
     );
   }
+  if (
+    id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+    id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+  ) {
+    throw erroreCategoriaTecnica('categoriaId');
+  }
 
   return categoria;
 }
@@ -107,6 +117,43 @@ function haFisseAttive(ctx: ContestoScrittura, categoriaId: string): boolean {
       )
       .get(categoriaId) !== undefined
   );
+}
+
+export function rimuoviBudgetPerCategoria(
+  ctx: ContestoScrittura,
+  categoriaId: string,
+): void {
+  const rimuovi = ctx.db.transaction(() => {
+    const budgetDefault = ctx.db
+      .prepare(
+        `SELECT id, revision FROM budget_defaults WHERE category_id = ? AND ${SOLO_ATTIVI}`,
+      )
+      .get(categoriaId) as { id: string; revision: string } | undefined;
+    if (budgetDefault) {
+      cancella(
+        ctx,
+        'budget_defaults',
+        'budget_defaults',
+        budgetDefault.id,
+        budgetDefault.revision,
+      );
+    }
+    const overrides = ctx.db
+      .prepare(
+        `SELECT id, revision FROM budget_overrides WHERE category_id = ? AND ${SOLO_ATTIVI}`,
+      )
+      .all(categoriaId) as Array<{ id: string; revision: string }>;
+    for (const override of overrides) {
+      cancella(
+        ctx,
+        'budget_overrides',
+        'budget_overrides',
+        override.id,
+        override.revision,
+      );
+    }
+  });
+  rimuovi();
 }
 
 export function creaRepositorioBudgetDefault(
@@ -161,6 +208,12 @@ export function creaRepositorioBudgetDefault(
         category_id: dati.categoriaId,
         amount_cents: dati.amountCents,
       });
+    },
+
+    async elimina(categoriaId) {
+      const riga = leggiRiga(categoriaId);
+      if (!riga) throw erroreNonTrovato('previsione', categoriaId);
+      rimuoviBudgetPerCategoria(ctx, categoriaId);
     },
   };
 }

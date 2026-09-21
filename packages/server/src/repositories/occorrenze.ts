@@ -151,7 +151,7 @@ export function elencaOccorrenzePending(
 ): OccorrenzaFissaConDettagli[] {
   const righe = ctx.db
     .prepare(
-      `SELECT recurring_occurrences.id, recurring_id, period, due_date, recurring_occurrences.amount_cents, recurring_occurrences.account_id, recurring_occurrences.category_id, recurring_occurrences.mode, recurring_occurrences.status, transaction_id, recurring_occurrences.revision, recurring_expenses.name, transactions.date AS transaction_date FROM recurring_occurrences JOIN recurring_expenses ON recurring_occurrences.recurring_id = recurring_expenses.id LEFT JOIN transactions ON recurring_occurrences.transaction_id = transactions.id WHERE recurring_occurrences.status = 'pending' AND recurring_occurrences.${SOLO_ATTIVI} ORDER BY due_date ASC`,
+      `SELECT recurring_occurrences.id, recurring_id, period, due_date, recurring_occurrences.amount_cents, recurring_occurrences.account_id, recurring_occurrences.category_id, recurring_occurrences.mode, recurring_occurrences.status, transaction_id, recurring_occurrences.revision, recurring_expenses.name, transactions.date AS transaction_date FROM recurring_occurrences JOIN recurring_expenses ON recurring_occurrences.recurring_id = recurring_expenses.id LEFT JOIN transactions ON recurring_occurrences.transaction_id = transactions.id WHERE recurring_occurrences.status = 'pending' AND recurring_occurrences.mode = 'manual' AND recurring_occurrences.${SOLO_ATTIVI} ORDER BY due_date ASC`,
     )
     .all() as RigaOccorrenza[];
   return righe.map(mappaOccorrenza);

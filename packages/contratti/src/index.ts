@@ -15,3 +15,4 @@ export * from './prospetto.js';
 export * from './grafici.js';
 export * from './backup.js';
 export * from './regole.js';
+export * from './posizioni.js';

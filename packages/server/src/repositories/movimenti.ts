@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+  ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   normalizzaTesto,
   validaDataApertura,
   validaSegnoCategoria,
@@ -11,7 +13,9 @@ import {
 
 import {
   ErroreApi,
+  erroreCategoriaTecnica,
   erroreDominio,
+  erroreMovimentoDiSaldamento,
   erroreNonTrovato,
   erroreValidazione,
 } from '../errori.js';
@@ -32,6 +36,7 @@ export interface RigaMovimento {
   description: string;
   description_norm: string;
   transfer_group_id: string | null;
+  linked_position_id: string | null;
   revision: string;
 }
 
@@ -59,6 +64,7 @@ export function mappaMovimento(riga: RigaMovimento): MovimentoConDettagli {
     descrizione: riga.description,
     descrizioneNorm: riga.description_norm,
     transferGroupId: riga.transfer_group_id,
+    posizioneId: riga.linked_position_id,
   };
 }
 
@@ -77,9 +83,16 @@ function leggiCategoria(
   ctx: ContestoScrittura,
   id: string,
 ): RigaCategoria | undefined {
-  return ctx.db
+  const categoria = ctx.db
     .prepare(`SELECT id, kind FROM categories WHERE id = ? AND ${SOLO_ATTIVI}`)
     .get(id) as RigaCategoria | undefined;
+  if (
+    id === ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI ||
+    id === ID_CATEGORIA_TECNICA_INCASSO_CREDITI
+  ) {
+    throw erroreCategoriaTecnica('categoriaId');
+  }
+  return categoria;
 }
 
 function creaMovimentoPerValidazione(
@@ -95,6 +108,7 @@ function creaMovimentoPerValidazione(
     contoId: dati.contoId,
     categoriaId: dati.categoriaId,
     transferGroupId: null,
+    posizioneId: null,
   };
 }
 
@@ -137,6 +151,7 @@ export interface FiltriRicercaMovimenti {
   contoId?: string;
   settoreId?: string;
   categoriaId?: string;
+  posizioneId?: string;
   testo?: string;
 }
 
@@ -189,6 +204,10 @@ function costruisciFiltro(filtri: FiltriRicercaMovimenti): {
   if (filtri.categoriaId !== undefined) {
     condizioni.push('category_id = ?');
     parametri.push(filtri.categoriaId);
+  }
+  if (filtri.posizioneId !== undefined) {
+    condizioni.push('linked_position_id = ?');
+    parametri.push(filtri.posizioneId);
   }
   if (filtri.settoreId !== undefined) {
     condizioni.push('categories.sector_id = ?');
@@ -246,7 +265,7 @@ export function creaRepositorioMovimenti(
   function leggiRiga(id: string): RigaMovimento | undefined {
     return ctx.db
       .prepare(
-        `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, revision FROM transactions WHERE id = ? AND ${SOLO_ATTIVI}`,
+        `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, linked_position_id, revision FROM transactions WHERE id = ? AND ${SOLO_ATTIVI}`,
       )
       .get(id) as RigaMovimento | undefined;
   }
@@ -255,7 +274,7 @@ export function creaRepositorioMovimenti(
     async elenca() {
       const righe = ctx.db
         .prepare(
-          `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, revision FROM transactions WHERE ${SOLO_ATTIVI} ORDER BY date DESC`,
+          `SELECT id, date, amount_cents, account_id, category_id, description, description_norm, transfer_group_id, linked_position_id, revision FROM transactions WHERE ${SOLO_ATTIVI} ORDER BY date DESC`,
         )
         .all() as RigaMovimento[];
       return righe.map(mappaMovimento);
@@ -313,6 +332,9 @@ export function creaRepositorioMovimenti(
           'movimento_di_trasferimento',
           "Questo movimento fa parte di un trasferimento: modificalo con l'endpoint dei trasferimenti.",
         );
+      }
+      if (riga.linked_position_id !== null) {
+        throw erroreMovimentoDiSaldamento();
       }
 
       const contoId = dati.contoId ?? riga.account_id;
@@ -391,6 +413,9 @@ export function creaRepositorioMovimenti(
           'movimento_di_trasferimento',
           "Questo movimento fa parte di un trasferimento: modificalo con l'endpoint dei trasferimenti.",
         );
+      }
+      if (riga.linked_position_id !== null) {
+        throw erroreMovimentoDiSaldamento();
       }
       cancella(ctx, 'transactions', 'transactions', id, riga.revision);
     },

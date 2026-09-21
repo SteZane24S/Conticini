@@ -5,6 +5,8 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ID_CATEGORIA_TECNICA_INCASSO_CREDITI } from '@conticini/dominio';
+
 import { runMigrations } from '../migrations-runner.js';
 import { inserisci, type ContestoScrittura } from '../scrittura.js';
 import { creaStipendio } from './stipendi.js';
@@ -77,6 +79,7 @@ describe('creaStipendio', () => {
       descrizione: 'Stipendio febbraio',
       descrizioneNorm: 'stipendio febbraio',
       transferGroupId: null,
+      posizioneId: null,
     });
     expect(creato.ciclo).toEqual({
       id: expect.any(String),
@@ -96,6 +99,25 @@ describe('creaStipendio', () => {
     ).toThrow(
       expect.objectContaining({
         codice: 'richiesta_non_valida',
+        campo: 'categoriaId',
+      }),
+    );
+  });
+
+  it('rifiuta una categoria tecnica', () => {
+    const ctx = creaContesto();
+    preparaDati(ctx);
+
+    expect(() =>
+      creaStipendio(
+        ctx,
+        datiStipendio({
+          categoriaId: ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
+        }),
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        codice: 'categoria_tecnica',
         campo: 'categoriaId',
       }),
     );

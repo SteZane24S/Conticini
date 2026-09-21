@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type {
   MotivoMovimentoAnterioreApertura,
+  MotivoSaldamentoNonValido,
   MotivoSegnoNonCoerente,
   MotivoTrasferimentoNonValido,
   MotivoVincoloPrevisioneFissa,
@@ -29,6 +30,7 @@ type MotivoDominio =
   | MotivoTrasferimentoNonValido
   | MotivoSegnoNonCoerente
   | MotivoMovimentoAnterioreApertura
+  | MotivoSaldamentoNonValido
   | MotivoVincoloPrevisioneFissa;
 
 const MESSAGGI_DOMINIO: Record<MotivoDominio, string> = {
@@ -44,6 +46,9 @@ const MESSAGGI_DOMINIO: Record<MotivoDominio, string> = {
     'La data del movimento è precedente alla data di apertura del conto.',
   previsione_e_fissa_su_stessa_categoria:
     'Una categoria con previsione non può avere spese fisse attive, e viceversa.',
+  importo_non_positivo: "L'importo del saldamento deve essere positivo.",
+  importo_supera_residuo:
+    "L'importo del saldamento supera il residuo della posizione.",
 };
 
 export function erroreNonTrovato(entita: string, id: string): ErroreApi {
@@ -69,6 +74,50 @@ export function erroreSettoreConCategorie(id: string): ErroreApi {
 
 export function erroreBackupNonValido(messaggio: string): ErroreApi {
   return new ErroreApi(400, 'backup_non_valido', messaggio);
+}
+
+export function erroreCategoriaTecnica(campo?: string): ErroreApi {
+  return new ErroreApi(
+    422,
+    'categoria_tecnica',
+    'Questa categoria è riservata al sistema e non è selezionabile.',
+    campo,
+  );
+}
+
+export function erroreCategoriaTecnicaProtetta(): ErroreApi {
+  return new ErroreApi(
+    409,
+    'categoria_tecnica_protetta',
+    'Questa categoria è riservata al sistema: non si rinomina né si elimina.',
+  );
+}
+
+export function erroreMovimentoDiSaldamento(): ErroreApi {
+  return new ErroreApi(
+    422,
+    'movimento_di_saldamento',
+    'Questo movimento è un saldamento: annullalo dalla pagina Debiti e crediti.',
+  );
+}
+
+export function erroreEliminazionePosizioneConSaldamenti(
+  id: string,
+): ErroreApi {
+  return new ErroreApi(
+    409,
+    'posizione_con_saldamenti',
+    `La posizione ha saldamenti collegati: non si può eliminare. (${id})`,
+  );
+}
+
+export function erroreSaldamentoInConflitto(): ErroreApi {
+  return new ErroreApi(
+    409,
+    'saldamento_in_conflitto',
+    'Questo operazioneId è già stato usato per un saldamento con dati diversi.',
+    'operazioneId',
+  );
 }
 
 export function erroreDominio(
