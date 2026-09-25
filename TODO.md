@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** Giro 6.1 chiuso il 21/09/2026. La Fase 6 resta aperta. Piano rivisto il 25/09/2026: dopo la fase 6 viene la nuova fase 7 (totale unico), poi la fase 8 (mobile).
-**Prossimo giro:** 6.2 — Pagina Debiti e crediti, da `fasi/fase-6-debiti-crediti/PIANO.md`.
+**Stato:** Giro 6.2 chiuso il 25/09/2026. La Fase 6 — Debiti e crediti è chiusa. Piano rivisto il 25/09/2026: dopo la fase 6 viene la nuova fase 7 (totale unico), poi la fase 8 (mobile).
+**Prossimo giro:** 7.1 — Dominio: saldo segnato, totale con àncore, scarto, test di accettazione, da `fasi/fase-7-totale-unico/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -43,7 +43,7 @@
 
 ### Fase 6 — Debiti e crediti
 - [x] 6.1 Modello, dominio e API: migrazione 002, residuo derivato dai movimenti collegati, categorie tecniche riservate, saldamento atomico
-- [ ] 6.2 Pagina Debiti e crediti: elenco, creazione, salda tutto o in parte, annullamento, totale netto
+- [x] 6.2 Pagina Debiti e crediti: elenco, creazione, salda tutto o in parte, annullamento, totale netto
 
 ### Fase 7 — Totale unico, conti segnati, rettifiche e àncore
 - [ ] 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione
@@ -156,3 +156,12 @@
 - Il rilascio in `app/programma` va rifatto alla chiusura della fase 6 e di nuovo alla 7.5.
 - La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata in questa sessione di pianificazione.
 - Prossimo giro: **6.2 — Pagina Debiti e crediti**, da `fasi/fase-6-debiti-crediti/PIANO.md`. Orchestratore: Sonnet 5 `high`, contesto pulito.
+
+## Giro 6.2 (25/09/2026)
+
+- La Fase 6 — Debiti e crediti è chiusa con questo giro: giri 6.1 e 6.2 completati.
+- Il rilascio in `app/programma` va rifatto alla chiusura della fase 6 (`npm run release`, `app/dati/` non toccata): non eseguito in questo giro, in attesa della decisione dell'utente su quando farlo.
+- Dati di prova rimasti in `.dati-dev` dal collaudo (non nei dati reali): debito «TEST-6.2 Mario» con un saldamento parziale attivo di 50,00 sul conto Corrente, credito «TEST-6.2 Luigi» saldato per intero sul conto Risparmio.
+- Il giro 6.2 è stato orchestrato su Opus 5.5 per scelta dell'utente, per misurare i consumi della nuova versione: da tenere presente nel confronto dei pesi fra giri nel registro dei consumi.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 6.2.
+- Prossimo giro: 7.1 — Dominio del totale unico, da `fasi/fase-7-totale-unico/PIANO.md`; non tocca `packages/web`.

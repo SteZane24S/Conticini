@@ -83,6 +83,7 @@ const VOCI_MENU = [
   { percorso: '/categorie-e-regole', etichetta: 'Categorie e regole' },
   { percorso: '/spese-fisse', etichetta: 'Spese fisse' },
   { percorso: '/in-attesa', etichetta: 'In attesa' },
+  { percorso: '/debiti-e-crediti', etichetta: 'Debiti e crediti' },
   { percorso: '/previsioni', etichetta: 'Previsioni' },
   { percorso: '/grafici', etichetta: 'Grafici' },
   { percorso: '/backup', etichetta: 'Backup' },
