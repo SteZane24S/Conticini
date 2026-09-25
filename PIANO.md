@@ -14,16 +14,16 @@ Decisioni prese con l'utente e con `tech-advisor` (gpt-6-astra high, thread
 `01a0aed2-0203-7bc2-9204-fbd42ccdaf4d`) il 17/09/2026 — sono **congelate**.
 
 ## Requisiti congelati
-- **Movimento**: data, importo, descrizione, conto, categoria. Categorie su 2 livelli (Settore > Categoria), ciascuna di tipo `entrata` o `uscita`.
+- **Movimento**: data, importo, descrizione, categoria. *(Fino al 25/09/2026 anche il conto: vedi «Revisione del 25/09/2026».)* Categorie su 2 livelli (Settore > Categoria), ciascuna di tipo `entrata` o `uscita`.
 - **Apprendimento**: (1) autocompletamento delle descrizioni già usate, con categoria e importo abituali; (2) categoria e settore creati al volo dal form; (3) regole esplicite "descrizione contiene X → categoria Y", con priorità deterministica. La scelta manuale vince sempre.
-- **Conti/fonti** aggiunti a piacere, ciascuno col proprio saldo iniziale e la data di apertura. Trasferimenti fra conti: non sono né entrate né uscite.
+- **Conti/fonti** aggiunti a piacere, ciascuno col proprio saldo iniziale e la data di apertura. *Dal 25/09/2026 sono saldi segnati, aggiornati con la Rettifica; i trasferimenti non si creano più e restano solo in storico: vedi «Revisione del 25/09/2026».*
 - **Entrate extra** categorizzate: rimborsi, vendite, regali.
 - **Stipendio**: data e importo variabili, registrati a mano; alla registrazione si indicano la data prevista del prossimo e, facoltativamente, l'importo previsto. **Periodo = ciclo** `[stipendio effettivo, stipendio effettivo successivo)`.
 - **Spese fisse**: ricorrenza mensile (giorno N), ogni N mesi, annuale; data di inizio e data di fine facoltativa; flag **automatica/manuale** per ogni spesa. Il giorno 31 nei mesi corti diventa l'ultimo giorno del mese, e l'ancora resta 31. Il 29/2 nelle annuali segue la stessa regola. Nessuno slittamento per weekend.
 - **Previsioni di spesa** per categoria: un valore predefinito che vale per ogni ciclo, con la possibilità di sovrascriverlo nel singolo ciclo. **Vincolo**: una categoria con previsione non può avere spese fisse attive, e viceversa.
 - **Formula** (D = data di riferimento, E = data prevista del prossimo stipendio):
   `saldo_previsto(E⁻) = saldo(D) − Σ fisse ancora da pagare − Σ_c max(0, B_c − S_c(D))`
-  - `saldo(D)` = Σ saldi iniziali dei conti aperti entro D + Σ movimenti con `data ≤ D` (i trasferimenti si annullano).
+  - `saldo(D)` = Σ saldi iniziali dei conti aperti entro D + Σ movimenti con `data ≤ D` (i trasferimenti si annullano). *Dal 25/09/2026, dopo un'àncora di «Allinea il totale», vale la definizione della revisione qui sotto; la formula del prospetto non cambia.*
   - Fisse ancora da pagare = occorrenze con scadenza in `(D, E)` **più** le occorrenze con scadenza ≤ D non pagate entro D (le manuali scadute restano impegni finché non vengono confermate o saltate). "Pagata entro D" significa movimento collegato con data ≤ D, non `status = confirmed`. Per le occorrenze non pagate si usa l'importo previsto.
   - `S_c(D)` = spese della categoria c nel ciclo che contiene D, con data ≤ D. Se c sfora, il residuo è 0 e l'eccedenza è già nel saldo.
   - Lo stipendio futuro è escluso. Si mostra a parte, ben distinto, "dopo l'accredito previsto" quando esiste l'importo previsto.
@@ -34,6 +34,18 @@ Decisioni prese con l'utente e con `tech-advisor` (gpt-6-astra high, thread
 - **UI provvisoria** ora; restyling con Claude Design in una fase dedicata.
 - **Avvio**: icona → server locale → finestra Edge `--app`, senza barra degli indirizzi.
 - Tutti i conti sono in EUR.
+
+## Revisione del 25/09/2026 (Opus 5, con l'utente e `tech-advisor`)
+Decisioni dell'utente, **congelate**, che sostituiscono le parti dei requisiti marcate qui sopra.
+Dettaglio completo, modello e giri in `fasi/fase-7-totale-unico/PIANO.md`.
+- **Nessun conto** su movimenti, spese fisse, occorrenze, stipendi e saldamenti: tenere le spese divise per conto si è rivelato ingestibile. Tutti i calcoli lavorano sul **totale**. I dati storici conservano il loro `account_id`.
+- **Conti = saldi segnati.** Il saldo segnato di un conto a D è l'ultima lettura (Rettifica) con data ≤ D; senza letture vale il valore storico (saldo iniziale + movimenti storici di quel conto).
+- **La Rettifica tocca solo il conto, non il totale**: le spese registrate lo hanno già ridotto.
+- **Scarto** = Σ saldi segnati − totale calcolato, visibile in Prospetto e Conti.
+- **«Allinea il totale» è un'àncora** (t = oggi, X = Σ segnati a t, C = movimenti datati t già esistenti), fuori dai consumi. Per D ≥ t: `totale(D) = X + movimenti con t < data ≤ D + movimenti datati t fuori da C + saldi iniziali dei conti aperti in (t, D]`. Scelta del consulente (thread `01a0d91f-a121-7992-aaeb-6061d06aada7`), condivisa dall'utente: un movimento di correzione a importo fisso conterebbe due volte le spese registrate in ritardo.
+- **Trasferimenti eliminati**: niente creazione, modifica o cancellazione; quelli passati restano in sola lettura.
+- **Telefono** (fase 8): ambito invariato più Debiti e crediti in sola lettura; rettifiche e àncore solo sul PC.
+- Nuovo ordine: 6.2 → fase 7 (totale unico) → fase 8 (mobile, ex fase 7).
 
 ## Architettura (scelta A del tech-advisor)
 TypeScript ovunque, monorepo con npm workspaces in `Conticini/sviluppo`:
@@ -86,7 +98,8 @@ Conticini/
       fase-4-grafici-backup-rilascio/PIANO.md
       fase-5-design/PIANO.md          (contiene il brief per Claude Design)
       fase-6-debiti-crediti/PIANO.md
-      fase-7-mobile-sync/PIANO.md
+      fase-7-totale-unico/PIANO.md
+      fase-8-mobile-sync/PIANO.md
     storico/                (vuoto; regola globale sui documenti superati)
 ```
 Ogni giro crea `fasi/fase-N-…/giro-N.M/` con `TODO.md` e `guida-sviluppo.md`, scritti da
@@ -143,18 +156,27 @@ transazione; due categorie tecniche riservate tengono i saldamenti dentro i sald
 consumi. Il Prospetto e la formula di previsione **non si toccano**: il totale netto vive solo
 nella pagina nuova.
 - 6.1 Modello, dominio e API.
-- 6.2 Pagina Debiti e crediti.
+- 6.2 Pagina Debiti e crediti (il selettore del conto nel saldamento è temporaneo: lo toglie la fase 7).
 
-**Fase 7 — Mobile e sincronizzazione** (pianificata il 20/09/2026, dettaglio in `fasi/fase-7-mobile-sync/PIANO.md`)
+**Fase 7 — Totale unico, conti segnati, rettifiche e àncore** (pianificata il 25/09/2026, dettaglio in `fasi/fase-7-totale-unico/PIANO.md`)
+Il conto sparisce da movimenti, spese fisse, occorrenze, stipendi e saldamenti; i conti diventano
+saldi segnati con la Rettifica; lo scarto si chiude con «Allinea il totale», che salva un'àncora.
+- 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione.
+- 7.2 Migrazione 003 (ricostruzione delle tabelle con `account_id` nullable, backup automatico pre-migrazione) e API senza conto; trasferimenti in sola lettura.
+- 7.3 API di rettifiche, àncore, prospetto, export (con la correzione dell'export JSON che omette le posizioni).
+- 7.4 Interfaccia senza conto.
+- 7.5 Conti e Prospetto (Rettifica, scarto, Allinea); rilascio in `app/`.
+
+**Fase 8 — Mobile e sincronizzazione** (pianificata il 20/09/2026 come fase 7, rivista il 25/09/2026; dettaglio in `fasi/fase-8-mobile-sync/PIANO.md`)
 Web app distribuita da un'origine statica (Cloudflare Pages, repository privato), senza backend;
 sul telefono si inserisce e si consulta, senza uso offline e senza database nel browser; stato
 ricostruito in memoria da uno snapshot e da pacchetti immutabili su Google Drive
 (`appDataFolder`, scope `drive.appdata`); PC archivio autorevole; conflitti espliciti.
-- 7.1 Protocollo, snapshot, applicazione dei pacchetti (senza rete).
-- 7.2 Trasporto Google Drive sul PC.
-- 7.3 App mobile in lettura.
-- 7.4 App mobile in scrittura.
-- 7.5 In attesa, conflitti, chiusura.
+- 8.1 Protocollo, snapshot (con posizioni, letture e àncore), applicazione dei pacchetti (senza rete).
+- 8.2 Trasporto Google Drive sul PC.
+- 8.3 App mobile in lettura (con Debiti e crediti in sola lettura).
+- 8.4 App mobile in scrittura (movimenti senza conto).
+- 8.5 In attesa, conflitti, chiusura.
 
 ## CLAUDE.md di progetto (contenuti)
 - layer e confini (tabella sopra);

@@ -1,6 +1,6 @@
 # Conticini — stato del progetto
 
-**Stato:** Giro 6.1 chiuso il 21/09/2026. La Fase 6 resta aperta.
+**Stato:** Giro 6.1 chiuso il 21/09/2026. La Fase 6 resta aperta. Piano rivisto il 25/09/2026: dopo la fase 6 viene la nuova fase 7 (totale unico), poi la fase 8 (mobile).
 **Prossimo giro:** 6.2 — Pagina Debiti e crediti, da `fasi/fase-6-debiti-crediti/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
@@ -45,12 +45,19 @@
 - [x] 6.1 Modello, dominio e API: migrazione 002, residuo derivato dai movimenti collegati, categorie tecniche riservate, saldamento atomico
 - [ ] 6.2 Pagina Debiti e crediti: elenco, creazione, salda tutto o in parte, annullamento, totale netto
 
-### Fase 7 — Mobile e sincronizzazione
-- [ ] 7.1 Protocollo, snapshot e applicazione dei pacchetti (solo PC, senza rete)
-- [ ] 7.2 Trasporto Google Drive sul PC (OAuth desktop su loopback, `appDataFolder`)
-- [ ] 7.3 App mobile in lettura (router in-process, stato in memoria, Prospetto e saldi)
-- [ ] 7.4 App mobile in scrittura (inserimento movimenti, pubblicazione dei pacchetti)
-- [ ] 7.5 In attesa, risoluzione dei conflitti, manifest e chiusura della fase
+### Fase 7 — Totale unico, conti segnati, rettifiche e àncore
+- [ ] 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione
+- [ ] 7.2 Migrazione 003 (tabelle ricostruite con `account_id` nullable, backup pre-migrazione) e API senza conto; trasferimenti in sola lettura
+- [ ] 7.3 API di rettifiche, àncore, prospetto, export (con le posizioni nell'export JSON)
+- [ ] 7.4 Interfaccia senza conto
+- [ ] 7.5 Conti e Prospetto (Rettifica, scarto, Allinea il totale); rilascio in `app/`
+
+### Fase 8 — Mobile e sincronizzazione
+- [ ] 8.1 Protocollo, snapshot (con posizioni, letture, àncore) e applicazione dei pacchetti (solo PC, senza rete)
+- [ ] 8.2 Trasporto Google Drive sul PC (OAuth desktop su loopback, `appDataFolder`)
+- [ ] 8.3 App mobile in lettura (router in-process, stato in memoria, Prospetto, saldi segnati, Debiti e crediti in sola lettura)
+- [ ] 8.4 App mobile in scrittura (inserimento movimenti senza conto, pubblicazione dei pacchetti)
+- [ ] 8.5 In attesa, risoluzione dei conflitti, manifest e chiusura della fase
 
 ## Pendenze aperte
 - Il file `AGENTS.md` non tracciato alla radice resta una pendenza preesistente invariata: è comparso durante sessioni Codex di un giro precedente, non è richiesto dai brief e non è incluso in alcun commit; la decisione se tenerlo, cancellarlo o ignorarlo è dell’utente.
@@ -136,3 +143,16 @@
 - Il commit del giro 6.1 include anche una funzionalità preesistente non committata e non rivista da questo giro (eliminazione di una previsione con cascata sulle spese fisse collegate): inclusa nel commit su decisione esplicita dell’utente, dopo essere stata segnalata dall’orchestratore. Non è stata sottoposta a review né a checker in questo giro; se emergessero problemi, va trattata come un giro a sé.
 - Rilievo accettato come debito, non corretto: nessuna validazione runtime del segno rispetto al kind della categoria tecnica nel percorso non-saldamento; il percorso di saldamento l’ha già, aggiunta in questo giro. Il rischio è basso perché le due mappature sono funzioni pure e deterministiche dello stesso `verso`, verificate dai test di dominio.
 - Prossimo giro: 6.2 — Pagina Debiti e crediti, da `fasi/fase-6-debiti-crediti/PIANO.md`. Tocca `packages/web`: chiudersi con `live-testing`.
+
+## Pianificazione del 25/09/2026 (Opus 5)
+
+- L'utente ha deciso di **eliminare la suddivisione per conto**: tenere le spese divise per conto è ingestibile. Movimenti, spese fisse, occorrenze, stipendi e saldamenti non hanno più un conto; tutti i calcoli lavorano sul totale; i conti diventano saldi segnati. Nuova **fase 7** in `fasi/fase-7-totale-unico/PIANO.md`; la fase mobile è diventata **fase 8** (`git mv fasi/fase-7-mobile-sync fasi/fase-8-mobile-sync`), con i giri rinumerati 8.1-8.5 e una sezione «Revisione del 25/09/2026» nel suo piano.
+- Decisioni dell'utente, congelate: la **Rettifica** aggiorna solo il saldo segnato del conto e non tocca il totale; lo **scarto** (Σ segnati − totale) è visibile in Prospetto e Conti; **«Allinea il totale»** chiude lo scarto ed è fuori dai consumi; i **trasferimenti** sono eliminati e quelli passati restano in sola lettura; sul **telefono** si aggiunge Debiti e crediti in sola lettura, mentre rettifiche e Allinea restano solo sul PC. Chiude la domanda aperta del 20/09 sulla presenza dei debiti sul telefono.
+- Posizione del consulente messa agli atti (`tech-advisor`, `gpt-6-astra` `high`, thread `01a0d91f-a121-7992-aaeb-6061d06aada7`): «Allinea» salva un'**àncora** («il totale al giorno t vale X», con l'insieme C dei movimenti di quel giorno già coperti), non un movimento di correzione a importo fisso, che conterebbe due volte le spese registrate in ritardo o acquisite in ritardo dal telefono. L'orchestratore partiva dall'importo fisso per semplicità e si è convinto; l'utente ha scelto l'àncora.
+- Conseguenza accettata e da scrivere nei test della 7.1: dopo un'àncora, un movimento datato prima di essa cambia le categorie ma non il totale; il test «pagare una fissa all'importo e alla data previsti non cambia la proiezione» non vale per un pagamento registrato in ritardo e già assorbito da un'àncora.
+- Difetto trovato dal consulente, da correggere nella 7.3: l'export JSON (`packages/server/src/routes/export.ts`) usa un elenco fisso di tabelle che **omette `debt_credit_positions`**.
+- Rischio da presidiare nella 7.2: la migrazione 003 ricostruisce tabelle e girerà sui dati reali di `app/dati/` al primo avvio dopo il rilascio. Per questo il server farà un backup automatico prima di applicare migrazioni pendenti, e la 003 si prova su `.dati-dev` confrontando totale e saldi per conto prima e dopo.
+- Il giro 6.2 si esegue come già pianificato, con il selettore del conto nel saldamento: è temporaneo e lo toglie la fase 7 (spreco minimo, accettato per chiudere la fase 6 in ordine).
+- Il rilascio in `app/programma` va rifatto alla chiusura della fase 6 e di nuovo alla 7.5.
+- La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata in questa sessione di pianificazione.
+- Prossimo giro: **6.2 — Pagina Debiti e crediti**, da `fasi/fase-6-debiti-crediti/PIANO.md`. Orchestratore: Sonnet 5 `high`, contesto pulito.

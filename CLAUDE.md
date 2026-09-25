@@ -44,13 +44,17 @@ Test con Vitest. Le API si testano con `fastify.inject` su un DB temporaneo.
 ## Invarianti di dominio
 - Soldi = interi in centesimi, `amount_cents` con segno (+ entrata, − uscita). Parsing dalla stringa (`"12,34"` → 1234), mai `parseFloat * 100`. Tutto in EUR.
 - Date = stringhe `YYYY-MM-DD`; "oggi" si calcola nel fuso locale.
-- Trasferimento = esattamente 2 movimenti con lo stesso `transfer_group_id`, conti diversi, stessa data, importi opposti, categoria nulla. Si crea, modifica e cancella sempre come gruppo, in un'unica transazione.
+- Trasferimento = esattamente 2 movimenti con lo stesso `transfer_group_id`, conti diversi, stessa data, importi opposti, categoria nulla. **Dalla fase 7 non si creano, non si modificano e non si cancellano più**: quelli storici restano in sola lettura.
+- **Dalla fase 7 (revisione del 25/09/2026) nessun conto** su movimenti, spese fisse, occorrenze, stipendi e saldamenti: `account_id` è NULL sui dati nuovi e si conserva su quelli storici. Tutti i calcoli lavorano sul totale.
+- Saldo segnato del conto a D = ultima lettura (Rettifica) con data ≤ D, altrimenti saldo iniziale + movimenti storici di quel conto. La Rettifica **non tocca il totale**. Scarto = Σ saldi segnati − totale.
+- Àncora di «Allinea il totale» = (t, X, C): per D ≥ t il totale è X + movimenti con t < data ≤ D + movimenti datati t fuori da C + saldi iniziali dei conti aperti in (t, D]. Fuori dai consumi. Una sola funzione pura del totale in `dominio`, usata da prospetto, grafici e debiti. Dettaglio in `fasi/fase-7-totale-unico/PIANO.md`.
 - Ciclo = `[stipendio effettivo, stipendio effettivo successivo)`. Un'entrata extra non apre un ciclo.
 - Formula del prospetto: `saldo(D) − fisse ancora da pagare − Σ max(0, B_c − S_c(D))`. I casi limite sono in `PIANO.md` («Requisiti congelati») e vanno rispettati tutti.
 - Una categoria con previsione non può avere spese fisse attive, e viceversa.
 - Occorrenza di una spesa fissa: id = UUIDv5(recurring_id + periodo `YYYY-MM`); movimento automatico: id = UUIDv5(occurrence_id). Il catch-up è idempotente.
 - Colonne di sincronizzazione su ogni tabella sincronizzabile: `id` UUID, `created_at`, `updated_at`, `deleted_at`, `revision`, `base_revision`. **Mai DELETE fisico**: si usano tombstone. Ogni scrittura registra in `change_log` nella stessa transazione.
 - SQLite: WAL, `foreign_keys=ON`. Il backup si fa solo con l'API di backup di better-sqlite3.
+- Dalla 7.2: prima di applicare migrazioni pendenti il server fa un backup automatico; le migrazioni che ricostruiscono tabelle girano con `foreign_keys=OFF` fuori dalla transazione e `PRAGMA foreign_key_check` prima del commit.
 
 ## Dati e ambienti
 - La cartella dati la decide `CONTICINI_DATA_DIR`.

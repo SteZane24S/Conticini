@@ -146,6 +146,9 @@ attraverso il percorso esistente, senza nessuna regola nuova.
   crediti; le posizioni saldate non spariscono ma si distinguono.
 - Form di creazione: descrizione, importo, selettore debito/credito.
 - Azione «salda»: scelta del conto, importo preimpostato al residuo e modificabile, data.
+  **Nota del 25/09/2026:** il selettore del conto è temporaneo. La fase 7 elimina il conto dai
+  saldamenti (giro 7.2 per l'API, 7.4 per l'interfaccia); qui si costruisce comunque, perché l'API
+  del 6.1 lo richiede e la fase 6 si chiude nell'ordine previsto.
 - Annullamento di un saldamento.
 - In cima alla pagina il **totale netto** con le tre componenti leggibili: soldi sui conti, crediti
   da incassare, debiti da pagare. Etichettato come riferito a oggi.
@@ -160,5 +163,5 @@ chiaro e scuro.
 - Nessuna previsione, nessun promemoria, nessuna scadenza.
 - Nessun collegamento di un movimento già esistente a una posizione: si valuterà se servirà davvero
   dopo qualche settimana d'uso.
-- Nessuna presenza nella versione mobile della fase 7, se non come eventuale sola lettura decisa
-  in quella sede.
+- Nessuna presenza nella versione mobile, se non in sola lettura: deciso il 25/09/2026, la pagina
+  compare sul telefono in sola lettura nella fase 8 (ex fase 7).
