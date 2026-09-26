@@ -126,7 +126,7 @@ describe('occorrenze', () => {
     const occorrenza = confermaOccorrenza(ctx, 'occorrenza-1');
     const movimento = ctx.db
       .prepare(
-        'SELECT date, amount_cents, description, description_norm FROM transactions WHERE id = (SELECT transaction_id FROM recurring_occurrences WHERE id = ?)',
+        'SELECT date, amount_cents, account_id, description, description_norm FROM transactions WHERE id = (SELECT transaction_id FROM recurring_occurrences WHERE id = ?)',
       )
       .get('occorrenza-1');
 
@@ -138,6 +138,7 @@ describe('occorrenze', () => {
     expect(movimento).toEqual({
       date: '2026-02-05',
       amount_cents: -8500,
+      account_id: null,
       description: 'Luce e gas',
       description_norm: 'luce e gas',
     });
@@ -159,13 +160,17 @@ describe('occorrenze', () => {
       .get('occorrenza-1');
     const movimento = ctx.db
       .prepare(
-        'SELECT date, amount_cents FROM transactions WHERE id = (SELECT transaction_id FROM recurring_occurrences WHERE id = ?)',
+        'SELECT date, amount_cents, account_id FROM transactions WHERE id = (SELECT transaction_id FROM recurring_occurrences WHERE id = ?)',
       )
       .get('occorrenza-1');
 
     expect(occorrenza.movimentoCollegato).toEqual({ data: '2026-02-07' });
     expect(riga).toEqual({ due_date: '2026-02-05', amount_cents: 8500 });
-    expect(movimento).toEqual({ date: '2026-02-07', amount_cents: -9000 });
+    expect(movimento).toEqual({
+      date: '2026-02-07',
+      amount_cents: -9000,
+      account_id: null,
+    });
   });
 
   it('rifiuta la conferma di un occorrenza già pagata', () => {

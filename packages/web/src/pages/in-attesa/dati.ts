@@ -164,11 +164,13 @@ export async function cercaCandidatiCollegamento(
   >,
 ): Promise<MovimentoDto[]> {
   const parametri = new URLSearchParams({
-    contoId: occorrenza.contoId,
     dataDa: dataConScarto(occorrenza.scadenza, -7),
     dataA: dataConScarto(occorrenza.scadenza, 7),
     perPagina: '200',
   });
+  if (occorrenza.contoId !== null) {
+    parametri.set('contoId', occorrenza.contoId);
+  }
   const risposta = await apiGet(
     `/api/movimenti?${parametri.toString()}`,
     elencoMovimentiRispostaSchema,

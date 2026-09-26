@@ -3,7 +3,10 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { buildApp } from './app.js';
-import { eseguiBackupAutomaticoSeNecessario } from './backup.js';
+import {
+  eseguiBackupAutomaticoSeNecessario,
+  eseguiBackupPreMigrazioneSeNecessario,
+} from './backup.js';
 import { openDatabase } from './database.js';
 import { loadEnv } from './env.js';
 import { ensureMeta } from './meta.js';
@@ -63,6 +66,15 @@ async function main(): Promise<void> {
   }
 
   const db = openDatabase(env.dataDir);
+  try {
+    await eseguiBackupPreMigrazioneSeNecessario(db, env.dataDir);
+  } catch (errore) {
+    console.error(
+      'Backup pre-migrazione fallito: interruzione per sicurezza dei dati.',
+      errore,
+    );
+    process.exit(1);
+  }
   await eseguiBackupAutomaticoSeNecessario(db, env.dataDir).catch(
     (errore: unknown) => {
       console.error("Backup automatico all'avvio fallito:", errore);

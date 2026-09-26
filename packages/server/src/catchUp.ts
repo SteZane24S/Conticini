@@ -29,7 +29,6 @@ interface RigaSpesaFissa {
   start_date: string;
   end_date: string | null;
   amount_cents: number;
-  account_id: string;
   category_id: string;
   mode: 'auto' | 'manual';
 }
@@ -94,7 +93,7 @@ export function eseguiCatchUp(
             inserisci(ctx, 'transactions', 'transactions', movimentoId, {
               date: scadenza,
               amount_cents: -spesaFissa.amount_cents,
-              account_id: spesaFissa.account_id,
+              account_id: null,
               category_id: spesaFissa.category_id,
               description: spesaFissa.name,
               description_norm: normalizzaTesto(spesaFissa.name),
@@ -121,7 +120,7 @@ export function eseguiCatchUp(
           inserisci(ctx, 'transactions', 'transactions', movimentoId, {
             date: scadenza,
             amount_cents: -spesaFissa.amount_cents,
-            account_id: spesaFissa.account_id,
+            account_id: null,
             category_id: spesaFissa.category_id,
             description: spesaFissa.name,
             description_norm: normalizzaTesto(spesaFissa.name),
@@ -137,7 +136,7 @@ export function eseguiCatchUp(
               period: periodo,
               due_date: scadenza,
               amount_cents: spesaFissa.amount_cents,
-              account_id: spesaFissa.account_id,
+              account_id: null,
               category_id: spesaFissa.category_id,
               mode: 'auto',
               status: 'paid',
@@ -157,7 +156,7 @@ export function eseguiCatchUp(
             period: periodo,
             due_date: scadenza,
             amount_cents: spesaFissa.amount_cents,
-            account_id: spesaFissa.account_id,
+            account_id: null,
             category_id: spesaFissa.category_id,
             mode: spesaFissa.mode,
             status: 'pending',

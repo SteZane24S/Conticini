@@ -104,6 +104,7 @@ describe('creaRepositorioSpeseFisse', () => {
 
       expect(await repo.ottieni(creata.id)).toEqual({
         ...datiSpesa({ regola }),
+        contoId: null,
         id: creata.id,
       });
     },
@@ -176,13 +177,17 @@ describe('creaRepositorioSpeseFisse', () => {
 
     expect(
       ctx.db
-        .prepare('SELECT amount_cents FROM recurring_occurrences WHERE id = ?')
+        .prepare(
+          'SELECT amount_cents, account_id FROM recurring_occurrences WHERE id = ?',
+        )
         .get('pending-1'),
-    ).toEqual({ amount_cents: 90000 });
+    ).toEqual({ amount_cents: 90000, account_id: 'conto-1' });
     expect(
       ctx.db
-        .prepare('SELECT amount_cents FROM recurring_occurrences WHERE id = ?')
+        .prepare(
+          'SELECT amount_cents, account_id FROM recurring_occurrences WHERE id = ?',
+        )
         .get('paid-1'),
-    ).toEqual({ amount_cents: 85000 });
+    ).toEqual({ amount_cents: 85000, account_id: 'conto-1' });
   });
 });

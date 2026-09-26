@@ -21,6 +21,7 @@ import type {
 import { openDatabase, percorsoDatabase } from './database.js';
 import {
   contaMigrazioniDisponibili,
+  migrazioniPendenti,
   runMigrations,
 } from './migrations-runner.js';
 import { ensureMeta } from './meta.js';
@@ -203,6 +204,17 @@ export async function eseguiBackupAutomaticoSeNecessario(
   if (eta > UN_GIORNO_MS) {
     await eseguiBackup(db, impostazioni.cartella, impostazioni.rotazione);
   }
+}
+
+export async function eseguiBackupPreMigrazioneSeNecessario(
+  db: Database.Database,
+  dataDir: string,
+): Promise<void> {
+  if (migrazioniPendenti(db).length === 0) {
+    return;
+  }
+  const impostazioni = leggiImpostazioniBackup(dataDir);
+  await eseguiBackup(db, impostazioni.cartella, impostazioni.rotazione);
 }
 
 export function verificaFileBackup(

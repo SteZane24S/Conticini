@@ -91,26 +91,30 @@ describe('rotte movimenti', () => {
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
       ok: true,
-      movimento: { id: expect.any(String), amountCents: -1200 },
+      movimento: { id: expect.any(String), amountCents: -1200, contoId: null },
     });
   });
 
-  it('restituisce gli errori di conto, categoria e regole di dominio', async () => {
+  it('ignora il contoId ricevuto alla creazione', async () => {
     const applicazione = creaApp();
 
     const conto = await creaMovimento(applicazione, { contoId: 'inesistente' });
+
+    expect(conto.statusCode).toBe(201);
+    expect(conto.json().movimento.contoId).toBeNull();
+  });
+
+  it('restituisce gli errori di categoria e regole di dominio', async () => {
+    const applicazione = creaApp();
+
     const categoria = await creaMovimento(applicazione, {
       categoriaId: 'inesistente',
     });
     const segno = await creaMovimento(applicazione, { amountCents: 1200 });
-    const data = await creaMovimento(applicazione, { data: '2026-01-01' });
 
-    expect(conto.statusCode).toBe(404);
     expect(categoria.statusCode).toBe(404);
     expect(segno.json().errore.codice).toBe('segno_non_coerente');
     expect(segno.statusCode).toBe(422);
-    expect(data.json().errore.codice).toBe('movimento_anteriore_apertura');
-    expect(data.statusCode).toBe(422);
   });
 
   it('rifiuta l importo zero nella validazione della richiesta', async () => {
@@ -126,7 +130,7 @@ describe('rotte movimenti', () => {
 
   it('elenca e filtra i movimenti con paginazione', async () => {
     const applicazione = creaApp();
-    const primo = await creaMovimento(applicazione, {
+    await creaMovimento(applicazione, {
       data: '2026-02-10',
       descrizione: 'Caffè Roma',
     });
@@ -168,11 +172,8 @@ describe('rotte movimenti', () => {
       movimenti: expect.any(Array),
     });
     expect(conto.json()).toMatchObject({
-      totale: 2,
-      movimenti: [
-        { id: terzo.json().movimento.id },
-        { id: primo.json().movimento.id },
-      ],
+      totale: 0,
+      movimenti: [],
     });
     expect(date.json()).toMatchObject({
       totale: 1,

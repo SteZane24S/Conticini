@@ -58,17 +58,21 @@ describe('creaRepositorioMovimenti', () => {
   }
 
   function datiMovimento(
-    dati: Partial<Omit<MovimentoConDettagli, 'id'>> = {},
-  ): Omit<MovimentoConDettagli, 'id'> {
+    dati: Partial<
+      Pick<
+        MovimentoConDettagli,
+        'data' | 'amountCents' | 'categoriaId' | 'descrizione'
+      >
+    > = {},
+  ): Pick<
+    MovimentoConDettagli,
+    'data' | 'amountCents' | 'categoriaId' | 'descrizione'
+  > {
     return {
       data: '2026-02-10' as DataISO,
       amountCents: -1250,
-      contoId: 'conto-1',
       categoriaId: 'categoria-uscita',
       descrizione: 'Spesa iniziale',
-      descrizioneNorm: '',
-      transferGroupId: null,
-      posizioneId: null,
       ...dati,
     };
   }
@@ -86,7 +90,7 @@ describe('creaRepositorioMovimenti', () => {
       id: expect.any(String),
       data: '2026-02-10',
       amountCents: -1250,
-      contoId: 'conto-1',
+      contoId: null,
       categoriaId: 'categoria-uscita',
       descrizione: 'Città Perché',
       descrizioneNorm: 'citta perche',
@@ -96,20 +100,17 @@ describe('creaRepositorioMovimenti', () => {
     expect(await repo.ottieni(creato.id)).toEqual(creato);
   });
 
-  it('rifiuta conto e categoria inesistenti', async () => {
+  it('rifiuta categoria inesistente', async () => {
     const ctx = creaContesto();
     preparaDati(ctx);
     const repo = creaRepositorioMovimenti(ctx);
 
     await expect(
-      repo.crea(datiMovimento({ contoId: 'conto-inesistente' })),
-    ).rejects.toMatchObject({ codice: 'non_trovato' });
-    await expect(
       repo.crea(datiMovimento({ categoriaId: 'categoria-inesistente' })),
     ).rejects.toMatchObject({ codice: 'non_trovato' });
   });
 
-  it('applica le validazioni di segno e apertura del conto', async () => {
+  it('applica la validazione di segno senza validare l apertura del conto', async () => {
     const ctx = creaContesto();
     preparaDati(ctx);
     const repo = creaRepositorioMovimenti(ctx);
@@ -119,9 +120,10 @@ describe('creaRepositorioMovimenti', () => {
     ).rejects.toMatchObject({
       codice: 'segno_non_coerente',
     });
-    await expect(
-      repo.crea(datiMovimento({ data: '2026-01-01' as DataISO })),
-    ).rejects.toMatchObject({ codice: 'movimento_anteriore_apertura' });
+    const creato = await repo.crea(
+      datiMovimento({ data: '2026-01-01' as DataISO }),
+    );
+    expect(creato.contoId).toBeNull();
   });
 
   it('elenca tutti i movimenti attivi', async () => {
@@ -149,7 +151,7 @@ describe('creaRepositorioMovimenti', () => {
     });
 
     expect(descrizioneAggiornata).toMatchObject({
-      contoId: 'conto-1',
+      contoId: null,
       data: '2026-02-10',
       amountCents: -1250,
       categoriaId: 'categoria-uscita',
@@ -158,12 +160,12 @@ describe('creaRepositorioMovimenti', () => {
 
     const aggiornato = await repo.aggiorna(creato.id, {
       contoId: 'conto-2',
-      data: '2026-02-15' as DataISO,
+      data: '2026-01-01' as DataISO,
     });
 
     expect(aggiornato).toMatchObject({
-      contoId: 'conto-2',
-      data: '2026-02-15',
+      contoId: null,
+      data: '2026-01-01',
       amountCents: -1250,
       categoriaId: 'categoria-uscita',
       descrizioneNorm: 'caffe citta',
@@ -178,9 +180,6 @@ describe('creaRepositorioMovimenti', () => {
     await expect(
       repo.aggiorna(creato.id, { amountCents: -1250 }),
     ).rejects.toMatchObject({ codice: 'segno_non_coerente' });
-    await expect(
-      repo.aggiorna(creato.id, { data: '2026-01-01' as DataISO }),
-    ).rejects.toMatchObject({ codice: 'movimento_anteriore_apertura' });
   });
 
   it('rifiuta l azzeramento della categoria su un movimento normale', async () => {
@@ -250,7 +249,6 @@ describe('creaRepositorioMovimenti', () => {
     const secondo = await repo.crea(
       datiMovimento({
         data: '2026-02-11' as DataISO,
-        contoId: 'conto-2',
         categoriaId: 'categoria-entrata',
         amountCents: 2500,
         descrizione: 'Stipendio',
@@ -265,7 +263,7 @@ describe('creaRepositorioMovimenti', () => {
 
     expect(
       cercaMovimenti(ctx, { contoId: 'conto-1' }, { pagina: 1, perPagina: 50 }),
-    ).toMatchObject({ totale: 2, elementi: [terzo, primo] });
+    ).toMatchObject({ totale: 0, elementi: [] });
     expect(
       cercaMovimenti(
         ctx,
@@ -300,6 +298,6 @@ describe('creaRepositorioMovimenti', () => {
         { contoId: 'conto-1', dataDa: '2026-02-12', testo: 'milano' },
         { pagina: 1, perPagina: 50 },
       ),
-    ).toMatchObject({ totale: 1, elementi: [terzo] });
+    ).toMatchObject({ totale: 0, elementi: [] });
   });
 });

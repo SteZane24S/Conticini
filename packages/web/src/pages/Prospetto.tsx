@@ -66,7 +66,10 @@ export function Prospetto() {
   const { cicli } = useStipendio();
   const { prospetto, fisseArricchite, caricando, errore } = useProspetto(data);
 
-  function nomeConto(contoId: string) {
+  function nomeConto(contoId: string | null) {
+    if (contoId === null) {
+      return '—';
+    }
     return conti.find((conto) => conto.id === contoId)?.nome ?? contoId;
   }
   function nomeCategoria(categoriaId: string | null) {

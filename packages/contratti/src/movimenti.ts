@@ -6,7 +6,7 @@ export const movimentoSchema = z.object({
   id: z.string(),
   data: z.string().regex(dataIsoRegex),
   amountCents: z.number().int(),
-  contoId: z.string(),
+  contoId: z.string().nullable(),
   categoriaId: z.string().nullable(),
   transferGroupId: z.string().nullable(),
   posizioneId: z.string().nullable(),

@@ -405,7 +405,10 @@ export function DebitiCrediti() {
     }
   }
 
-  function nomeConto(contoId: string): string {
+  function nomeConto(contoId: string | null): string {
+    if (contoId === null) {
+      return '—';
+    }
     return (
       conti.find((conto) => conto.id === contoId)?.nome ?? 'Conto sconosciuto'
     );

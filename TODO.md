@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** Giro 7.1 chiuso il 26/09/2026. La Fase 7 — Totale unico, conti segnati, rettifiche e àncore è aperta.
-**Prossimo giro:** 7.2 — Migrazione 003 e API senza conto, da `fasi/fase-7-totale-unico/PIANO.md`.
+**Stato:** Giro 7.2 chiuso il 26/09/2026. La Fase 7 — Totale unico, conti segnati, rettifiche e àncore è aperta.
+**Prossimo giro:** 7.3 — API di rettifiche, àncore, prospetto, export, da `fasi/fase-7-totale-unico/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -47,7 +47,7 @@
 
 ### Fase 7 — Totale unico, conti segnati, rettifiche e àncore
 - [x] 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione
-- [ ] 7.2 Migrazione 003 (tabelle ricostruite con `account_id` nullable, backup pre-migrazione) e API senza conto; trasferimenti in sola lettura
+- [x] 7.2 Migrazione 003 (tabelle ricostruite con `account_id` nullable, backup pre-migrazione) e API senza conto; trasferimenti in sola lettura
 - [ ] 7.3 API di rettifiche, àncore, prospetto, export (con le posizioni nell'export JSON)
 - [ ] 7.4 Interfaccia senza conto
 - [ ] 7.5 Conti e Prospetto (Rettifica, scarto, Allinea il totale); rilascio in `app/`
@@ -175,3 +175,12 @@
 - Il giro 7.1 è stato orchestrato su Opus 5.5 per scelta dell'utente: tenerne conto nel confronto dei pesi fra giri.
 - La pendenza preesistente su `AGENTS.md` resta invariata.
 - Prossimo giro: 7.2 — Migrazione 003 e API senza conto; tocca `packages/server` e i dati. Il piano richiede backup automatico pre-migrazione e prova della 003 su `.dati-dev`.
+
+## Giro 7.2 (26/09/2026)
+
+- Per il 7.3 restano da implementare i repository di letture e àncore, il collegamento alla route del prospetto, l'estensione dello schema zod del prospetto e il passaggio di `saldoGiornaliero` a `totaleA`.
+- Per il 7.3 restano la correzione dell'export JSON per includere `debt_credit_positions` e la rimozione della colonna Conto dall'export CSV.
+- La pulizia visiva dell'interfaccia, inclusa la rimozione dei selettori di conto e delle quattro funzioni `nomeConto`, resta pianificata per il 7.4.
+- La pendenza preesistente su `AGENTS.md` resta invariata: file non tracciato alla radice, non toccato da questo giro; la decisione spetta all'utente.
+- Debito accettato: la duplicazione delle quattro funzioni `nomeConto` in `packages/web` non è stata refattorizzata, perché preesistente e non aggravata in modo sostanziale dal giro.
+- Prossimo giro: 7.3 — API di rettifiche, àncore, prospetto, export, da `fasi/fase-7-totale-unico/PIANO.md`.

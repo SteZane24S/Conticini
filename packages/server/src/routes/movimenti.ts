@@ -62,7 +62,6 @@ export function registraRotteMovimenti(
     const movimento = await repo.crea({
       data: risultato.data.data,
       amountCents: risultato.data.amountCents,
-      contoId: risultato.data.contoId,
       categoriaId: risultato.data.categoriaId,
       descrizione: risultato.data.descrizione,
     });

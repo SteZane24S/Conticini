@@ -22,7 +22,7 @@ interface RigaOccorrenza {
   period: string;
   due_date: string;
   amount_cents: number;
-  account_id: string;
+  account_id: string | null;
   category_id: string | null;
   mode: 'auto' | 'manual';
   status: 'pending' | 'paid' | 'skipped';
@@ -120,9 +120,6 @@ export function creaRepositorioOccorrenze(
       if (dati.categoriaId !== undefined) {
         colonne.category_id = dati.categoriaId;
       }
-      if (dati.contoId !== undefined) {
-        colonne.account_id = dati.contoId;
-      }
       if (dati.stato !== undefined) {
         colonne.status = dati.stato;
       }
@@ -170,7 +167,7 @@ export function confermaOccorrenza(
     inserisci(ctx, 'transactions', 'transactions', movimentoId, {
       date: correzioni?.data ?? riga.due_date,
       amount_cents: -(correzioni?.amountCents ?? riga.amount_cents),
-      account_id: riga.account_id,
+      account_id: null,
       category_id: riga.category_id,
       description: riga.name,
       description_norm: normalizzaTesto(riga.name),

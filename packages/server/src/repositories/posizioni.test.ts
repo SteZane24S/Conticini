@@ -6,7 +6,7 @@ import Database from 'better-sqlite3';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { runMigrations } from '../migrations-runner.js';
-import { inserisci, type ContestoScrittura } from '../scrittura.js';
+import type { ContestoScrittura } from '../scrittura.js';
 import {
   annullaSaldamento,
   creaRepositorioPosizioni,
@@ -30,23 +30,7 @@ describe('repository posizioni', () => {
     dir = mkdtempSync(path.join(tmpdir(), 'conticini-posizioni-'));
     db = new Database(path.join(dir, 'conticini.db'));
     runMigrations(db);
-    const ctx = { db, deviceId: 'device-test' };
-    inserisci(ctx, 'accounts', 'accounts', 'conto-1', {
-      name: 'Conto principale',
-      initial_balance_cents: 100000,
-      opened_on: '2026-01-01',
-      archived: 0,
-    });
-    return ctx;
-  }
-
-  function saldoConto(ctx: ContestoScrittura): number {
-    const riga = ctx.db
-      .prepare(
-        'SELECT initial_balance_cents + COALESCE(SUM(amount_cents), 0) AS saldo FROM accounts LEFT JOIN transactions ON transactions.account_id = accounts.id AND transactions.deleted_at IS NULL WHERE accounts.id = ?',
-      )
-      .get('conto-1') as { saldo: number };
-    return riga.saldo;
+    return { db, deviceId: 'device-test' };
   }
 
   it('crea un debito con residuo uguale all importo iniziale', async () => {
@@ -65,7 +49,7 @@ describe('repository posizioni', () => {
     });
   });
 
-  it('saldando in parte un debito riduce il residuo e il saldo del conto', async () => {
+  it('saldando in parte un debito riduce il residuo senza conto', async () => {
     const ctx = creaContesto();
     const repo = creaRepositorioPosizioni(ctx);
     const posizione = await repo.crea({
@@ -75,15 +59,14 @@ describe('repository posizioni', () => {
     });
 
     const saldamento = saldaPosizione(ctx, posizione.id, {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'parziale-1',
     });
 
     expect(saldamento.movimento.amountCents).toBe(-5000);
+    expect(saldamento.movimento.contoId).toBeNull();
     expect(saldamento.posizione.residuoCents).toBe(-15000);
-    expect(saldoConto(ctx)).toBe(95000);
   });
 
   it('rifiuta un saldamento che supera il residuo', async () => {
@@ -96,7 +79,6 @@ describe('repository posizioni', () => {
 
     expect(() =>
       saldaPosizione(ctx, posizione.id, {
-        contoId: 'conto-1',
         importoCents: 20001,
         data: '2026-09-21',
         operazioneId: 'troppo',
@@ -112,7 +94,6 @@ describe('repository posizioni', () => {
       importoInizialeCents: -20000,
     });
     const dati = {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'replay',
@@ -138,7 +119,6 @@ describe('repository posizioni', () => {
       importoInizialeCents: -20000,
     });
     const dati = {
-      contoId: 'conto-1',
       importoCents: 20000,
       data: '2026-09-21',
       operazioneId: 'replay-totale',
@@ -165,7 +145,6 @@ describe('repository posizioni', () => {
       importoInizialeCents: -20000,
     });
     saldaPosizione(ctx, posizione.id, {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'conflitto',
@@ -173,15 +152,22 @@ describe('repository posizioni', () => {
 
     expect(() =>
       saldaPosizione(ctx, posizione.id, {
-        contoId: 'conto-1',
         importoCents: 6000,
         data: '2026-09-21',
         operazioneId: 'conflitto',
       }),
     ).toThrow(expect.objectContaining({ codice: 'saldamento_in_conflitto' }));
+
+    expect(() =>
+      saldaPosizione(ctx, posizione.id, {
+        importoCents: 5000,
+        data: '2026-09-22',
+        operazioneId: 'conflitto',
+      }),
+    ).toThrow(expect.objectContaining({ codice: 'saldamento_in_conflitto' }));
   });
 
-  it('annullando un saldamento ripristina il saldo del conto e il residuo', async () => {
+  it('annullando un saldamento ripristina il residuo', async () => {
     const ctx = creaContesto();
     const posizione = await creaRepositorioPosizioni(ctx).crea({
       descrizione: 'Prestito',
@@ -189,7 +175,6 @@ describe('repository posizioni', () => {
       importoInizialeCents: -20000,
     });
     const saldamento = saldaPosizione(ctx, posizione.id, {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'annulla',
@@ -198,7 +183,6 @@ describe('repository posizioni', () => {
     const posizioneAnnullata = annullaSaldamento(ctx, saldamento.movimento.id);
 
     expect(posizioneAnnullata.residuoCents).toBe(-20000);
-    expect(saldoConto(ctx)).toBe(100000);
   });
 
   it('rifiuta di eliminare una posizione con saldamenti collegati', async () => {
@@ -210,7 +194,6 @@ describe('repository posizioni', () => {
       importoInizialeCents: -20000,
     });
     saldaPosizione(ctx, posizione.id, {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'eliminazione',
@@ -230,14 +213,13 @@ describe('repository posizioni', () => {
     });
 
     const saldamento = saldaPosizione(ctx, posizione.id, {
-      contoId: 'conto-1',
       importoCents: 5000,
       data: '2026-09-21',
       operazioneId: 'credito',
     });
 
     expect(saldamento.movimento.amountCents).toBe(5000);
+    expect(saldamento.movimento.contoId).toBeNull();
     expect(saldamento.posizione.residuoCents).toBe(15000);
-    expect(saldoConto(ctx)).toBe(105000);
   });
 });

@@ -40,7 +40,7 @@ export const ricorrenzaFissaSchema = z.object({
   nome: z.string(),
   regola: regolaRicorrenzaSchema,
   amountCents: amountCentsSchema,
-  contoId: z.string(),
+  contoId: z.string().nullable(),
   categoriaId: z.string(),
   mode: z.enum(['auto', 'manual']),
   active: z.boolean(),

@@ -11,7 +11,7 @@ export const occorrenzaSchema = z.object({
   scadenza: z.string().regex(dataIsoRegex),
   amountCentsPrevisto: z.number().int(),
   categoriaId: z.string().nullable(),
-  contoId: z.string(),
+  contoId: z.string().nullable(),
   stato: z.enum(['pending', 'paid', 'skipped']),
   movimentoCollegato: movimentoCollegatoSchema.nullable(),
   ricorrenzaId: z.string(),

@@ -67,7 +67,7 @@ function creaFormModifica(
     ),
     tipo: movimento.amountCents > 0 ? 'entrata' : 'uscita',
     contoId: contiAttivi.some((conto) => conto.id === movimento.contoId)
-      ? movimento.contoId
+      ? (movimento.contoId ?? '')
       : '',
     categoriaId: movimento.categoriaId ?? '',
   };
@@ -109,7 +109,10 @@ export function ElencoMovimenti({
   const contiAttivi = conti.filter((conto) => !conto.archiviato);
   const saldoNettoCents = totaleEntrateCents - totaleUsciteCents;
 
-  function nomeConto(contoId: string): string {
+  function nomeConto(contoId: string | null): string {
+    if (contoId === null) {
+      return '—';
+    }
     return conti.find((conto) => conto.id === contoId)?.nome ?? contoId;
   }
 

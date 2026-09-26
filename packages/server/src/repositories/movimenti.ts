@@ -31,7 +31,7 @@ export interface RigaMovimento {
   id: string;
   date: string;
   amount_cents: number;
-  account_id: string;
+  account_id: string | null;
   category_id: string | null;
   description: string;
   description_norm: string;
@@ -168,7 +168,6 @@ export interface RisultatoMovimenti {
 interface DatiCreazioneMovimento {
   data: string;
   amountCents: number;
-  contoId: string;
   categoriaId: string | null;
   descrizione: string;
 }
@@ -286,10 +285,6 @@ export function creaRepositorioMovimenti(
     },
 
     async crea(dati) {
-      const conto = leggiConto(ctx, dati.contoId);
-      if (!conto) {
-        throw erroreNonTrovato('conto', dati.contoId);
-      }
       if (dati.categoriaId === null) {
         throw erroreValidazione('La categoria è obbligatoria.', 'categoriaId');
       }
@@ -298,16 +293,19 @@ export function creaRepositorioMovimenti(
         throw erroreNonTrovato('categoria', dati.categoriaId);
       }
 
-      const datiValidazione = { ...dati, data: dati.data as DataISO };
+      const datiValidazione = {
+        ...dati,
+        contoId: null,
+        data: dati.data as DataISO,
+      };
       validaSegno(datiValidazione, categoria);
-      validaData(datiValidazione, conto);
 
       const id = randomUUID();
       const descriptionNorm = normalizzaTesto(dati.descrizione);
       inserisci(ctx, 'transactions', 'transactions', id, {
         date: dati.data,
         amount_cents: dati.amountCents,
-        account_id: dati.contoId,
+        account_id: null,
         category_id: dati.categoriaId,
         description: dati.descrizione,
         description_norm: descriptionNorm,
@@ -337,7 +335,7 @@ export function creaRepositorioMovimenti(
         throw erroreMovimentoDiSaldamento();
       }
 
-      const contoId = dati.contoId ?? riga.account_id;
+      const contoId = riga.account_id;
       const categoriaId =
         'categoriaId' in dati ? dati.categoriaId : riga.category_id;
       const amountCents = dati.amountCents ?? riga.amount_cents;
@@ -347,7 +345,7 @@ export function creaRepositorioMovimenti(
         throw erroreValidazione('La categoria è obbligatoria.', 'categoriaId');
       }
 
-      if (dati.contoId !== undefined || dati.data !== undefined) {
+      if (dati.data !== undefined && contoId !== null) {
         const conto = leggiConto(ctx, contoId);
         if (!conto) {
           throw erroreNonTrovato('conto', contoId);
@@ -374,9 +372,6 @@ export function creaRepositorioMovimenti(
       }
       if (dati.amountCents !== undefined) {
         colonne.amount_cents = dati.amountCents;
-      }
-      if (dati.contoId !== undefined) {
-        colonne.account_id = dati.contoId;
       }
       if (dati.categoriaId !== undefined) {
         colonne.category_id = dati.categoriaId;

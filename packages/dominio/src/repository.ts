@@ -48,7 +48,7 @@ export interface RicorrenzaFissa {
   nome: string;
   regola: RegolaRicorrenza;
   amountCents: number;
-  contoId: string;
+  contoId: string | null;
   categoriaId: string;
   mode: 'auto' | 'manual';
   active: boolean;

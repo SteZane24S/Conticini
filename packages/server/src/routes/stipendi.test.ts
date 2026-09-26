@@ -80,7 +80,11 @@ describe('rotte stipendi', () => {
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
       ok: true,
-      movimento: { amountCents: 250000, transferGroupId: null },
+      movimento: {
+        amountCents: 250000,
+        contoId: null,
+        transferGroupId: null,
+      },
       ciclo: {
         startDate: '2026-02-10',
         salaryTransactionId: response.json().movimento.id,
@@ -88,7 +92,7 @@ describe('rotte stipendi', () => {
     });
   });
 
-  it('restituisce gli errori per categoria non di entrata e conto inesistente', async () => {
+  it('restituisce gli errori per categoria non di entrata', async () => {
     const applicazione = creaApp();
 
     const categoria = await applicazione.inject({
@@ -96,17 +100,10 @@ describe('rotte stipendi', () => {
       url: '/api/stipendi',
       payload: payload({ categoriaId: 'categoria-uscita' }),
     });
-    const conto = await applicazione.inject({
-      method: 'POST',
-      url: '/api/stipendi',
-      payload: payload({ contoId: 'inesistente' }),
-    });
-
     expect(categoria.statusCode).toBe(400);
     expect(categoria.json().errore).toMatchObject({
       codice: 'richiesta_non_valida',
       campo: 'categoriaId',
     });
-    expect(conto.statusCode).toBe(404);
   });
 });

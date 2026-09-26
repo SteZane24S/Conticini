@@ -7,7 +7,6 @@ import {
   oggiLocale,
   segnoMovimentoSaldamento,
   uuidv5,
-  validaDataApertura,
   validaSaldamento,
   validaSegnoCategoria,
   NAMESPACE_CONTICINI,
@@ -33,7 +32,7 @@ import {
   SOLO_ATTIVI,
   type ContestoScrittura,
 } from '../scrittura.js';
-import { leggiConto, mappaMovimento, type RigaMovimento } from './movimenti.js';
+import { mappaMovimento, type RigaMovimento } from './movimenti.js';
 
 interface RigaPosizione {
   id: string;
@@ -202,17 +201,12 @@ export function saldaPosizione(
   ctx: ContestoScrittura,
   posizioneId: string,
   dati: {
-    contoId: string;
     importoCents: number;
     data: string;
     operazioneId: string;
   },
 ): { movimento: MovimentoConDettagli; posizione: PosizioneConResiduo } {
   const riga = leggiPosizioneObbligatoria(ctx, posizioneId);
-  const conto = leggiConto(ctx, dati.contoId);
-  if (!conto) {
-    throw erroreNonTrovato('conto', dati.contoId);
-  }
   const verso = riga.direction as VersoPosizione;
   const categoriaId = categoriaSaldamentoPer(verso);
   const amountCents = dati.importoCents * segnoMovimentoSaldamento(verso);
@@ -224,7 +218,6 @@ export function saldaPosizione(
   if (esistente) {
     if (
       esistente.amount_cents !== amountCents ||
-      esistente.account_id !== dati.contoId ||
       esistente.date !== dati.data
     ) {
       throw erroreSaldamentoInConflitto();
@@ -248,7 +241,7 @@ export function saldaPosizione(
     id: '',
     data: dati.data as DataISO,
     amountCents,
-    contoId: dati.contoId,
+    contoId: null,
     categoriaId,
     transferGroupId: null,
     posizioneId: null,
@@ -261,21 +254,13 @@ export function saldaPosizione(
   if (!esitoSegno.valido) {
     throw erroreDominio(esitoSegno.motivo, 'importoCents');
   }
-  const esitoData = validaDataApertura(movimentoPerValidazione, {
-    id: conto.id,
-    dataApertura: conto.opened_on as DataISO,
-    saldoInizialeCents: 0,
-  });
-  if (!esitoData.valido) {
-    throw erroreDominio(esitoData.motivo, 'data');
-  }
 
   const scrivi = ctx.db.transaction(() => {
     try {
       inserisci(ctx, 'transactions', 'transactions', movimentoId, {
         date: dati.data,
         amount_cents: amountCents,
-        account_id: dati.contoId,
+        account_id: null,
         category_id: categoriaId,
         description: riga.description,
         description_norm: normalizzaTesto(riga.description),

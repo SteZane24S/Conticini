@@ -49,46 +49,57 @@ describe('rotte trasferimenti', () => {
     return app;
   }
 
-  function payload(dati: Record<string, unknown> = {}) {
-    return {
-      data: '2026-02-10',
-      amountCents: 1200,
-      contoOrigineId: 'conto-1',
-      contoDestinazioneId: 'conto-2',
-      descrizione: 'Giroconto',
-      ...dati,
-    };
+  function inserisciTrasferimentoStorico(
+    gruppo: string,
+    data = '2026-02-10',
+  ): void {
+    const inserisciRiga = db!.prepare(`
+      INSERT INTO transactions (
+        id, created_at, updated_at, deleted_at, revision, base_revision,
+        date, amount_cents, account_id, category_id, description, description_norm,
+        transfer_group_id, linked_position_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const timestamp = '2026-01-01T00:00:00.000Z';
+
+    inserisciRiga.run(
+      `${gruppo}-origine`,
+      timestamp,
+      timestamp,
+      null,
+      'r1',
+      null,
+      data,
+      -1200,
+      'conto-1',
+      null,
+      'Giroconto storico',
+      'giroconto storico',
+      gruppo,
+      null,
+    );
+    inserisciRiga.run(
+      `${gruppo}-destinazione`,
+      timestamp,
+      timestamp,
+      null,
+      'r1',
+      null,
+      data,
+      1200,
+      'conto-2',
+      null,
+      'Giroconto storico',
+      'giroconto storico',
+      gruppo,
+      null,
+    );
   }
 
-  it('crea un trasferimento valido', async () => {
-    const response = await creaApp().inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload(),
-    });
-    expect(response.statusCode).toBe(201);
-    expect(response.json().trasferimento.movimenti).toHaveLength(2);
-    expect(
-      response
-        .json()
-        .trasferimento.movimenti.map(
-          (movimento: { amountCents: number }) => movimento.amountCents,
-        ),
-    ).toEqual([-1200, 1200]);
-  });
-
-  it('elenca i trasferimenti esistenti, dal più recente', async () => {
+  it('elenca i trasferimenti esistenti, dal piu recente', async () => {
     const applicazione = creaApp();
-    await applicazione.inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload({ data: '2026-02-10' }),
-    });
-    await applicazione.inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload({ data: '2026-03-01' }),
-    });
+    inserisciTrasferimentoStorico('precedente', '2026-02-10');
+    inserisciTrasferimentoStorico('recente', '2026-03-01');
 
     const response = await applicazione.inject({
       method: 'GET',
@@ -100,93 +111,66 @@ describe('rotte trasferimenti', () => {
     expect(response.json().trasferimenti[0].data).toBe('2026-03-01');
   });
 
-  it('restituisce gli errori di conto, schema e apertura', async () => {
+  it('ottiene un trasferimento storico', async () => {
     const applicazione = creaApp();
-    const inesistente = await applicazione.inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload({ contoOrigineId: 'inesistente' }),
-    });
-    const stesso = await applicazione.inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload({ contoDestinazioneId: 'conto-1' }),
-    });
-    const apertura = await applicazione.inject({
-      method: 'POST',
-      url: '/api/trasferimenti',
-      payload: payload({ data: '2026-01-15' }),
+    inserisciTrasferimentoStorico('storico');
+
+    const response = await applicazione.inject({
+      method: 'GET',
+      url: '/api/trasferimenti/storico',
     });
 
-    expect(inesistente.statusCode).toBe(404);
-    expect(stesso.statusCode).toBe(400);
-    expect(stesso.json().errore.codice).toBe('richiesta_non_valida');
-    expect(apertura.statusCode).toBe(422);
-    expect(apertura.json().errore.codice).toBe('movimento_anteriore_apertura');
+    expect(response.statusCode).toBe(200);
+    expect(response.json().trasferimento.transferGroupId).toBe('storico');
   });
 
-  it('ottiene, aggiorna e elimina un trasferimento', async () => {
-    const applicazione = creaApp();
-    const creato = await applicazione.inject({
+  it('restituisce non trovato per GET su gruppi inesistenti', async () => {
+    const response = await creaApp().inject({
+      method: 'GET',
+      url: '/api/trasferimenti/inesistente',
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it('restituisce rotta non trovata per POST', async () => {
+    const response = await creaApp().inject({
       method: 'POST',
       url: '/api/trasferimenti',
-      payload: payload(),
+      payload: {
+        data: '2026-02-10',
+        amountCents: 1200,
+        contoOrigineId: 'conto-1',
+        contoDestinazioneId: 'conto-2',
+        descrizione: 'Giroconto',
+      },
     });
-    const gruppo = creato.json().trasferimento.transferGroupId as string;
-    const letto = await applicazione.inject({
-      method: 'GET',
-      url: `/api/trasferimenti/${gruppo}`,
-    });
-    const descrizione = await applicazione.inject({
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it('restituisce rotta non trovata per PUT', async () => {
+    const applicazione = creaApp();
+    inserisciTrasferimentoStorico('storico');
+
+    const response = await applicazione.inject({
       method: 'PUT',
-      url: `/api/trasferimenti/${gruppo}`,
+      url: '/api/trasferimenti/storico',
       payload: { descrizione: 'Aggiornato' },
     });
-    const importo = await applicazione.inject({
-      method: 'PUT',
-      url: `/api/trasferimenti/${gruppo}`,
-      payload: { amountCents: 2500 },
-    });
-    const rilettura = await applicazione.inject({
-      method: 'GET',
-      url: `/api/trasferimenti/${gruppo}`,
-    });
-    const eliminato = await applicazione.inject({
-      method: 'DELETE',
-      url: `/api/trasferimenti/${gruppo}`,
-    });
-    const dopoEliminazione = await applicazione.inject({
-      method: 'GET',
-      url: `/api/trasferimenti/${gruppo}`,
-    });
 
-    expect(letto.statusCode).toBe(200);
-    expect(descrizione.json().trasferimento.descrizione).toBe('Aggiornato');
-    expect(importo.statusCode).toBe(200);
-    expect(
-      rilettura
-        .json()
-        .trasferimento.movimenti.map(
-          (movimento: { amountCents: number }) => movimento.amountCents,
-        ),
-    ).toEqual([-2500, 2500]);
-    expect(eliminato.json()).toEqual({ ok: true });
-    expect(dopoEliminazione.statusCode).toBe(404);
+    expect(response.statusCode).toBe(404);
   });
 
-  it('restituisce non trovato per GET e PUT su gruppi inesistenti', async () => {
+  it('restituisce rotta non trovata per DELETE', async () => {
     const applicazione = creaApp();
-    const get = await applicazione.inject({
-      method: 'GET',
-      url: '/api/trasferimenti/inesistente',
-    });
-    const put = await applicazione.inject({
-      method: 'PUT',
-      url: '/api/trasferimenti/inesistente',
-      payload: { descrizione: 'x' },
+    inserisciTrasferimentoStorico('storico');
+
+    const response = await applicazione.inject({
+      method: 'DELETE',
+      url: '/api/trasferimenti/storico',
     });
 
-    expect(get.statusCode).toBe(404);
-    expect(put.statusCode).toBe(404);
+    expect(response.statusCode).toBe(404);
   });
 });

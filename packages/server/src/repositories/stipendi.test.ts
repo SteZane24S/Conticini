@@ -74,7 +74,7 @@ describe('creaStipendio', () => {
       id: expect.any(String),
       data: '2026-02-10',
       amountCents: 250000,
-      contoId: 'conto-1',
+      contoId: null,
       categoriaId: 'categoria-entrata',
       descrizione: 'Stipendio febbraio',
       descrizioneNorm: 'stipendio febbraio',
@@ -123,12 +123,15 @@ describe('creaStipendio', () => {
     );
   });
 
-  it('rifiuta un conto inesistente', () => {
+  it('crea lo stipendio ignorando un conto inesistente', () => {
     const ctx = creaContesto();
     preparaDati(ctx);
 
-    expect(() =>
-      creaStipendio(ctx, datiStipendio({ contoId: 'conto-inesistente' })),
-    ).toThrow(expect.objectContaining({ codice: 'non_trovato' }));
+    const creato = creaStipendio(
+      ctx,
+      datiStipendio({ contoId: 'conto-inesistente' }),
+    );
+
+    expect(creato.movimento.contoId).toBeNull();
   });
 });

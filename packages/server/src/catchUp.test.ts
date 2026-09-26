@@ -139,29 +139,37 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db
         .prepare(
-          'SELECT recurring_occurrences.due_date, recurring_occurrences.status, transactions.date AS transaction_date FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id ORDER BY recurring_occurrences.due_date',
+          'SELECT recurring_occurrences.due_date, recurring_occurrences.status, recurring_occurrences.account_id AS occurrence_account_id, transactions.date AS transaction_date, transactions.account_id AS transaction_account_id FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id ORDER BY recurring_occurrences.due_date',
         )
         .all(),
     ).toEqual([
       {
         due_date: '2025-11-05',
         status: 'paid',
+        occurrence_account_id: null,
         transaction_date: '2025-11-05',
+        transaction_account_id: null,
       },
       {
         due_date: '2025-12-05',
         status: 'paid',
+        occurrence_account_id: null,
         transaction_date: '2025-12-05',
+        transaction_account_id: null,
       },
       {
         due_date: '2026-01-05',
         status: 'paid',
+        occurrence_account_id: null,
         transaction_date: '2026-01-05',
+        transaction_account_id: null,
       },
       {
         due_date: '2026-02-05',
         status: 'paid',
+        occurrence_account_id: null,
         transaction_date: '2026-02-05',
+        transaction_account_id: null,
       },
     ]);
   });
@@ -179,11 +187,16 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db
         .prepare(
-          'SELECT due_date, status, transaction_id FROM recurring_occurrences',
+          'SELECT due_date, status, transaction_id, account_id FROM recurring_occurrences',
         )
         .all(),
     ).toEqual([
-      { due_date: '2026-01-05', status: 'pending', transaction_id: null },
+      {
+        due_date: '2026-01-05',
+        status: 'pending',
+        transaction_id: null,
+        account_id: null,
+      },
     ]);
     expect(
       ctx.db.prepare('SELECT COUNT(*) AS totale FROM transactions').get(),
@@ -209,12 +222,22 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db
         .prepare(
-          'SELECT mode, status, transaction_id FROM recurring_occurrences ORDER BY mode',
+          'SELECT mode, status, transaction_id, account_id FROM recurring_occurrences ORDER BY mode',
         )
         .all(),
     ).toEqual([
-      { mode: 'auto', status: 'pending', transaction_id: null },
-      { mode: 'manual', status: 'pending', transaction_id: null },
+      {
+        mode: 'auto',
+        status: 'pending',
+        transaction_id: null,
+        account_id: null,
+      },
+      {
+        mode: 'manual',
+        status: 'pending',
+        transaction_id: null,
+        account_id: null,
+      },
     ]);
     expect(
       ctx.db.prepare('SELECT COUNT(*) AS totale FROM transactions').get(),
@@ -236,14 +259,16 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db
         .prepare(
-          'SELECT recurring_occurrences.status, recurring_occurrences.transaction_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.due_date = ?',
+          'SELECT recurring_occurrences.status, recurring_occurrences.transaction_id, recurring_occurrences.account_id AS occurrence_account_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents, transactions.account_id AS transaction_account_id FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.due_date = ?',
         )
         .get('2026-03-05'),
     ).toEqual({
       status: 'paid',
       transaction_id: expect.any(String),
+      occurrence_account_id: null,
       transaction_date: '2026-03-05',
       transaction_amount_cents: -75000,
+      transaction_account_id: null,
     });
   });
 
@@ -275,15 +300,17 @@ describe('eseguiCatchUp', () => {
     expect(
       ctx.db
         .prepare(
-          'SELECT recurring_occurrences.status, recurring_occurrences.due_date, recurring_occurrences.transaction_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.recurring_id = ? AND recurring_occurrences.period = ?',
+          'SELECT recurring_occurrences.status, recurring_occurrences.due_date, recurring_occurrences.transaction_id, recurring_occurrences.account_id AS occurrence_account_id, transactions.date AS transaction_date, transactions.amount_cents AS transaction_amount_cents, transactions.account_id AS transaction_account_id FROM recurring_occurrences JOIN transactions ON transactions.id = recurring_occurrences.transaction_id WHERE recurring_occurrences.recurring_id = ? AND recurring_occurrences.period = ?',
         )
         .get('spesa-fissa-auto', '2026-03'),
     ).toEqual({
       status: 'paid',
       due_date: '2026-03-10',
       transaction_id: expect.any(String),
+      occurrence_account_id: null,
       transaction_date: '2026-03-10',
       transaction_amount_cents: -75000,
+      transaction_account_id: null,
     });
   });
 });

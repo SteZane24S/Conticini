@@ -138,6 +138,7 @@ describe('rotte spese fisse', () => {
 
     expect(creata.json().spesaFissa).toMatchObject({
       ...payload,
+      contoId: null,
       active: true,
     });
     expect(elenco.statusCode).toBe(200);

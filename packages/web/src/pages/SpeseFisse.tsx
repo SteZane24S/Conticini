@@ -414,8 +414,12 @@ export function SpeseFisse() {
       }
       return a.prossimaScadenza.localeCompare(b.prossimaScadenza);
     });
-  const nomeConto = (id: string) =>
-    conti.find((conto) => conto.id === id)?.nome ?? id;
+  const nomeConto = (id: string | null) => {
+    if (id === null) {
+      return '—';
+    }
+    return conti.find((conto) => conto.id === id)?.nome ?? id;
+  };
   const nomeCategoria = (id: string) =>
     categorie.find((categoria) => categoria.id === id)?.nome ?? id;
 

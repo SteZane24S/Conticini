@@ -53,7 +53,7 @@ describe('rotte occorrenze', () => {
       start_date: '2026-01-05',
       end_date: null,
       amount_cents: 8500,
-      account_id: 'conto-1',
+      account_id: null,
       category_id: 'categoria-1',
       mode: 'manual',
       active: 1,
@@ -68,7 +68,7 @@ describe('rotte occorrenze', () => {
         period: '2026-02',
         due_date: '2026-02-05',
         amount_cents: 8500,
-        account_id: 'conto-1',
+        account_id: null,
         category_id: 'categoria-1',
         mode: 'manual',
         status: 'pending',
@@ -96,7 +96,7 @@ describe('rotte occorrenze', () => {
 
     expect(elenco.json()).toMatchObject({
       ok: true,
-      occorrenze: [{ id: 'pending-1', stato: 'pending' }],
+      occorrenze: [{ id: 'pending-1', stato: 'pending', contoId: null }],
     });
     expect(conferma.statusCode).toBe(200);
     expect(conferma.json()).toMatchObject({
@@ -104,6 +104,7 @@ describe('rotte occorrenze', () => {
       occorrenza: {
         id: 'pending-1',
         stato: 'paid',
+        contoId: null,
         movimentoCollegato: { data: '2026-02-05' },
       },
     });

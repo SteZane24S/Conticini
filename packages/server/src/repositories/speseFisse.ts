@@ -19,7 +19,6 @@ import {
   erroreNonTrovato,
   erroreValidazione,
 } from '../errori.js';
-import { leggiConto } from './movimenti.js';
 import {
   aggiorna as aggiornaRiga,
   cancella,
@@ -38,7 +37,7 @@ interface RigaSpesaFissa {
   start_date: string;
   end_date: string | null;
   amount_cents: number;
-  account_id: string;
+  account_id: string | null;
   category_id: string;
   mode: 'auto' | 'manual';
   active: number;
@@ -190,9 +189,6 @@ export function creaRepositorioSpeseFisse(
     },
 
     async crea(dati) {
-      if (!leggiConto(ctx, dati.contoId)) {
-        throw erroreNonTrovato('conto', dati.contoId);
-      }
       leggiCategoriaSpesaFissa(ctx, dati.categoriaId);
       if (dati.active) {
         validaPrevisioneFissa(ctx, dati.categoriaId);
@@ -203,7 +199,7 @@ export function creaRepositorioSpeseFisse(
         name: dati.nome,
         ...colonneRegola(dati.regola),
         amount_cents: dati.amountCents,
-        account_id: dati.contoId,
+        account_id: null,
         category_id: dati.categoriaId,
         mode: dati.mode,
         active: dati.active ? 1 : 0,
@@ -218,7 +214,6 @@ export function creaRepositorioSpeseFisse(
 
     async aggiorna(id, dati) {
       const rigaCorrente = leggiRigaRevisione(id);
-      const contoId = dati.contoId ?? rigaCorrente.account_id;
       const categoriaId = dati.categoriaId ?? rigaCorrente.category_id;
       const amountCents = dati.amountCents ?? rigaCorrente.amount_cents;
       const mode = dati.mode ?? rigaCorrente.mode;
@@ -226,11 +221,6 @@ export function creaRepositorioSpeseFisse(
       const categoriaCambiata = categoriaId !== rigaCorrente.category_id;
       const attivata = active && rigaCorrente.active === 0;
 
-      if (dati.contoId !== undefined && contoId !== rigaCorrente.account_id) {
-        if (!leggiConto(ctx, contoId)) {
-          throw erroreNonTrovato('conto', contoId);
-        }
-      }
       if (dati.categoriaId !== undefined && categoriaCambiata) {
         leggiCategoriaSpesaFissa(ctx, categoriaId);
       }
@@ -247,9 +237,6 @@ export function creaRepositorioSpeseFisse(
       }
       if (dati.amountCents !== undefined) {
         colonne.amount_cents = dati.amountCents;
-      }
-      if (dati.contoId !== undefined) {
-        colonne.account_id = dati.contoId;
       }
       if (dati.categoriaId !== undefined) {
         colonne.category_id = dati.categoriaId;
@@ -274,9 +261,6 @@ export function creaRepositorioSpeseFisse(
         const colonneOccorrenza: Record<string, string | number | null> = {};
         if (amountCents !== rigaCorrente.amount_cents) {
           colonneOccorrenza.amount_cents = amountCents;
-        }
-        if (contoId !== rigaCorrente.account_id) {
-          colonneOccorrenza.account_id = contoId;
         }
         if (categoriaId !== rigaCorrente.category_id) {
           colonneOccorrenza.category_id = categoriaId;

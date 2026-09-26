@@ -4,7 +4,6 @@ import {
   ID_CATEGORIA_TECNICA_INCASSO_CREDITI,
   ID_CATEGORIA_TECNICA_PAGAMENTO_DEBITI,
   normalizzaTesto,
-  validaDataApertura,
   validaSegnoCategoria,
   type CicloConDettagli,
   type DataISO,
@@ -23,12 +22,7 @@ import {
   type ContestoScrittura,
 } from '../scrittura.js';
 import { leggiRigaCiclo, mappaCiclo } from './cicli.js';
-import {
-  leggiConto,
-  mappaMovimento,
-  type RigaConto,
-  type RigaMovimento,
-} from './movimenti.js';
+import { mappaMovimento, type RigaMovimento } from './movimenti.js';
 
 interface RigaCategoria {
   id: string;
@@ -101,32 +95,16 @@ function validaSegno(dati: DatiStipendio, categoria: RigaCategoria): void {
   }
 }
 
-function validaData(dati: DatiStipendio, conto: RigaConto): void {
-  const esito = validaDataApertura(creaMovimentoPerValidazione(dati), {
-    id: conto.id,
-    dataApertura: conto.opened_on as DataISO,
-    saldoInizialeCents: 0,
-  });
-  if (!esito.valido) {
-    throw erroreDominio(esito.motivo, 'data');
-  }
-}
-
 export function creaStipendio(
   ctx: ContestoScrittura,
   dati: DatiStipendio,
 ): { movimento: MovimentoConDettagli; ciclo: CicloConDettagli } {
-  const conto = leggiConto(ctx, dati.contoId);
-  if (!conto) {
-    throw erroreNonTrovato('conto', dati.contoId);
-  }
   const categoria = leggiCategoria(ctx, dati.categoriaId);
   if (!categoria) {
     throw erroreNonTrovato('categoria', dati.categoriaId);
   }
 
   validaSegno(dati, categoria);
-  validaData(dati, conto);
 
   const movimentoId = randomUUID();
   const cicloId = randomUUID();
@@ -135,7 +113,7 @@ export function creaStipendio(
     inserisci(ctx, 'transactions', 'transactions', movimentoId, {
       date: dati.data,
       amount_cents: dati.amountCents,
-      account_id: dati.contoId,
+      account_id: null,
       category_id: dati.categoriaId,
       description: dati.descrizione,
       description_norm: descriptionNorm,

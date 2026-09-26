@@ -17,6 +17,7 @@ import {
   cartellaBackupDefault,
   elencaBackup,
   eseguiBackup,
+  eseguiBackupPreMigrazioneSeNecessario,
   leggiImpostazioniBackup,
   scriviImpostazioniBackup,
   statoUltimoBackup,
@@ -184,5 +185,23 @@ describe('backup', () => {
     expect(() => verificaFileBackup(valido, schemaVersione - 1)).toThrow(
       ErroreBackupNonValido,
     );
+  });
+
+  it('non crea backup pre-migrazione senza migrazioni pendenti', async () => {
+    const database = creaDatabase();
+    const cartella = path.join(dir!, 'copie');
+
+    await eseguiBackupPreMigrazioneSeNecessario(database, dir!);
+
+    expect(elencaBackup(cartella)).toEqual([]);
+  });
+
+  it('crea un backup pre-migrazione con migrazioni pendenti', async () => {
+    dir = mkdtempSync(path.join(tmpdir(), 'conticini-backup-'));
+    db = new Database(path.join(dir, 'conticini.db'));
+
+    await eseguiBackupPreMigrazioneSeNecessario(db, dir);
+
+    expect(elencaBackup(cartellaBackupDefault(dir))).toHaveLength(1);
   });
 });
