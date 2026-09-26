@@ -1,5 +1,5 @@
-import { confrontaDate } from './date.js';
-import { type Conto, type Movimento } from './saldi.js';
+import { confrontaDate, type DataISO } from './date.js';
+import { type AncoraTotale, type Conto, type Movimento } from './saldi.js';
 
 export type TipoCategoria = 'entrata' | 'uscita';
 
@@ -67,8 +67,58 @@ export function validaDataApertura(
   movimento: Movimento,
   conto: Conto,
 ): EsitoValidazione<MotivoMovimentoAnterioreApertura> {
+  if (movimento.contoId === null) {
+    return { valido: true };
+  }
+
   if (confrontaDate(movimento.data, conto.dataApertura) < 0) {
     return { valido: false, motivo: 'movimento_anteriore_apertura' };
+  }
+
+  return { valido: true };
+}
+
+export type MotivoAperturaNonSuccessivaAncora =
+  'apertura_non_successiva_ancora';
+
+export function validaAperturaDopoAncora(
+  dataApertura: DataISO,
+  ultimaAncora: AncoraTotale | null,
+): EsitoValidazione<MotivoAperturaNonSuccessivaAncora> {
+  if (
+    ultimaAncora !== null &&
+    confrontaDate(dataApertura, ultimaAncora.data) <= 0
+  ) {
+    return { valido: false, motivo: 'apertura_non_successiva_ancora' };
+  }
+
+  return { valido: true };
+}
+
+export type MotivoSaldoSegnatoNonZero = 'saldo_segnato_non_zero';
+
+export function validaArchiviazioneConto(
+  saldoSegnatoCents: number,
+): EsitoValidazione<MotivoSaldoSegnatoNonZero> {
+  if (saldoSegnatoCents !== 0) {
+    return { valido: false, motivo: 'saldo_segnato_non_zero' };
+  }
+
+  return { valido: true };
+}
+
+export type MotivoDataLettura = 'lettura_futura' | 'lettura_anteriore_apertura';
+
+export function validaDataLettura(
+  dataLettura: DataISO,
+  oggi: DataISO,
+  conto: Conto,
+): EsitoValidazione<MotivoDataLettura> {
+  if (confrontaDate(dataLettura, oggi) > 0) {
+    return { valido: false, motivo: 'lettura_futura' };
+  }
+  if (confrontaDate(dataLettura, conto.dataApertura) < 0) {
+    return { valido: false, motivo: 'lettura_anteriore_apertura' };
   }
 
   return { valido: true };

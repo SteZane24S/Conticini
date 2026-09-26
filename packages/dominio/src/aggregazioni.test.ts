@@ -10,7 +10,7 @@ import {
 import { type Ciclo } from './cicli.js';
 import { parseDataISO, type DataISO } from './date.js';
 import { type CategoriaConDettagli } from './repository.js';
-import { saldoA, type Conto, type Movimento } from './saldi.js';
+import { totaleSenzaAncore, type Conto, type Movimento } from './saldi.js';
 
 function data(value: string): DataISO {
   return parseDataISO(value);
@@ -157,9 +157,9 @@ describe('aggregazioni', () => {
 
     expect(risultato).toHaveLength(3);
     expect(risultato.map((punto) => punto.saldoCents)).toEqual([
-      saldoA(data('2024-01-01'), conti, movimenti),
-      saldoA(data('2024-01-02'), conti, movimenti),
-      saldoA(data('2024-01-03'), conti, movimenti),
+      totaleSenzaAncore(data('2024-01-01'), conti, movimenti),
+      totaleSenzaAncore(data('2024-01-02'), conti, movimenti),
+      totaleSenzaAncore(data('2024-01-03'), conti, movimenti),
     ]);
     expect(() =>
       saldoGiornaliero(

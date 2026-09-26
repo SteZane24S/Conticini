@@ -4,6 +4,9 @@ import { parseDataISO, type DataISO } from './date.js';
 import { type Conto, type Movimento } from './saldi.js';
 import {
   validaDataApertura,
+  validaAperturaDopoAncora,
+  validaArchiviazioneConto,
+  validaDataLettura,
   validaSegnoCategoria,
   validaTrasferimento,
   validaVincoloPrevisioneFissa,
@@ -303,6 +306,90 @@ describe('validaDataApertura', () => {
     };
 
     expect(validaDataApertura(movimento, conto)).toEqual({ valido: true });
+  });
+
+  it('valida un movimento senza conto anteriore a qualunque apertura', () => {
+    expect(
+      validaDataApertura(
+        {
+          id: 'senza-conto',
+          data: data('2024-01-01'),
+          amountCents: -5_000,
+          contoId: null,
+          categoriaId: null,
+          transferGroupId: null,
+          posizioneId: null,
+        },
+        conto,
+      ),
+    ).toEqual({ valido: true });
+  });
+});
+
+describe('validaAperturaDopoAncora', () => {
+  const ancora = {
+    id: 'ancora',
+    data: data('2024-01-10'),
+    totaleCents: 0,
+    movimentiCoperti: [],
+  };
+
+  it('rifiuta l’apertura uguale o anteriore all’àncora e valida quella successiva', () => {
+    expect(validaAperturaDopoAncora(data('2024-01-10'), ancora)).toEqual({
+      valido: false,
+      motivo: 'apertura_non_successiva_ancora',
+    });
+    expect(validaAperturaDopoAncora(data('2024-01-09'), ancora)).toEqual({
+      valido: false,
+      motivo: 'apertura_non_successiva_ancora',
+    });
+    expect(validaAperturaDopoAncora(data('2024-01-11'), ancora)).toEqual({
+      valido: true,
+    });
+    expect(validaAperturaDopoAncora(data('2024-01-09'), null)).toEqual({
+      valido: true,
+    });
+  });
+});
+
+describe('validaArchiviazioneConto', () => {
+  it('valida soltanto il saldo segnato pari a zero', () => {
+    expect(validaArchiviazioneConto(0)).toEqual({ valido: true });
+    expect(validaArchiviazioneConto(-1)).toEqual({
+      valido: false,
+      motivo: 'saldo_segnato_non_zero',
+    });
+    expect(validaArchiviazioneConto(1)).toEqual({
+      valido: false,
+      motivo: 'saldo_segnato_non_zero',
+    });
+  });
+});
+
+describe('validaDataLettura', () => {
+  const conto: Conto = {
+    id: 'conto',
+    saldoInizialeCents: 0,
+    dataApertura: data('2024-01-10'),
+  };
+  const oggi = data('2024-01-20');
+
+  it('valida la lettura di oggi e quella del giorno di apertura', () => {
+    expect(validaDataLettura(oggi, oggi, conto)).toEqual({ valido: true });
+    expect(validaDataLettura(data('2024-01-10'), oggi, conto)).toEqual({
+      valido: true,
+    });
+  });
+
+  it('rifiuta le letture future e anteriori all’apertura', () => {
+    expect(validaDataLettura(data('2024-01-21'), oggi, conto)).toEqual({
+      valido: false,
+      motivo: 'lettura_futura',
+    });
+    expect(validaDataLettura(data('2024-01-09'), oggi, conto)).toEqual({
+      valido: false,
+      motivo: 'lettura_anteriore_apertura',
+    });
   });
 });
 

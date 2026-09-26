@@ -2,7 +2,7 @@ import { type Ciclo } from './cicli.js';
 import { aggiungiGiorni, confrontaDate, type DataISO } from './date.js';
 import { type BudgetDefault, type BudgetOverride } from './prospetto.js';
 import { type CategoriaConDettagli } from './repository.js';
-import { saldoA, type Conto, type Movimento } from './saldi.js';
+import { totaleSenzaAncore, type Conto, type Movimento } from './saldi.js';
 import { somma } from './soldi.js';
 
 export interface IntervalloDate {
@@ -112,7 +112,10 @@ export function saldoGiornaliero(
     confrontaDate(giorno, dataFine) <= 0;
     giorno = aggiungiGiorni(giorno, 1)
   ) {
-    punti.push({ data: giorno, saldoCents: saldoA(giorno, conti, movimenti) });
+    punti.push({
+      data: giorno,
+      saldoCents: totaleSenzaAncore(giorno, conti, movimenti),
+    });
   }
 
   return punti;

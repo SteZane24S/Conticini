@@ -46,6 +46,9 @@ export function registraRotteProspetto(
         occorrenzeFisse,
         budgetDefaults,
         budgetOverrides,
+        // Letture e àncore entrano con le API del giro 7.3.
+        letture: [],
+        ancore: [],
       }),
     };
   });

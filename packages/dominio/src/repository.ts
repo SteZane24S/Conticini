@@ -1,4 +1,10 @@
-import { type Conto, type Movimento } from './saldi.js';
+import {
+  type AncoraTotale,
+  type Conto,
+  type LetturaConto,
+  type Movimento,
+} from './saldi.js';
+import { type DataISO } from './date.js';
 import { type Ciclo } from './cicli.js';
 import { type Posizione } from './posizioni.js';
 import {
@@ -163,6 +169,20 @@ export interface RepositorioPosizioni {
     dati: Partial<Pick<Posizione, 'descrizione'>>,
   ): Promise<PosizioneConResiduo>;
   elimina(id: string): Promise<void>;
+}
+
+export interface RepositorioLetture {
+  elenca(contoId?: string): Promise<LetturaConto[]>;
+  // Crea la lettura, o aggiorna quella dello stesso conto nella stessa data.
+  registra(dati: Omit<LetturaConto, 'id'>): Promise<LetturaConto>;
+  annullaUltima(contoId: string): Promise<void>;
+}
+
+export interface RepositorioAncore {
+  elenca(): Promise<AncoraTotale[]>;
+  // Calcola X e C dentro la transazione che scrive l'àncora di oggi.
+  allinea(oggi: DataISO): Promise<AncoraTotale>;
+  annullaUltima(): Promise<void>;
 }
 
 export interface ServizioApprendimento {

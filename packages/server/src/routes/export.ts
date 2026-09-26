@@ -57,7 +57,9 @@ export function registraRotteExport(
         movimento.data.split('-').reverse().join('/'),
         movimento.descrizione,
         formattaImportoCsv(movimento.amountCents),
-        contiPerId.get(movimento.contoId) ?? movimento.contoId,
+        movimento.contoId === null
+          ? ''
+          : (contiPerId.get(movimento.contoId) ?? movimento.contoId),
         categoria ? (settoriPerId.get(categoria.settoreId) ?? '') : '',
         categoria?.nome ?? '',
       ];

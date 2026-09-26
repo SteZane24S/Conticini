@@ -1,7 +1,7 @@
 # Conticini — stato del progetto
 
-**Stato:** Giro 6.2 chiuso il 25/09/2026. La Fase 6 — Debiti e crediti è chiusa. Piano rivisto il 25/09/2026: dopo la fase 6 viene la nuova fase 7 (totale unico), poi la fase 8 (mobile).
-**Prossimo giro:** 7.1 — Dominio: saldo segnato, totale con àncore, scarto, test di accettazione, da `fasi/fase-7-totale-unico/PIANO.md`.
+**Stato:** Giro 7.1 chiuso il 26/09/2026. La Fase 7 — Totale unico, conti segnati, rettifiche e àncore è aperta.
+**Prossimo giro:** 7.2 — Migrazione 003 e API senza conto, da `fasi/fase-7-totale-unico/PIANO.md`.
 **Orchestratore dei giri:** Claude Sonnet 5 `high`, contesto pulito a ogni giro.
 
 ## Checklist dei giri
@@ -46,7 +46,7 @@
 - [x] 6.2 Pagina Debiti e crediti: elenco, creazione, salda tutto o in parte, annullamento, totale netto
 
 ### Fase 7 — Totale unico, conti segnati, rettifiche e àncore
-- [ ] 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione
+- [x] 7.1 Dominio: saldo segnato, totale con àncore, scarto, test di accettazione
 - [ ] 7.2 Migrazione 003 (tabelle ricostruite con `account_id` nullable, backup pre-migrazione) e API senza conto; trasferimenti in sola lettura
 - [ ] 7.3 API di rettifiche, àncore, prospetto, export (con le posizioni nell'export JSON)
 - [ ] 7.4 Interfaccia senza conto
@@ -165,3 +165,13 @@
 - Il giro 6.2 è stato orchestrato su Opus 5.5 per scelta dell'utente, per misurare i consumi della nuova versione: da tenere presente nel confronto dei pesi fra giri nel registro dei consumi.
 - La pendenza preesistente su `AGENTS.md` resta invariata: non è stata generata né modificata nel giro 6.2.
 - Prossimo giro: 7.1 — Dominio del totale unico, da `fasi/fase-7-totale-unico/PIANO.md`; non tocca `packages/web`.
+
+## Giro 7.1 (26/09/2026)
+
+- L'utente ha deciso il 26/09/2026 di completare tutta la Fase 7 e fare il rilascio in `app/programma` solo alla fine, nel giro 7.5, non alla chiusura della fase 6.
+- Per il giro 7.3 resta da portare `saldoGiornaliero` (`packages/dominio/src/aggregazioni.ts`) a `totaleA` con le àncore quando le API le forniranno, insieme al grafico del saldo giornaliero.
+- Per il giro 7.3 `packages/server/src/routes/prospetto.ts` passa ancora `letture: []` e `ancore: []`; va collegato ai nuovi repository. Lo schema zod `packages/contratti/src/prospetto.ts` va esteso per non scartare `origine`, `dataLettura`, `sommaSaldiSegnatiCents` e `scartoCents`.
+- Per il giro 7.3 la colonna Conto dell'export CSV esporta vuoto per i movimenti senza conto; il piano prevede di rimuoverla.
+- Il giro 7.1 è stato orchestrato su Opus 5.5 per scelta dell'utente: tenerne conto nel confronto dei pesi fra giri.
+- La pendenza preesistente su `AGENTS.md` resta invariata.
+- Prossimo giro: 7.2 — Migrazione 003 e API senza conto; tocca `packages/server` e i dati. Il piano richiede backup automatico pre-migrazione e prova della 003 su `.dati-dev`.

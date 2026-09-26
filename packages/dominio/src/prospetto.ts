@@ -2,11 +2,13 @@ import { confrontaDate, type DataISO } from './date.js';
 import { somma } from './soldi.js';
 import { cicloContenente, type Ciclo } from './cicli.js';
 import {
-  saldoA,
-  saldiPerConto,
+  saldiSegnati,
+  totaleA,
+  type AncoraTotale,
   type Conto,
+  type LetturaConto,
   type Movimento,
-  type SaldoConto,
+  type SaldoSegnato,
 } from './saldi.js';
 
 export type StatoOccorrenzaFissa = 'pending' | 'paid' | 'skipped';
@@ -20,7 +22,7 @@ export interface OccorrenzaFissa {
   scadenza: DataISO;
   amountCentsPrevisto: number;
   categoriaId: string | null;
-  contoId: string;
+  contoId: string | null;
   stato: StatoOccorrenzaFissa;
   movimentoCollegato: MovimentoCollegato | null;
 }
@@ -51,7 +53,9 @@ export interface Prospetto {
   data: DataISO;
   dataFutura: boolean;
   saldoTotaleCents: number;
-  saldiPerConto: SaldoConto[];
+  saldiPerConto: SaldoSegnato[];
+  sommaSaldiSegnatiCents: number;
+  scartoCents: number;
   fisseAncoraDaPagare: OccorrenzaFissa[];
   totaleFisseAncoraDaPagareCents: number;
   categorie: RigaCategoria[];
@@ -67,6 +71,8 @@ export interface DatiProspetto {
   occorrenzeFisse: OccorrenzaFissa[];
   budgetDefaults: BudgetDefault[];
   budgetOverrides: BudgetOverride[];
+  letture: LetturaConto[];
+  ancore: AncoraTotale[];
 }
 
 export function prospetto(
@@ -111,16 +117,17 @@ export function prospetto(
         );
         const previstoCents =
           override?.amountCents ?? budgetDefault.amountCents;
-        const speseCents = -somma(
-          dati.movimenti
-            .filter(
-              (movimento) =>
-                movimento.categoriaId === budgetDefault.categoriaId &&
-                confrontaDate(movimento.data, ciclo.startDate) >= 0 &&
-                confrontaDate(movimento.data, d) <= 0,
-            )
-            .map((movimento) => movimento.amountCents),
-        );
+        const speseCents =
+          -somma(
+            dati.movimenti
+              .filter(
+                (movimento) =>
+                  movimento.categoriaId === budgetDefault.categoriaId &&
+                  confrontaDate(movimento.data, ciclo.startDate) >= 0 &&
+                  confrontaDate(movimento.data, d) <= 0,
+              )
+              .map((movimento) => movimento.amountCents),
+          ) || 0;
         const residuoCents = Math.max(0, previstoCents - speseCents);
         const sforamentoCents = Math.max(0, speseCents - previstoCents);
 
@@ -136,6 +143,17 @@ export function prospetto(
   const totaleResiduiCents = somma(
     categorie.map((categoria) => categoria.residuoCents),
   );
+  const saldoTotaleCents = totaleA(d, dati.conti, dati.movimenti, dati.ancore);
+  const saldiPerConto = saldiSegnati(
+    d,
+    dati.conti,
+    dati.movimenti,
+    dati.letture,
+  );
+  const sommaSaldiSegnatiCents = somma(
+    saldiPerConto.map((saldo) => saldo.saldoCents),
+  );
+  const scartoCents = somma([sommaSaldiSegnatiCents, -saldoTotaleCents]);
   let saldoPrevistoCents: number | null;
   let motivoSaldoPrevistoAssente: MotivoSaldoPrevistoAssente | null;
 
@@ -150,7 +168,7 @@ export function prospetto(
     motivoSaldoPrevistoAssente = 'orizzonte_superato';
   } else {
     saldoPrevistoCents = somma([
-      saldoA(d, dati.conti, dati.movimenti),
+      saldoTotaleCents,
       -totaleFisseAncoraDaPagareCents,
       -totaleResiduiCents,
     ]);
@@ -165,8 +183,10 @@ export function prospetto(
   return {
     data: d,
     dataFutura: confrontaDate(d, oggi) > 0,
-    saldoTotaleCents: saldoA(d, dati.conti, dati.movimenti),
-    saldiPerConto: saldiPerConto(d, dati.conti, dati.movimenti),
+    saldoTotaleCents,
+    saldiPerConto,
+    sommaSaldiSegnatiCents,
+    scartoCents,
     fisseAncoraDaPagare,
     totaleFisseAncoraDaPagareCents,
     categorie,

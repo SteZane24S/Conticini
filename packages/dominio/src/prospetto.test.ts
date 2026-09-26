@@ -7,7 +7,14 @@ import {
   type DatiProspetto,
   type OccorrenzaFissa,
 } from './prospetto.js';
-import { saldoA, type Conto, type Movimento } from './saldi.js';
+import {
+  calcolaAncora,
+  totaleSenzaAncore,
+  type AncoraTotale,
+  type Conto,
+  type LetturaConto,
+  type Movimento,
+} from './saldi.js';
 
 function data(value: string): DataISO {
   return parseDataISO(value);
@@ -44,6 +51,8 @@ function dati(
   cicli: Ciclo[],
   movimenti: Movimento[] = [],
   occorrenzeFisse: OccorrenzaFissa[] = [],
+  letture: LetturaConto[] = [],
+  ancore: AncoraTotale[] = [],
 ): DatiProspetto {
   return {
     conti,
@@ -52,6 +61,8 @@ function dati(
     occorrenzeFisse,
     budgetDefaults: [],
     budgetOverrides: [],
+    letture,
+    ancore,
   };
 }
 
@@ -79,7 +90,7 @@ describe('prospetto', () => {
       },
     ];
 
-    expect(saldoA(data('2024-01-10'), conti, movimenti)).toBe(0);
+    expect(totaleSenzaAncore(data('2024-01-10'), conti, movimenti)).toBe(0);
   });
 
   it('2. pagare una fissa allimporto e alla data previsti non cambia saldoPrevistoCents', () => {
@@ -425,11 +436,23 @@ describe('prospetto', () => {
       ],
       budgetDefaults: [{ categoriaId: 'spesa-casa', amountCents: 30_000 }],
       budgetOverrides: [],
+      letture: [],
+      ancore: [],
     });
 
     expect(risultato.saldiPerConto).toEqual([
-      { contoId: 'a', saldoCents: 293_000 },
-      { contoId: 'b', saldoCents: 70_000 },
+      {
+        contoId: 'a',
+        saldoCents: 293_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
+      {
+        contoId: 'b',
+        saldoCents: 70_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
     ]);
     expect(risultato.saldoTotaleCents).toBe(363_000);
     expect(risultato.categorie).toEqual([
@@ -449,5 +472,304 @@ describe('prospetto', () => {
     expect(risultato.saldoPrevistoCents).toBe(291_000);
     expect(risultato.dopoAccreditoCents).toBe(441_000);
     expect(risultato.dataFutura).toBe(false);
+  });
+});
+
+describe('prospetto con letture e àncore', () => {
+  it('espone i saldi segnati e lo scarto', () => {
+    const conti = [conto('banca', 100_000), conto('contanti', 10_000)];
+    const movimenti: Movimento[] = [
+      {
+        id: 'spesa',
+        data: data('2024-01-10'),
+        amountCents: -15_000,
+        contoId: null,
+        categoriaId: null,
+        transferGroupId: null,
+        posizioneId: null,
+      },
+    ];
+    const letture: LetturaConto[] = [
+      {
+        id: 'lettura-banca',
+        contoId: 'banca',
+        data: data('2024-01-15'),
+        saldoCents: 88_000,
+      },
+      {
+        id: 'lettura-contanti',
+        contoId: 'contanti',
+        data: data('2024-01-16'),
+        saldoCents: 7_000,
+      },
+    ];
+
+    const dopoLetture = prospetto(
+      data('2024-01-20'),
+      data('2024-01-20'),
+      dati(conti, [], movimenti, [], letture),
+    );
+    const primaLetture = prospetto(
+      data('2024-01-12'),
+      data('2024-01-20'),
+      dati(conti, [], movimenti, [], letture),
+    );
+
+    expect(dopoLetture.saldoTotaleCents).toBe(95_000);
+    expect(dopoLetture.saldiPerConto).toEqual([
+      {
+        contoId: 'banca',
+        saldoCents: 88_000,
+        origine: 'lettura',
+        dataLettura: data('2024-01-15'),
+      },
+      {
+        contoId: 'contanti',
+        saldoCents: 7_000,
+        origine: 'lettura',
+        dataLettura: data('2024-01-16'),
+      },
+    ]);
+    expect(dopoLetture.sommaSaldiSegnatiCents).toBe(95_000);
+    expect(dopoLetture.scartoCents).toBe(0);
+    expect(primaLetture.saldiPerConto).toEqual([
+      {
+        contoId: 'banca',
+        saldoCents: 100_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
+      {
+        contoId: 'contanti',
+        saldoCents: 10_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
+    ]);
+    expect(primaLetture.sommaSaldiSegnatiCents).toBe(110_000);
+    expect(primaLetture.scartoCents).toBe(15_000);
+  });
+
+  it('la spesa ritrovata dopo làncora entra nella categoria ma non nel totale', () => {
+    const conti = [conto('a', 100_000)];
+    const cicli: Ciclo[] = [
+      {
+        id: 'ciclo1',
+        startDate: data('2024-01-01'),
+        expectedNextDate: data('2024-02-01'),
+        expectedAmountCents: null,
+      },
+    ];
+    const letture: LetturaConto[] = [
+      {
+        id: 'lettura',
+        contoId: 'a',
+        data: data('2024-01-18'),
+        saldoCents: 97_000,
+      },
+    ];
+    const ancora: AncoraTotale = {
+      id: 'ancora',
+      ...calcolaAncora(data('2024-01-18'), conti, [], letture),
+    };
+    const prima = dati(conti, cicli, [], [], letture, [ancora]);
+    prima.budgetDefaults = [{ categoriaId: 'cibo', amountCents: 10_000 }];
+    const dopo = dati(
+      conti,
+      cicli,
+      [
+        {
+          id: 'spesa-ritrovata',
+          data: data('2024-01-17'),
+          amountCents: -3_000,
+          contoId: null,
+          categoriaId: 'cibo',
+          transferGroupId: null,
+          posizioneId: null,
+        },
+      ],
+      [],
+      letture,
+      [ancora],
+    );
+    dopo.budgetDefaults = [{ categoriaId: 'cibo', amountCents: 10_000 }];
+
+    const prospettoPrima = prospetto(
+      data('2024-01-20'),
+      data('2024-01-20'),
+      prima,
+    );
+    const prospettoDopo = prospetto(
+      data('2024-01-20'),
+      data('2024-01-20'),
+      dopo,
+    );
+
+    expect(prospettoPrima.saldoTotaleCents).toBe(97_000);
+    expect(prospettoDopo.saldoTotaleCents).toBe(97_000);
+    expect(prospettoPrima.categorie[0]?.speseCents).toBe(0);
+    expect(prospettoDopo.categorie[0]?.speseCents).toBe(3_000);
+    // È la conseguenza voluta descritta nel piano, non un difetto.
+    expect(prospettoDopo.saldoPrevistoCents).toBe(
+      (prospettoPrima.saldoPrevistoCents ?? 0) + 3_000,
+    );
+  });
+
+  it('2. pagare una fissa in ritardo già assorbita da unàncora migliora la proiezione', () => {
+    const conti = [conto('a', 100_000)];
+    const cicli: Ciclo[] = [
+      {
+        id: 'ciclo1',
+        startDate: data('2024-01-01'),
+        expectedNextDate: data('2024-02-01'),
+        expectedAmountCents: null,
+      },
+    ];
+    const letture: LetturaConto[] = [
+      {
+        id: 'lettura',
+        contoId: 'a',
+        data: data('2024-01-18'),
+        saldoCents: 95_000,
+      },
+    ];
+    const ancora: AncoraTotale = {
+      id: 'ancora',
+      ...calcolaAncora(data('2024-01-18'), conti, [], letture),
+    };
+    const prima = dati(
+      conti,
+      cicli,
+      [],
+      [occorrenza('fissa1', '2024-01-15', 'pending', null)],
+      letture,
+      [ancora],
+    );
+    const dopo = dati(
+      conti,
+      cicli,
+      [
+        {
+          id: 'pagamento-fissa1',
+          data: data('2024-01-15'),
+          amountCents: -5_000,
+          contoId: null,
+          categoriaId: null,
+          transferGroupId: null,
+          posizioneId: null,
+        },
+      ],
+      [
+        occorrenza('fissa1', '2024-01-15', 'paid', {
+          data: data('2024-01-15'),
+        }),
+      ],
+      letture,
+      [ancora],
+    );
+
+    const prospettoPrima = prospetto(
+      data('2024-01-20'),
+      data('2024-01-20'),
+      prima,
+    );
+    const prospettoDopo = prospetto(
+      data('2024-01-20'),
+      data('2024-01-20'),
+      dopo,
+    );
+
+    expect(prospettoPrima.saldoTotaleCents).toBe(95_000);
+    expect(prospettoPrima.saldoPrevistoCents).toBe(90_000);
+    expect(prospettoDopo.saldoTotaleCents).toBe(95_000);
+    expect(prospettoDopo.fisseAncoraDaPagare).toEqual([]);
+    expect(prospettoDopo.saldoPrevistoCents).toBe(95_000);
+  });
+
+  it('mantiene il prospetto invariato senza letture e senza àncore', () => {
+    const risultato = prospetto(data('2024-01-20'), data('2024-01-25'), {
+      conti: [conto('a', 200_000), conto('b', 50_000)],
+      movimenti: [
+        {
+          id: 'stipendio',
+          data: data('2024-01-05'),
+          amountCents: 150_000,
+          contoId: 'a',
+          categoriaId: null,
+          transferGroupId: null,
+          posizioneId: null,
+        },
+        {
+          id: 'trasferimento-a',
+          data: data('2024-01-10'),
+          amountCents: -20_000,
+          contoId: 'a',
+          categoriaId: null,
+          transferGroupId: 't1',
+          posizioneId: null,
+        },
+        {
+          id: 'trasferimento-b',
+          data: data('2024-01-10'),
+          amountCents: 20_000,
+          contoId: 'b',
+          categoriaId: null,
+          transferGroupId: 't1',
+          posizioneId: null,
+        },
+        {
+          id: 'spesa-casa-1',
+          data: data('2024-01-12'),
+          amountCents: -12_000,
+          contoId: 'a',
+          categoriaId: 'spesa-casa',
+          transferGroupId: null,
+          posizioneId: null,
+        },
+        {
+          id: 'spesa-casa-2',
+          data: data('2024-01-18'),
+          amountCents: -25_000,
+          contoId: 'a',
+          categoriaId: 'spesa-casa',
+          transferGroupId: null,
+          posizioneId: null,
+        },
+      ],
+      cicli: [
+        {
+          id: 'ciclo1',
+          startDate: data('2024-01-05'),
+          expectedNextDate: data('2024-02-05'),
+          expectedAmountCents: 150_000,
+        },
+      ],
+      occorrenzeFisse: [
+        occorrenza('fissa1', '2024-01-15', 'pending', null, 60_000),
+        occorrenza('fissa2', '2024-01-31', 'pending', null, 12_000),
+      ],
+      budgetDefaults: [{ categoriaId: 'spesa-casa', amountCents: 30_000 }],
+      budgetOverrides: [],
+      letture: [],
+      ancore: [],
+    });
+
+    expect(risultato.scartoCents).toBe(0);
+    expect(risultato.saldiPerConto).toEqual([
+      {
+        contoId: 'a',
+        saldoCents: 293_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
+      {
+        contoId: 'b',
+        saldoCents: 70_000,
+        origine: 'storico',
+        dataLettura: null,
+      },
+    ]);
+    expect(risultato.saldoTotaleCents).toBe(363_000);
+    expect(risultato.saldoPrevistoCents).toBe(291_000);
   });
 });
